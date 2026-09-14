@@ -645,7 +645,6 @@ function offlineCapHours(){return OFFLINE_CAP_BASE_HOURS+s.lv.offlineCap*OFFLINE
 function offlineCapNextHours(){return OFFLINE_CAP_BASE_HOURS+(s.lv.offlineCap+1)*OFFLINE_CAP_PER_LV;}
 function offlineCapCostFor(lv){return Math.round(OFFLINE_CAP_BASE_COST*Math.pow(OFFLINE_CAP_MULT,lv));}
 
-// ===== ЗВУК =====
 var audioCtx = null;
 var audioBroken = false;
 var activeLoops = {};
@@ -656,20 +655,6 @@ function initAudio(){
   if(!Ctx){audioBroken=true;return;}
   audioCtx = new Ctx();
  }catch(e){audioBroken=true;audioCtx=null;}
-}
-function snd(freq,dur,type,vol){
- try{
-  if(!audioCtx||!s||!s.settings||!s.settings.sound) return;
-  var t0=audioCtx.currentTime;
-  var osc=audioCtx.createOscillator();
-  var gain=audioCtx.createGain();
-  osc.type=type||'sine';
-  osc.frequency.value=freq;
-  gain.gain.setValueAtTime(vol||0.15,t0);
-  gain.gain.exponentialRampToValueAtTime(0.0001,t0+(dur||0.15));
-  osc.connect(gain);gain.connect(audioCtx.destination);
-  osc.start(t0);osc.stop(t0+(dur||0.15)+0.02);
- }catch(e){}
 }
 function sndClick(){ try{ if(!audioCtx||!s.settings.sound)return; var t0=audioCtx.currentTime; var osc=audioCtx.createOscillator(); var g=audioCtx.createGain(); osc.type='triangle'; osc.frequency.setValueAtTime(220,t0); osc.frequency.exponentialRampToValueAtTime(80,t0+0.06); g.gain.setValueAtTime(0.12,t0); g.gain.exponentialRampToValueAtTime(0.0001,t0+0.08); osc.connect(g);g.connect(audioCtx.destination); osc.start(t0);osc.stop(t0+0.1); }catch(e){} }
 function sndDing(){ try{ if(!audioCtx||!s.settings.sound)return; var t0=audioCtx.currentTime; [1200,1800,2400].forEach(function(f,i){ var o=audioCtx.createOscillator(); var g=audioCtx.createGain(); o.type='sine'; o.frequency.value=f; g.gain.setValueAtTime(0.12,t0+i*0.03); g.gain.exponentialRampToValueAtTime(0.0001,t0+i*0.03+0.35); o.connect(g);g.connect(audioCtx.destination); o.start(t0+i*0.03);o.stop(t0+i*0.03+0.4); }); }catch(e){} }
@@ -683,14 +668,12 @@ function stopAcidLoop(){ try{ if(activeLoops.acid){activeLoops.acid.src.stop();a
 function startFireLoop(){ try{ if(!audioCtx||!s.settings.sound)return; if(activeLoops.fire)return; var o=audioCtx.createOscillator(); o.type='sawtooth'; o.frequency.value=55; var f=audioCtx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=180; var g=audioCtx.createGain(); g.gain.value=0.05; o.connect(f);f.connect(g);g.connect(audioCtx.destination); o.start(); activeLoops.fire={osc:o,gain:g}; }catch(e){} }
 function stopFireLoop(){ try{ if(activeLoops.fire){activeLoops.fire.osc.stop();activeLoops.fire=null;} }catch(e){activeLoops.fire=null;} }
 
-// ===== ВИБРАЦИЯ =====
 function vibe(ms){ try{ if(!s||!s.settings||!s.settings.vibe)return; if(navigator.vibrate) navigator.vibrate(ms||15); }catch(e){} }
 var hapticInput=null;
 function initHaptic(){ try{ var el=document.createElement('input'); el.type='checkbox'; el.setAttribute('switch',''); el.style.position='absolute'; el.style.opacity='0'; el.style.pointerEvents='none'; el.style.left='-9999px'; el.setAttribute('aria-hidden','true'); document.body.appendChild(el); hapticInput=el; }catch(e){} }
 function iosHaptic(){ try{ if(!s.settings.vibe)return; if(!hapticInput)return; hapticInput.checked=!hapticInput.checked; var evt=document.createEvent('HTMLEvents'); evt.initEvent('change',true,false); hapticInput.dispatchEvent(evt); }catch(e){} }
 function tapVibe(){ vibe(12); iosHaptic(); }
 
-// ===== ВИЗУАЛЬНЫЕ =====
 function bumpCash(){ try{ var el=document.getElementById('cashWrap'); if(!el)return; el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); setTimeout(function(){el.classList.remove('bump');},200); }catch(e){} }
 function bumpToast(){ try{ var el=document.getElementById('toast'); if(!el)return; el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); setTimeout(function(){el.classList.remove('bump');},200); }catch(e){} }
 function flashInvItem(key){
@@ -1330,7 +1313,7 @@ function render(){
  setText('d-luck','шанс двойного дропа: '+Math.round(luckChance()*100)+'% → '+Math.round(Math.min((s.lv.luck+1)*0.05,0.7)*100)+'%');
  setText('b-dump',s.cost.dump+' ₽');setDis('b-dump',s.cash<s.cost.dump);
  if(s.lv.dump===0)setText('d-dump','лом будет капать в склад сам: 1 шт каждые 4.5с');
- else setText('d-dump','лом капает сам: '+s.lv.dump+' шт каждые 4.5с → '+(s.lv.dump+1);
+ else setText('d-dump','лом капает сам: '+s.lv.dump+' шт каждые 4.5с → '+(s.lv.dump+1));
 
  var br=document.getElementById('b-reputation');
  if(br){

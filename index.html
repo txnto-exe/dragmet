@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ДРАГМЕТ">
+<meta name="theme-color" content="#141810">
 <title>ДРАГМЕТ</title>
 <style>
 :root{
@@ -13,11 +17,9 @@
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{margin:0;padding:0;}
-body{background:var(--bg);background-image:radial-gradient(ellipse at top left, rgba(143,179,57,0.08), transparent 55%),radial-gradient(ellipse at bottom right, rgba(168,214,74,0.06), transparent 55%);color:var(--text);font-family:ui-sans-serif,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;min-height:100vh;}
-
+body{background:var(--bg);background-image:radial-gradient(ellipse at top left, rgba(143,179,57,0.08), transparent 55%),radial-gradient(ellipse at bottom right, rgba(168,214,74,0.06), transparent 55%);color:var(--text);font-family:ui-sans-serif,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;min-height:100vh;-webkit-user-select:none;user-select:none;}
 .screen{display:none;min-height:100vh;}
 .screen.active{display:block;}
-
 #menuScreen{padding:24px 20px calc(40px + env(safe-area-inset-bottom));display:none;flex-direction:column;justify-content:center;align-items:center;}
 #menuScreen.active{display:flex;}
 .menu-logo{text-align:center;margin-bottom:8px;}
@@ -30,10 +32,8 @@ body{background:var(--bg);background-image:radial-gradient(ellipse at top left, 
 .menu-btn.primary{background:var(--rust);color:#0d1207;border-color:var(--rust);}
 .menu-btn.primary:active{background:var(--acid);}
 .menu-btn.secondary{background:var(--panel);color:var(--text);}
-.menu-btn.danger{color:var(--rust);border-color:var(--rust-dim);}
 .menu-version{position:fixed;bottom:calc(12px + env(safe-area-inset-bottom));left:0;right:0;text-align:center;font-size:11px;color:var(--text-dim);}
 .menu-save-info{text-align:center;font-size:11.5px;color:var(--text-dim);margin-top:4px;margin-bottom:12px;min-height:16px;}
-
 #settingsScreen{padding:24px 12px calc(40px + env(safe-area-inset-bottom));}
 .settings-wrap{max-width:480px;margin:0 auto;}
 .settings-title{font-size:22px;font-weight:800;margin:0 0 20px;}
@@ -44,15 +44,12 @@ body{background:var(--bg);background-image:radial-gradient(ellipse at top left, 
 .settings-desc{font-size:11px;color:var(--text-dim);margin-top:2px;}
 .settings-btn{padding:8px 14px;border-radius:4px;border:1px solid var(--edge);background:var(--panel-2);color:var(--gold);font-family:ui-monospace,monospace;font-size:12.5px;font-weight:600;cursor:pointer;touch-action:manipulation;white-space:nowrap;}
 .settings-btn.danger{color:var(--rust);border-color:var(--rust-dim);}
-.settings-btn:active{transform:scale(0.98);}
-
 .switch{position:relative;display:inline-block;width:48px;height:26px;flex-shrink:0;}
 .switch input{opacity:0;width:0;height:0;}
 .switch-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--panel-2);border:1px solid var(--edge);border-radius:13px;transition:.2s;}
 .switch-slider:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:2px;background:var(--text-dim);border-radius:50%;transition:.2s;}
 .switch input:checked + .switch-slider{background:#28321c;border-color:var(--rust);}
 .switch input:checked + .switch-slider:before{transform:translateX(22px);background:var(--acid);}
-
 #gameScreen{padding:14px 12px calc(90px + env(safe-area-inset-bottom));}
 .wrap{max-width:480px;margin:0 auto;}
 header{position:sticky;top:0;z-index:100;background:var(--bg);display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--edge);margin:0 -12px 16px;box-shadow:0 6px 12px -8px rgba(0,0,0,0.9);}
@@ -69,8 +66,7 @@ h1.game-title{font-size:24px;font-weight:800;margin:0;} h1.game-title span{color
 .tab-section{display:none;}
 .tab-section.active{display:block;}
 .loc-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;}
-.loc-card{flex:0 0 auto;width:118px;background:var(--panel-2);border:1px solid var(--edge);border-radius:6px;padding:9px;cursor:pointer;touch-action:manipulation;transition:transform 0.08s;}
-.loc-card:active{transform:scale(0.97);}
+.loc-card{flex:0 0 auto;width:118px;background:var(--panel-2);border:1px solid var(--edge);border-radius:6px;padding:9px;cursor:pointer;touch-action:manipulation;}
 .loc-card.active{border-color:var(--rust);background:#28321c;}
 .loc-card.locked{opacity:0.6;}
 .loc-card.autodig{border-color:var(--prest-dim);}
@@ -82,8 +78,7 @@ h1.game-title{font-size:24px;font-weight:800;margin:0;} h1.game-title span{color
 .loc-auto-txt{font-size:9.5px;color:var(--prest);margin-top:2px;font-family:ui-monospace,monospace;}
 .loc-unlock{font-size:11px;margin-top:6px;color:var(--gold);font-family:ui-monospace,monospace;}
 .loc-empty{color:var(--rust);}
-.dig-btn{width:100%;padding:16px;background:var(--rust);color:#0d1207;border:none;border-radius:5px;font-size:16px;font-weight:700;cursor:pointer;position:relative;overflow:hidden;touch-action:manipulation;transition:transform 0.06s;}
-.dig-btn:active{transform:scale(0.98);}
+.dig-btn{width:100%;padding:16px;background:var(--rust);color:#0d1207;border:none;border-radius:5px;font-size:16px;font-weight:700;cursor:pointer;position:relative;overflow:hidden;touch-action:manipulation;}
 .dig-btn:disabled{background:var(--rust-dim);color:#7a8760;}
 .dig-btn.shake{animation:shakeBtn 0.35s;}
 @keyframes shakeBtn{0%,100%{transform:translateX(0);}20%{transform:translateX(-6px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}
@@ -99,13 +94,13 @@ h1.game-title{font-size:24px;font-weight:800;margin:0;} h1.game-title span{color
 .inv-item .l{font-size:9.5px;color:var(--text-dim);}
 .inv-item .g{font-size:9.5px;color:var(--gold-dim);font-family:ui-monospace,monospace;margin-top:2px;}
 .cap-bar{height:6px;background:var(--panel-2);border-radius:3px;margin-top:10px;overflow:hidden;border:1px solid var(--edge);}
-.cap-fill{height:100%;background:var(--text-dim);width:0%;transition:width 0.2s;}
+.cap-fill{height:100%;background:var(--text-dim);width:0%;}
 .cap-txt{font-size:11px;color:var(--text-dim);text-align:right;margin-top:4px;}
-.toggle-btn{margin-top:8px;width:100%;padding:8px;font-size:12px;font-weight:600;border-radius:4px;border:1px solid var(--edge);background:var(--panel-2);color:var(--text-dim);cursor:pointer;touch-action:manipulation;transition:transform 0.08s;}
-.toggle-btn:active{color:var(--acid);transform:scale(0.98);}
+.toggle-btn{margin-top:8px;width:100%;padding:8px;font-size:12px;font-weight:600;border-radius:4px;border:1px solid var(--edge);background:var(--panel-2);color:var(--text-dim);cursor:pointer;touch-action:manipulation;}
+.toggle-btn:active{color:var(--acid);}
 .stage{display:flex;gap:10px;align-items:center;margin-bottom:10px;}
 .stage:last-child{margin-bottom:0;}
-.stage-icon{width:38px;height:38px;border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;transition:transform 0.15s;}
+.stage-icon{width:38px;height:38px;border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;}
 .stage-icon.active{animation:pulseIcon 1.6s infinite;}
 @keyframes pulseIcon{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
 .ic-acid{background:var(--acid-dim);color:var(--acid);}
@@ -114,11 +109,10 @@ h1.game-title{font-size:24px;font-weight:800;margin:0;} h1.game-title span{color
 .stage-top{display:flex;justify-content:space-between;font-size:12px;color:var(--text-dim);margin-bottom:4px;}
 .stage-top b{color:var(--text);font-weight:600;}
 .bar{height:9px;background:var(--panel-2);border-radius:4px;overflow:hidden;border:1px solid var(--edge);}
-.bar-fill{height:100%;width:0%;transition:width 0.15s linear;}
+.bar-fill{height:100%;width:0%;}
 .bar-fill.acid{background:var(--acid);}
 .bar-fill.fire{background:var(--rust);}
-.stage-btn{margin-top:6px;width:100%;padding:8px;font-size:13px;font-weight:600;border-radius:4px;border:1px solid var(--edge);cursor:pointer;background:var(--panel-2);color:var(--text);touch-action:manipulation;transition:transform 0.08s,background 0.15s;}
-.stage-btn:active{transform:scale(0.98);}
+.stage-btn{margin-top:6px;width:100%;padding:8px;font-size:13px;font-weight:600;border-radius:4px;border:1px solid var(--edge);cursor:pointer;background:var(--panel-2);color:var(--text);touch-action:manipulation;}
 .stage-btn:disabled{opacity:0.35;}
 .stage-btn.ready{background:var(--acid-dim);border-color:var(--acid);}
 .market-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
@@ -126,11 +120,9 @@ h1.game-title{font-size:24px;font-weight:800;margin:0;} h1.game-title span{color
 .price .up{color:var(--acid);} .price .down{color:var(--rust);}
 .price .bonus{color:var(--prest);font-size:11px;margin-left:4px;}
 .price .reput{color:var(--gold);font-size:11px;margin-left:4px;}
-.ingot-big{font-family:ui-monospace,monospace;font-size:26px;font-weight:800;color:var(--acid);text-align:center;padding:10px 0 4px;transition:transform 0.15s;}
-.ingot-big.bump{transform:scale(1.1);}
+.ingot-big{font-family:ui-monospace,monospace;font-size:26px;font-weight:800;color:var(--acid);text-align:center;padding:10px 0 4px;}
 .ingot-big small{font-size:12px;color:var(--text-dim);font-weight:400;margin-left:4px;}
-.sell-btn{width:100%;padding:14px;background:var(--gold);color:#1f1a06;border:none;border-radius:5px;font-size:15px;font-weight:700;cursor:pointer;touch-action:manipulation;transition:transform 0.08s,background 0.15s;}
-.sell-btn:active{transform:scale(0.98);}
+.sell-btn{width:100%;padding:14px;background:var(--gold);color:#1f1a06;border:none;border-radius:5px;font-size:15px;font-weight:700;cursor:pointer;touch-action:manipulation;}
 .sell-btn:disabled{background:var(--gold-dim);color:#6b5f3f;}
 .sell-btn.flash{background:#f0c94a;animation:sellFlash 0.4s;}
 @keyframes sellFlash{0%{transform:scale(1);}50%{transform:scale(1.05);background:#f5d560;}100%{transform:scale(1);}}
@@ -138,24 +130,19 @@ h1.game-title{font-size:24px;font-weight:800;margin:0;} h1.game-title span{color
 .upg:last-child{border-bottom:none;}
 .upg-name{font-size:13.5px;font-weight:600;}
 .upg-desc{font-size:11px;color:var(--text-dim);margin-top:3px;line-height:1.35;}
-.upg-btn{flex-shrink:0;padding:8px 12px;border-radius:4px;border:1px solid var(--edge);background:var(--panel-2);color:var(--gold);font-family:ui-monospace,monospace;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap;touch-action:manipulation;transition:transform 0.08s,background 0.15s;}
-.upg-btn:active{transform:scale(0.96);}
+.upg-btn{flex-shrink:0;padding:8px 12px;border-radius:4px;border:1px solid var(--edge);background:var(--panel-2);color:var(--gold);font-family:ui-monospace,monospace;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap;touch-action:manipulation;}
 .upg-btn:disabled{color:var(--text-dim);opacity:0.5;}
 .upg-btn.owned{color:var(--acid);border-color:var(--acid-dim);}
 .upg-btn.prest{color:var(--prest);border-color:var(--prest-dim);}
 .upg-btn.offline{color:var(--offline);border-color:var(--offline-dim);}
 .upg-btn.bought{animation:boughtFlash 0.4s;}
 @keyframes boughtFlash{0%{background:var(--panel-2);}40%{background:var(--acid-dim);transform:scale(1.08);}100%{background:var(--panel-2);transform:scale(1);}}
-.sect-title{font-size:12px;color:var(--rust);font-weight:700;margin:14px 0 4px;letter-spacing:0.5px;text-transform:uppercase;}
-.sect-title.prest{color:var(--prest);}
-.sect-title:first-child{margin-top:0;}
 .stat-row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid var(--edge);}
 .stat-row:last-child{border-bottom:none;}
 .stat-row span:last-child{font-family:ui-monospace,monospace;color:var(--gold);}
 .footnote{text-align:center;font-size:11px;color:var(--text-dim);margin-top:18px;}
 .inv-list{display:flex;flex-direction:column;gap:4px;}
-.inv-line{display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--panel-2);border:1px solid var(--edge);border-radius:5px;font-size:12px;cursor:pointer;touch-action:manipulation;position:relative;user-select:none;-webkit-user-select:none;transition:transform 0.08s;}
-.inv-line:active{transform:scale(0.99);}
+.inv-line{display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--panel-2);border:1px solid var(--edge);border-radius:5px;font-size:12px;cursor:pointer;touch-action:manipulation;position:relative;user-select:none;-webkit-user-select:none;}
 .inv-line.dim{opacity:0.35;}
 .inv-line.locked{opacity:0.5;background:#1a1a1a;border-color:#2a2a2a;}
 .inv-line.locked .il-lock{opacity:1;}
@@ -171,22 +158,19 @@ h1.game-title{font-size:24px;font-weight:800;margin:0;} h1.game-title span{color
 .empty-note{font-size:11.5px;color:var(--text-dim);text-align:center;padding:14px 8px;font-style:italic;}
 .hint{font-size:11px;color:var(--text-dim);margin-top:12px;line-height:1.5;}
 .subtabs{display:flex;gap:6px;margin-bottom:12px;}
-.subtab{flex:1;padding:10px;border-radius:5px;border:1px solid var(--edge);background:var(--panel-2);color:var(--text-dim);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;touch-action:manipulation;transition:transform 0.08s;}
-.subtab:active{transform:scale(0.98);}
+.subtab{flex:1;padding:10px;border-radius:5px;border:1px solid var(--edge);background:var(--panel-2);color:var(--text-dim);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;touch-action:manipulation;}
 .subtab.active{background:#28321c;border-color:var(--rust);color:var(--rust);}
 .subtab.prest.active{background:#2a1e3d;border-color:var(--prest);color:var(--prest);}
 .prest-status{background:linear-gradient(135deg, #221636 0%, #2a1e3d 100%);border:1px solid var(--prest-dim);border-radius:6px;padding:14px;margin-bottom:12px;}
 .prest-status .ps-lvl{font-family:ui-monospace,monospace;font-size:22px;font-weight:800;color:var(--prest);}
 .prest-status .ps-line{display:flex;justify-content:space-between;font-size:13px;padding:3px 0;}
 .prest-status .ps-line span:last-child{font-family:ui-monospace,monospace;color:var(--prest);font-weight:600;}
-.prest-btn{width:100%;padding:12px;margin-top:10px;background:var(--prest);color:#1a0b2e;border:none;border-radius:5px;font-size:14px;font-weight:800;cursor:pointer;touch-action:manipulation;transition:transform 0.08s;}
-.prest-btn:active{transform:scale(0.98);}
+.prest-btn{width:100%;padding:12px;margin-top:10px;background:var(--prest);color:#1a0b2e;border:none;border-radius:5px;font-size:14px;font-weight:800;cursor:pointer;touch-action:manipulation;}
 .prest-btn:disabled{background:var(--prest-dim);color:#8a6baa;}
 .prest-btn.flash{animation:prestFlash 0.6s;}
 @keyframes prestFlash{0%{transform:scale(1);}30%{transform:scale(1.06);box-shadow:0 0 30px var(--prest);}100%{transform:scale(1);}}
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:200;display:flex;justify-content:space-around;align-items:flex-end;background:linear-gradient(to top, #0e120a 70%, rgba(14,18,10,0.92));border-top:1px solid var(--edge);padding:6px 4px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -8px 16px -8px rgba(0,0,0,0.9);}
-.tab-btn{flex:1;min-width:0;background:transparent;border:none;color:var(--text-dim);font-family:inherit;font-size:10px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;cursor:pointer;position:relative;border-radius:6px;transition:transform 0.08s;}
-.tab-btn:active{transform:scale(0.95);}
+.tab-btn{flex:1;min-width:0;background:transparent;border:none;color:var(--text-dim);font-family:inherit;font-size:10px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;cursor:pointer;position:relative;border-radius:6px;}
 .tab-btn .tab-ic{font-size:20px;line-height:1;}
 .tab-btn .tab-lbl{font-size:10px;letter-spacing:0.2px;white-space:nowrap;}
 .tab-btn.active{color:var(--acid);}
@@ -196,8 +180,7 @@ h1.game-title{font-size:24px;font-weight:800;margin:0;} h1.game-title span{color
 .tab-btn.center .tab-ic{background:var(--rust);color:#0d1207;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;margin-top:-18px;margin-bottom:2px;box-shadow:0 4px 10px rgba(0,0,0,0.6), 0 0 0 4px var(--bg);border:1px solid var(--edge);}
 .tab-btn.center.active .tab-ic{background:var(--acid);}
 .tab-prog{position:absolute;left:8px;right:8px;bottom:0;height:2px;background:transparent;border-radius:1px;overflow:hidden;}
-.tab-prog span{display:block;height:100%;width:0%;background:var(--acid);transition:width 0.15s linear;}
-
+.tab-prog span{display:block;height:100%;width:0%;background:var(--acid);}
 .acc-head{display:flex;justify-content:space-between;align-items:center;padding:12px 0;cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none;border-bottom:1px solid var(--edge);}
 .acc-head .acc-title{font-size:12px;color:var(--rust);font-weight:700;letter-spacing:0.5px;text-transform:uppercase;}
 .acc-head.prest .acc-title{color:var(--prest);}
@@ -207,10 +190,8 @@ h1.game-title{font-size:24px;font-weight:800;margin:0;} h1.game-title span{color
 .acc-body{display:none;padding-top:4px;}
 .acc-body.open{display:block;}
 .acc-body .upg:first-child{padding-top:6px;}
-
 .toast-msg{position:fixed;top:80px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--gold-dim);color:var(--gold);padding:10px 18px;border-radius:6px;font-size:13px;z-index:9999;max-width:90%;text-align:center;box-shadow:0 4px 14px rgba(0,0,0,0.6);pointer-events:none;opacity:0;transition:opacity 0.2s;}
 .toast-msg.show{opacity:1;}
-
 .offline-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:9998;padding:20px;}
 .offline-overlay.show{display:flex;}
 .offline-card{background:linear-gradient(135deg, #0e2836 0%, #1a3a4a 100%);border:1px solid var(--offline);border-radius:10px;padding:24px;max-width:400px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,0.8);}
@@ -222,7 +203,6 @@ h1.game-title{font-size:24px;font-weight:800;margin:0;} h1.game-title span{color
 .offline-card .oc-total{font-size:26px;font-weight:900;color:var(--offline);font-family:ui-monospace,monospace;text-align:center;margin:18px 0 8px;}
 .offline-card .oc-note{font-size:11px;color:var(--text-dim);text-align:center;margin-bottom:18px;line-height:1.4;}
 .offline-claim{width:100%;padding:14px;background:var(--offline);color:#0a1c26;border:none;border-radius:6px;font-size:16px;font-weight:800;cursor:pointer;touch-action:manipulation;}
-.offline-claim:active{transform:scale(0.98);}
 </style>
 </head>
 <body>
@@ -243,76 +223,33 @@ h1.game-title{font-size:24px;font-weight:800;margin:0;} h1.game-title span{color
 </div>
 
 <div class="screen active" id="menuScreen">
-  <div class="menu-logo">
-    <h1>ДРАГ<span>МЕТ</span></h1>
-  </div>
+  <div class="menu-logo"><h1>ДРАГ<span>МЕТ</span></h1></div>
   <div class="menu-tag">аффинаж · мусор · золото</div>
-
   <div class="menu-buttons">
     <button class="menu-btn primary" id="btnContinue" type="button">Продолжить</button>
     <button class="menu-btn secondary" id="btnNewGame" type="button">Новая игра</button>
     <button class="menu-btn secondary" id="btnSettings" type="button">Настройки</button>
     <div class="menu-save-info" id="saveInfo"></div>
   </div>
-
   <div class="menu-version">v0.5 · прототип</div>
 </div>
 
 <div class="screen" id="settingsScreen">
   <div class="settings-wrap">
     <h2 class="settings-title">Настройки</h2>
-
     <div class="settings-panel">
-      <div class="settings-row">
-        <div>
-          <div class="settings-name">Звук</div>
-          <div class="settings-desc">эффекты в игре</div>
-        </div>
-        <label class="switch"><input type="checkbox" id="tglSound"><span class="switch-slider"></span></label>
-      </div>
-      <div class="settings-row">
-        <div>
-          <div class="settings-name">Вибрация</div>
-          <div class="settings-desc">отклик при нажатиях</div>
-        </div>
-        <label class="switch"><input type="checkbox" id="tglVibe"><span class="switch-slider"></span></label>
-      </div>
-      <div class="settings-row">
-        <div>
-          <div class="settings-name">Музыка</div>
-          <div class="settings-desc">фоновая (пока не подключена)</div>
-        </div>
-        <label class="switch"><input type="checkbox" id="tglMusic" disabled><span class="switch-slider"></span></label>
-      </div>
+      <div class="settings-row"><div><div class="settings-name">Звук</div><div class="settings-desc">эффекты в игре</div></div><label class="switch"><input type="checkbox" id="tglSound"><span class="switch-slider"></span></label></div>
+      <div class="settings-row"><div><div class="settings-name">Вибрация</div><div class="settings-desc">отклик при нажатиях</div></div><label class="switch"><input type="checkbox" id="tglVibe"><span class="switch-slider"></span></label></div>
+      <div class="settings-row"><div><div class="settings-name">Музыка</div><div class="settings-desc">фоновая (пока не подключена)</div></div><label class="switch"><input type="checkbox" id="tglMusic" disabled><span class="switch-slider"></span></label></div>
     </div>
-
     <div class="settings-panel">
-      <div class="settings-row">
-        <div>
-          <div class="settings-name">Вернуться в меню</div>
-          <div class="settings-desc">выйти из игры без сброса прогресса</div>
-        </div>
-        <button class="settings-btn" id="btnBackToMenu" type="button">В меню</button>
-      </div>
+      <div class="settings-row"><div><div class="settings-name">Вернуться в меню</div><div class="settings-desc">выйти без сброса прогресса</div></div><button class="settings-btn" id="btnBackToMenu" type="button">В меню</button></div>
     </div>
-
     <div class="settings-panel">
-      <div class="settings-row">
-        <div>
-          <div class="settings-name">Новая игра</div>
-          <div class="settings-desc">сбросить весь прогресс, включая престиж</div>
-        </div>
-        <button class="settings-btn danger" id="btnResetAll" type="button">Сбросить</button>
-      </div>
+      <div class="settings-row"><div><div class="settings-name">Новая игра</div><div class="settings-desc">сбросить весь прогресс</div></div><button class="settings-btn danger" id="btnResetAll" type="button">Сбросить</button></div>
     </div>
-
     <div class="settings-panel">
-      <div class="settings-row">
-        <div>
-          <div class="settings-name">Сохранение</div>
-          <div class="settings-desc" id="settingsSaveInfo">—</div>
-        </div>
-      </div>
+      <div class="settings-row"><div><div class="settings-name">Сохранение</div><div class="settings-desc" id="settingsSaveInfo">—</div></div></div>
     </div>
   </div>
 </div>
@@ -332,10 +269,7 @@ h1.game-title{font-size:24px;font-weight:800;margin:0;} h1.game-title span{color
     <div class="panel">
       <p class="panel-title">Точки сбора</p>
       <div class="loc-row" id="locRow"></div>
-      <button class="dig-btn" id="digBtn" type="button">
-        <div class="dig-fill" id="digFill"></div>
-        <span class="dig-label" id="digLabel">Порыться</span>
-      </button>
+      <button class="dig-btn" id="digBtn" type="button"><div class="dig-fill" id="digFill"></div><span class="dig-label" id="digLabel">Порыться</span></button>
       <div class="toast" id="toast"></div>
       <div class="cap-bar"><div class="cap-fill" id="capFill"></div></div>
       <div class="cap-txt" id="capTxt"></div>
@@ -367,38 +301,23 @@ h1.game-title{font-size:24px;font-weight:800;margin:0;} h1.game-title span{color
     <div class="panel">
       <p class="panel-title">Скупщик</p>
       <div class="ingot-big" id="ingotBigWrap"><span id="ingotBig">0.000</span><small>г слитков</small></div>
-      <div class="market-row">
-        <span style="font-size:13px;color:var(--text-dim);">Цена за грамм</span>
-        <span class="price" id="priceTxt">— ₽</span>
-      </div>
+      <div class="market-row"><span style="font-size:13px;color:var(--text-dim);">Цена за грамм</span><span class="price" id="priceTxt">— ₽</span></div>
       <button class="sell-btn" id="sellBtn" type="button">Продать слитки</button>
     </div>
   </section>
 
   <section class="tab-section" data-tab="upg">
-    <div class="subtabs">
-      <button class="subtab active" id="subtab-normal" type="button">Обычная</button>
-      <button class="subtab prest" id="subtab-prest" type="button">★ Престиж</button>
-    </div>
-
+    <div class="subtabs"><button class="subtab active" id="subtab-normal" type="button">Обычная</button><button class="subtab prest" id="subtab-prest" type="button">★ Престиж</button></div>
     <div id="subview-normal">
       <div class="panel">
-
-        <div class="acc-head open" data-acc="eq">
-          <span class="acc-title">Оборудование</span>
-          <span class="acc-arrow">▼</span>
-        </div>
+        <div class="acc-head open" data-acc="eq"><span class="acc-title">Оборудование</span><span class="acc-arrow">▼</span></div>
         <div class="acc-body open" data-accbody="eq">
           <div class="upg"><div><div class="upg-name">Кислота почище</div><div class="upg-desc" id="d-acid"></div></div><button class="upg-btn" id="b-acid" type="button"></button></div>
           <div class="upg"><div><div class="upg-name">Печь помощнее</div><div class="upg-desc" id="d-fire"></div></div><button class="upg-btn" id="b-fire" type="button"></button></div>
           <div class="upg"><div><div class="upg-name">Складское место</div><div class="upg-desc" id="d-cap"></div></div><button class="upg-btn" id="b-cap" type="button"></button></div>
           <div class="upg"><div><div class="upg-name">Турбо-палец</div><div class="upg-desc" id="d-hold"></div></div><button class="upg-btn" id="b-hold" type="button"></button></div>
         </div>
-
-        <div class="acc-head" data-acc="spd">
-          <span class="acc-title">Скорость процесса</span>
-          <span class="acc-arrow">▼</span>
-        </div>
+        <div class="acc-head" data-acc="spd"><span class="acc-title">Скорость процесса</span><span class="acc-arrow">▼</span></div>
         <div class="acc-body" data-accbody="spd">
           <div class="upg"><div><div class="upg-name">Копать быстрее</div><div class="upg-desc" id="d-scavspd"></div></div><button class="upg-btn" id="b-scavspd" type="button"></button></div>
           <div class="upg"><div><div class="upg-name">Кислота быстрее</div><div class="upg-desc" id="d-acidspd"></div></div><button class="upg-btn" id="b-acidspd" type="button"></button></div>
@@ -406,83 +325,48 @@ h1.game-title{font-size:24px;font-weight:800;margin:0;} h1.game-title span{color
           <div class="upg"><div><div class="upg-name">Второй бак кислоты</div><div class="upg-desc" id="d-secondacid"></div></div><button class="upg-btn" id="b-secondacid" type="button"></button></div>
           <div class="upg"><div><div class="upg-name">Вторая печь</div><div class="upg-desc" id="d-secondfire"></div></div><button class="upg-btn" id="b-secondfire" type="button"></button></div>
         </div>
-
-        <div class="acc-head" data-acc="luck">
-          <span class="acc-title">Удача</span>
-          <span class="acc-arrow">▼</span>
-        </div>
+        <div class="acc-head" data-acc="luck"><span class="acc-title">Удача</span><span class="acc-arrow">▼</span></div>
         <div class="acc-body" data-accbody="luck">
           <div class="upg"><div><div class="upg-name">Хороший глаз</div><div class="upg-desc" id="d-goodeye"></div></div><button class="upg-btn" id="b-goodeye" type="button"></button></div>
           <div class="upg"><div><div class="upg-name">Чуйка на золото</div><div class="upg-desc" id="d-luck"></div></div><button class="upg-btn" id="b-luck" type="button"></button></div>
         </div>
-
-        <div class="acc-head" data-acc="income">
-          <span class="acc-title">Доход</span>
-          <span class="acc-arrow">▼</span>
-        </div>
+        <div class="acc-head" data-acc="income"><span class="acc-title">Доход</span><span class="acc-arrow">▼</span></div>
         <div class="acc-body" data-accbody="income">
           <div class="upg"><div><div class="upg-name">Репутация</div><div class="upg-desc" id="d-reputation"></div></div><button class="upg-btn" id="b-reputation" type="button"></button></div>
           <div class="upg"><div><div class="upg-name">Коэффициент оффлайна</div><div class="upg-desc" id="d-offlineRate"></div></div><button class="upg-btn offline" id="b-offlineRate" type="button"></button></div>
           <div class="upg"><div><div class="upg-name">Лимит оффлайна</div><div class="upg-desc" id="d-offlineCap"></div></div><button class="upg-btn offline" id="b-offlineCap" type="button"></button></div>
         </div>
-
-        <div class="acc-head" data-acc="regen">
-          <span class="acc-title">Восстановление точек</span>
-          <span class="acc-arrow">▼</span>
-        </div>
-        <div class="acc-body" data-accbody="regen">
-          <div id="regenList"></div>
-        </div>
-
-        <div class="acc-head no-border" data-acc="misc">
-          <span class="acc-title">Прочее</span>
-          <span class="acc-arrow">▼</span>
-        </div>
+        <div class="acc-head" data-acc="regen"><span class="acc-title">Восстановление точек</span><span class="acc-arrow">▼</span></div>
+        <div class="acc-body" data-accbody="regen"><div id="regenList"></div></div>
+        <div class="acc-head no-border" data-acc="misc"><span class="acc-title">Прочее</span><span class="acc-arrow">▼</span></div>
         <div class="acc-body" data-accbody="misc">
           <div class="upg"><div><div class="upg-name">Своя свалка</div><div class="upg-desc" id="d-dump"></div></div><button class="upg-btn" id="b-dump" type="button"></button></div>
         </div>
-
       </div>
     </div>
-
     <div id="subview-prest" style="display:none;">
       <div class="prest-status">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span style="font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;">Уровень престижа</span>
-          <span class="ps-lvl">★ <span id="psLvl">0</span></span>
-        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;">Уровень престижа</span><span class="ps-lvl">★ <span id="psLvl">0</span></span></div>
         <div class="ps-line" style="margin-top:8px;"><span>Очки престижа</span><span id="psPts">0</span></div>
         <div class="ps-line"><span>Бонус к продаже</span><span id="psBonus">+0%</span></div>
         <div class="ps-line"><span>Награда за следующий</span><span id="psReward">10</span></div>
         <button class="prest-btn" id="prestBtn" type="button">Престиж</button>
         <div style="font-size:11px;color:var(--text-dim);margin-top:8px;text-align:center;">Порог: 100 000 ₽ · сбросит всё кроме прокачек Престижа</div>
       </div>
-
       <div class="panel">
-        <div class="acc-head open prest" data-acc="pbonus">
-          <span class="acc-title">Бонусы престижа</span>
-          <span class="acc-arrow">▼</span>
-        </div>
+        <div class="acc-head open prest" data-acc="pbonus"><span class="acc-title">Бонусы престижа</span><span class="acc-arrow">▼</span></div>
         <div class="acc-body open" data-accbody="pbonus">
           <div class="upg"><div><div class="upg-name">Усиление бонуса</div><div class="upg-desc" id="d-bonusBoost"></div></div><button class="upg-btn prest" id="b-bonusBoost" type="button"></button></div>
           <div class="upg"><div><div class="upg-name">Стартовый капитал</div><div class="upg-desc" id="d-startCash"></div></div><button class="upg-btn prest" id="b-startCash" type="button"></button></div>
           <div class="upg"><div><div class="upg-name">Скидка на локации</div><div class="upg-desc" id="d-locDiscount"></div></div><button class="upg-btn prest" id="b-locDiscount" type="button"></button></div>
         </div>
-
-        <div class="acc-head prest" data-acc="pupg2">
-          <span class="acc-title">Улучшения II</span>
-          <span class="acc-arrow">▼</span>
-        </div>
+        <div class="acc-head prest" data-acc="pupg2"><span class="acc-title">Улучшения II</span><span class="acc-arrow">▼</span></div>
         <div class="acc-body" data-accbody="pupg2">
           <div class="upg"><div><div class="upg-name">Кислота II</div><div class="upg-desc" id="d-acidII"></div></div><button class="upg-btn prest" id="b-acidII" type="button"></button></div>
           <div class="upg"><div><div class="upg-name">Печь II</div><div class="upg-desc" id="d-fireII"></div></div><button class="upg-btn prest" id="b-fireII" type="button"></button></div>
           <div class="upg"><div><div class="upg-name">Склад II</div><div class="upg-desc" id="d-capII"></div></div><button class="upg-btn prest" id="b-capII" type="button"></button></div>
         </div>
-
-        <div class="acc-head no-border prest" data-acc="pauto">
-          <span class="acc-title">Автоматизация</span>
-          <span class="acc-arrow">▼</span>
-        </div>
+        <div class="acc-head no-border prest" data-acc="pauto"><span class="acc-title">Автоматизация</span><span class="acc-arrow">▼</span></div>
         <div class="acc-body" data-accbody="pauto">
           <div class="upg"><div><div class="upg-name">Снижение штрафа автокопания</div><div class="upg-desc" id="d-autoPenalty"></div></div><button class="upg-btn prest" id="b-autoPenalty" type="button"></button></div>
           <div id="autoDigList"></div>
@@ -503,17 +387,10 @@ h1.game-title{font-size:24px;font-weight:800;margin:0;} h1.game-title span{color
     </div>
     <div class="panel">
       <p class="panel-title">Управление</p>
-      <div class="upg">
-        <div><div class="upg-name">В главное меню</div><div class="upg-desc">прогресс сохранится автоматически</div></div>
-        <button class="upg-btn" id="b-tomenu" type="button">В меню</button>
-      </div>
-      <div class="upg">
-        <div><div class="upg-name">Начать заново</div><div class="upg-desc">обнуляет весь прогресс (включая престиж)</div></div>
-        <button class="upg-btn" id="b-reset" type="button">Сбросить</button>
-      </div>
+      <div class="upg"><div><div class="upg-name">В главное меню</div><div class="upg-desc">прогресс сохранится</div></div><button class="upg-btn" id="b-tomenu" type="button">В меню</button></div>
+      <div class="upg"><div><div class="upg-name">Начать заново</div><div class="upg-desc">обнулить всё</div></div><button class="upg-btn" id="b-reset" type="button">Сбросить</button></div>
     </div>
   </section>
-
   <p class="footnote">Прототип.</p>
 </div>
 
@@ -543,21 +420,9 @@ var PRESTIGE_THRESHOLD=100000;
 var NORMAL_UPG_KEYS=['acid','fire','cap','dump','hold','scavspd','acidspd','firespd','secondacid','secondfire','goodeye','luck','reputation','offlineRate','offlineCap'];
 var SAVE_KEY='dragmet_save_v1';
 var SAVE_KEY_BACKUP='dragmet_save_v1_backup';
-
-var REPUTATION_MAX=10;
-var REPUTATION_PER_LV=10;
-var REPUTATION_BASE_COST=2500;
-var REPUTATION_COST_MULT=1.7;
-
-var OFFLINE_RATE_MAX=15;
-var OFFLINE_RATE_PER_LV=5;
-var OFFLINE_RATE_BASE_COST=2000;
-var OFFLINE_RATE_MULT=1.55;
-var OFFLINE_CAP_MAX=9;
-var OFFLINE_CAP_BASE_HOURS=1;
-var OFFLINE_CAP_PER_LV=1;
-var OFFLINE_CAP_BASE_COST=1500;
-var OFFLINE_CAP_MULT=1.7;
+var REPUTATION_MAX=10,REPUTATION_PER_LV=10,REPUTATION_BASE_COST=2500,REPUTATION_COST_MULT=1.7;
+var OFFLINE_RATE_MAX=15,OFFLINE_RATE_PER_LV=5,OFFLINE_RATE_BASE_COST=2000,OFFLINE_RATE_MULT=1.55;
+var OFFLINE_CAP_MAX=9,OFFLINE_CAP_BASE_HOURS=1,OFFLINE_CAP_PER_LV=1,OFFLINE_CAP_BASE_COST=1500,OFFLINE_CAP_MULT=1.7;
 
 var LOCATIONS=[
  {key:'yard',name:'Баки во дворе',icon:'🗑️',unlockCost:0,maxStock:8,regenBase:5200,regenCost:350,autoCost:5,
@@ -602,16 +467,9 @@ function makeState(){return{
 var p=makePrest();
 for(var li=0;li<LOCATIONS.length;li++){p.autoDig[LOCATIONS[li].key]=0;p.autoTimers[LOCATIONS[li].key]=0;}
 var s=makeState();
-
 var lastSaveTs=0;
 
-function ensureSettings(){
- if(!s) return;
- if(!s.settings) s.settings={sound:true,vibe:true,music:false};
- if(typeof s.settings.sound==='undefined') s.settings.sound=true;
- if(typeof s.settings.vibe==='undefined') s.settings.vibe=true;
- if(typeof s.settings.music==='undefined') s.settings.music=false;
-}
+function ensureSettings(){if(!s)return;if(!s.settings)s.settings={sound:true,vibe:true,music:false};if(typeof s.settings.sound==='undefined')s.settings.sound=true;if(typeof s.settings.vibe==='undefined')s.settings.vibe=true;if(typeof s.settings.music==='undefined')s.settings.music=false;}
 
 function locDef(k){for(var i=0;i<LOCATIONS.length;i++)if(LOCATIONS[i].key===k)return LOCATIONS[i];}
 function locState(k){for(var i=0;i<s.locs.length;i++)if(s.locs[i].key===k)return s.locs[i];}
@@ -645,267 +503,59 @@ function offlineCapHours(){return OFFLINE_CAP_BASE_HOURS+s.lv.offlineCap*OFFLINE
 function offlineCapNextHours(){return OFFLINE_CAP_BASE_HOURS+(s.lv.offlineCap+1)*OFFLINE_CAP_PER_LV;}
 function offlineCapCostFor(lv){return Math.round(OFFLINE_CAP_BASE_COST*Math.pow(OFFLINE_CAP_MULT,lv));}
 
-// ============ ЗВУК ============
-var audioCtx=null;
-var audioBroken=false;
-var activeLoops={};
-function initAudio(){
- if(audioCtx||audioBroken)return;
- try{
-  var Ctx=window.AudioContext||window.webkitAudioContext;
-  if(!Ctx){audioBroken=true;return;}
-  audioCtx=new Ctx();
- }catch(e){audioBroken=true;audioCtx=null;}
-}
-function canPlay(){ return audioCtx && s && s.settings && s.settings.sound; }
+// === ЗВУК ===
+var audioCtx=null,audioBroken=false,activeLoops={};
+function initAudio(){if(audioCtx||audioBroken)return;try{var Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx){audioBroken=true;return;}audioCtx=new Ctx();}catch(e){audioBroken=true;audioCtx=null;}}
+function canPlay(){return audioCtx&&s&&s.settings&&s.settings.sound;}
+function tone(freq,dur,type,vol,delay){try{if(!canPlay())return;var t0=audioCtx.currentTime+(delay||0);var o=audioCtx.createOscillator();var g=audioCtx.createGain();o.type=type||'sine';o.frequency.setValueAtTime(freq,t0);g.gain.setValueAtTime(vol||0.1,t0);g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);o.connect(g);g.connect(audioCtx.destination);o.start(t0);o.stop(t0+dur+0.02);}catch(e){}}
+function slide(f1,f2,dur,type,vol,delay){try{if(!canPlay())return;var t0=audioCtx.currentTime+(delay||0);var o=audioCtx.createOscillator();var g=audioCtx.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f1,t0);o.frequency.exponentialRampToValueAtTime(Math.max(f2,20),t0+dur);g.gain.setValueAtTime(vol||0.1,t0);g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);o.connect(g);g.connect(audioCtx.destination);o.start(t0);o.stop(t0+dur+0.02);}catch(e){}}
+function rnd(f){return f*(0.92+Math.random()*0.16);}
+function sndTab(){tone(rnd(180),0.08,'sine',0.09);tone(rnd(90),0.1,'triangle',0.05,0.01);}
+function sndAccOpen(){tone(rnd(400),0.06,'sine',0.06);tone(rnd(600),0.07,'sine',0.04,0.03);}
+function sndAccClose(){tone(rnd(600),0.06,'sine',0.05);tone(rnd(400),0.08,'sine',0.04,0.03);}
+function sndToggle(){tone(rnd(500),0.05,'square',0.05);tone(rnd(750),0.06,'square',0.04,0.03);}
+function sndSelectLoc(){tone(rnd(600),0.05,'sine',0.06);tone(rnd(900),0.06,'sine',0.04,0.03);}
+function sndStartProcess(kind){if(kind==='acid'){tone(rnd(280),0.1,'triangle',0.08);tone(rnd(180),0.14,'triangle',0.06,0.05);}else{tone(rnd(220),0.12,'sawtooth',0.06);tone(rnd(140),0.16,'sawtooth',0.05,0.06);}}
+function sndBuy(){tone(rnd(400),0.08,'sine',0.08);tone(rnd(600),0.09,'sine',0.07,0.05);tone(rnd(800),0.1,'sine',0.06,0.1);}
+function sndDeny(){slide(rnd(180),80,0.15,'sawtooth',0.08);}
+function sndCoins(){[900,1350,1800,2200].forEach(function(f,i){tone(rnd(f),0.22,'square',0.06,i*0.05);});}
+function sndPrestige(){[523,659,784,1047].forEach(function(f,i){tone(f,0.5,'sine',0.12,i*0.12);});}
+function sndOfflineClaim(){[660,880,1320].forEach(function(f,i){tone(f,0.3,'triangle',0.1,i*0.08);});}
+function sndDigJunk(){tone(rnd(140),0.06,'triangle',0.08);tone(rnd(90),0.08,'sine',0.05,0.02);}
+function sndDigMid(){tone(rnd(220),0.07,'triangle',0.09);tone(rnd(150),0.09,'sine',0.05,0.02);}
+function sndDigNice(){tone(rnd(340),0.07,'sine',0.09);tone(rnd(500),0.09,'sine',0.06,0.03);}
+function sndDigRare(){tone(rnd(800),0.12,'sine',0.10);tone(rnd(1200),0.14,'sine',0.08,0.04);tone(rnd(1600),0.16,'sine',0.06,0.08);}
+function sndDigPricey(){[1000,1500,2000].forEach(function(f,i){tone(rnd(f),0.18,'sine',0.09,i*0.04);});}
+function sndDing(){[1200,1500,1800,2400].forEach(function(f,i){tone(rnd(f),0.35,'sine',0.12,i*0.05);});}
+function startAcidLoop(){try{if(!canPlay()||activeLoops.acid)return;activeLoops.acid={tick:0};var bubble=function(){if(!activeLoops.acid)return;var f1=200+Math.random()*150;var f2=f1+80+Math.random()*120;slide(f1,f2,0.12,'sine',0.035);activeLoops.acid.tick=setTimeout(bubble,180+Math.random()*220);};bubble();}catch(e){}}
+function stopAcidLoop(){try{if(activeLoops.acid){clearTimeout(activeLoops.acid.tick);activeLoops.acid=null;}}catch(e){activeLoops.acid=null;}}
+function startFireLoop(){try{if(!canPlay()||activeLoops.fire)return;var o=audioCtx.createOscillator();o.type='sawtooth';o.frequency.value=55;var f=audioCtx.createBiquadFilter();f.type='lowpass';f.frequency.value=200;var g=audioCtx.createGain();g.gain.value=0.045;o.connect(f);f.connect(g);g.connect(audioCtx.destination);o.start();activeLoops.fire={osc:o};}catch(e){}}
+function stopFireLoop(){try{if(activeLoops.fire){activeLoops.fire.osc.stop();activeLoops.fire=null;}}catch(e){activeLoops.fire=null;}}
 
-// Универсальный тон
-function tone(freq,dur,type,vol,delay){
- try{
-  if(!canPlay())return;
-  var t0=audioCtx.currentTime+(delay||0);
-  var o=audioCtx.createOscillator();
-  var g=audioCtx.createGain();
-  o.type=type||'sine';
-  o.frequency.setValueAtTime(freq,t0);
-  g.gain.setValueAtTime(vol||0.1,t0);
-  g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
-  o.connect(g);g.connect(audioCtx.destination);
-  o.start(t0);o.stop(t0+dur+0.02);
- }catch(e){}
-}
-// Тон со скольжением частоты
-function slide(f1,f2,dur,type,vol,delay){
- try{
-  if(!canPlay())return;
-  var t0=audioCtx.currentTime+(delay||0);
-  var o=audioCtx.createOscillator();
-  var g=audioCtx.createGain();
-  o.type=type||'sine';
-  o.frequency.setValueAtTime(f1,t0);
-  o.frequency.exponentialRampToValueAtTime(Math.max(f2,20),t0+dur);
-  g.gain.setValueAtTime(vol||0.1,t0);
-  g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
-  o.connect(g);g.connect(audioCtx.destination);
-  o.start(t0);o.stop(t0+dur+0.02);
- }catch(e){}
-}
-
-// --- Утилита: случайная вариация тона ±8% ---
-function rnd(f){ return f*(0.92+Math.random()*0.16); }
-
-// --- ЗВУК ВКЛАДОК (нижнее меню) ---
-function sndTab(){
- if(!canPlay())return;
- // глухой мягкий "тук"
- tone(rnd(180),0.08,'sine',0.09);
- tone(rnd(90),0.1,'triangle',0.05,0.01);
-}
-// --- ЗВУК АККОРДЕОНА ---
-function sndAccOpen(){
- if(!canPlay())return;
- tone(rnd(400),0.06,'sine',0.06);
- tone(rnd(600),0.07,'sine',0.04,0.03);
-}
-function sndAccClose(){
- if(!canPlay())return;
- tone(rnd(600),0.06,'sine',0.05);
- tone(rnd(400),0.08,'sine',0.04,0.03);
-}
-// --- ЗВУК ПЕРЕКЛЮЧАТЕЛЯ (тумблер) ---
-function sndToggle(){
- if(!canPlay())return;
- tone(rnd(500),0.05,'square',0.05);
- tone(rnd(750),0.06,'square',0.04,0.03);
-}
-// --- ЗВУК КЛИКА ПО ЛОКАЦИИ ---
-function sndSelectLoc(){
- if(!canPlay())return;
- tone(rnd(600),0.05,'sine',0.06);
- tone(rnd(900),0.06,'sine',0.04,0.03);
-}
-// --- ЗВУК КНОПКИ "РАСТВОРИТЬ/ВЫПАРИТЬ" ---
-function sndStartProcess(kind){
- if(!canPlay())return;
- if(kind==='acid'){
-  tone(rnd(280),0.1,'triangle',0.08);
-  tone(rnd(180),0.14,'triangle',0.06,0.05);
- } else {
-  tone(rnd(220),0.12,'sawtooth',0.06);
-  tone(rnd(140),0.16,'sawtooth',0.05,0.06);
- }
-}
-// --- ЗВУК ПОКУПКИ ---
-function sndBuy(){
- if(!canPlay())return;
- tone(rnd(400),0.08,'sine',0.08);
- tone(rnd(600),0.09,'sine',0.07,0.05);
- tone(rnd(800),0.1,'sine',0.06,0.1);
-}
-// --- ЗВУК ОТКАЗА ---
-function sndDeny(){
- if(!canPlay())return;
- slide(rnd(180),80,0.15,'sawtooth',0.08);
-}
-// --- ЗВУК ПРОДАЖИ (звон монет) ---
-function sndCoins(){
- if(!canPlay())return;
- [900,1350,1800,2200].forEach(function(f,i){ tone(rnd(f),0.22,'square',0.06,i*0.05); });
-}
-// --- ЗВУК ПРЕСТИЖА ---
-function sndPrestige(){
- if(!canPlay())return;
- [523,659,784,1047].forEach(function(f,i){ tone(f,0.5,'sine',0.12,i*0.12); });
-}
-// --- ЗВУК ОФФЛАЙН ЗАХОДА ---
-function sndOfflineClaim(){
- if(!canPlay())return;
- [660,880,1320].forEach(function(f,i){ tone(f,0.3,'triangle',0.1,i*0.08); });
-}
-
-// --- ЗВУКИ КОПАНИЯ ПО ТИПУ НАХОДКИ ---
-// 1) Хлам-мелочь: резисторы/конденсаторы/транзисторы - глухой "тюк"
-function sndDigJunk(){
- if(!canPlay())return;
- tone(rnd(140),0.06,'triangle',0.08);
- tone(rnd(90),0.08,'sine',0.05,0.02);
-}
-// 2) Микросхемы/HDD - средний
-function sndDigMid(){
- if(!canPlay())return;
- tone(rnd(220),0.07,'triangle',0.09);
- tone(rnd(150),0.09,'sine',0.05,0.02);
-}
-// 3) Телефоны/ОЗУ - чуть звонче
-function sndDigNice(){
- if(!canPlay())return;
- tone(rnd(340),0.07,'sine',0.09);
- tone(rnd(500),0.09,'sine',0.06,0.03);
-}
-// 4) Редкие - звон
-function sndDigRare(){
- if(!canPlay())return;
- tone(rnd(800),0.12,'sine',0.10);
- tone(rnd(1200),0.14,'sine',0.08,0.04);
- tone(rnd(1600),0.16,'sine',0.06,0.08);
-}
-// 5) Дорогие (процессоры/разъёмы) - яркий звон
-function sndDigPricey(){
- if(!canPlay())return;
- [1000,1500,2000].forEach(function(f,i){ tone(rnd(f),0.18,'sine',0.09,i*0.04); });
-}
-// 6) Легендарка - фанфары
-function sndDing(){
- if(!canPlay())return;
- [1200,1500,1800,2400].forEach(function(f,i){ tone(rnd(f),0.35,'sine',0.12,i*0.05); });
-}
-
-// --- ФОНОВЫЕ ЗВУКИ ПРОЦЕССОВ ---
-// Кислота: цикл мелких "бульков" каждые ~0.3с
-function startAcidLoop(){
- try{
-  if(!canPlay()||activeLoops.acid)return;
-  activeLoops.acid={tick:0};
-  var bubble=function(){
-   if(!activeLoops.acid)return;
-   // короткий бульк - скольжение вверх + случайность
-   var f1=200+Math.random()*150;
-   var f2=f1+80+Math.random()*120;
-   slide(f1,f2,0.12,'sine',0.035);
-   activeLoops.acid.tick=setTimeout(bubble, 180+Math.random()*220);
-  };
-  bubble();
- }catch(e){}
-}
-function stopAcidLoop(){
- try{
-  if(activeLoops.acid){
-   clearTimeout(activeLoops.acid.tick);
-   activeLoops.acid=null;
-  }
- }catch(e){activeLoops.acid=null;}
-}
-// Печь: гул
-function startFireLoop(){
- try{
-  if(!canPlay()||activeLoops.fire)return;
-  var o=audioCtx.createOscillator();
-  o.type='sawtooth';
-  o.frequency.value=55;
-  var f=audioCtx.createBiquadFilter();
-  f.type='lowpass';
-  f.frequency.value=200;
-  var g=audioCtx.createGain();
-  g.gain.value=0.045;
-  o.connect(f);f.connect(g);g.connect(audioCtx.destination);
-  o.start();
-  activeLoops.fire={osc:o};
- }catch(e){}
-}
-function stopFireLoop(){
- try{
-  if(activeLoops.fire){activeLoops.fire.osc.stop();activeLoops.fire=null;}
- }catch(e){activeLoops.fire=null;}
-}
-
-// ============ ВИБРАЦИЯ ============
-function vibe(ms){ try{ if(!s||!s.settings||!s.settings.vibe)return; if(navigator.vibrate)navigator.vibrate(ms||15); }catch(e){} }
+// === ВИБРАЦИЯ ===
+function vibe(ms){try{if(!s||!s.settings||!s.settings.vibe)return;if(navigator.vibrate)navigator.vibrate(ms||15);}catch(e){}}
 var hapticInput=null;
-function initHaptic(){ try{ var el=document.createElement('input'); el.type='checkbox'; el.setAttribute('switch',''); el.style.position='absolute'; el.style.opacity='0'; el.style.pointerEvents='none'; el.style.left='-9999px'; el.setAttribute('aria-hidden','true'); document.body.appendChild(el); hapticInput=el; }catch(e){} }
-function iosHaptic(){ try{ if(!s.settings.vibe)return; if(!hapticInput)return; hapticInput.checked=!hapticInput.checked; var evt=document.createEvent('HTMLEvents'); evt.initEvent('change',true,false); hapticInput.dispatchEvent(evt); }catch(e){} }
-function tapVibe(){ vibe(12); iosHaptic(); }
+function initHaptic(){try{var el=document.createElement('input');el.type='checkbox';el.setAttribute('switch','');el.style.position='absolute';el.style.opacity='0';el.style.pointerEvents='none';el.style.left='-9999px';el.setAttribute('aria-hidden','true');document.body.appendChild(el);hapticInput=el;}catch(e){}}
+function iosHaptic(){try{if(!s.settings.vibe)return;if(!hapticInput)return;hapticInput.checked=!hapticInput.checked;var evt=document.createEvent('HTMLEvents');evt.initEvent('change',true,false);hapticInput.dispatchEvent(evt);}catch(e){}}
+function tapVibe(){vibe(12);iosHaptic();}
 
-// ============ ВИЗУАЛЬНЫЕ ============
-function bumpCash(){ try{ var el=document.getElementById('cashWrap'); if(!el)return; el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); setTimeout(function(){el.classList.remove('bump');},200); }catch(e){} }
-function bumpToast(){ try{ var el=document.getElementById('toast'); if(!el)return; el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); setTimeout(function(){el.classList.remove('bump');},200); }catch(e){} }
-function flashInvItem(key){
- try{
-  var items=document.querySelectorAll('.inv-item');
-  for(var i=0;i<items.length;i++){
-   var lbl=items[i].querySelector('.l');
-   if(!lbl)continue;
-   if(lbl.textContent===CATALOG[key].name.toLowerCase()){
-    (function(el){el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash');setTimeout(function(){el.classList.remove('flash');},400);})(items[i]);
-    return;
-   }
-  }
- }catch(e){}
-}
-function shakeDigBtn(){ try{ var el=document.getElementById('digBtn'); if(!el)return; el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); setTimeout(function(){el.classList.remove('shake');},400); }catch(e){} }
-function flashSellBtn(){ try{ var el=document.getElementById('sellBtn'); if(!el)return; el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); setTimeout(function(){el.classList.remove('flash');},450); }catch(e){} }
-function flashBoughtBtn(el){ if(!el)return; try{ el.classList.remove('bought'); void el.offsetWidth; el.classList.add('bought'); setTimeout(function(){el.classList.remove('bought');},450); }catch(e){} }
-function flashPrestBtn(){ try{ var el=document.getElementById('prestBtn'); if(!el)return; el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); setTimeout(function(){el.classList.remove('flash');},650); }catch(e){} }
+// === ВИЗУАЛЬНЫЕ ===
+function bumpCash(){try{var el=document.getElementById('cashWrap');if(!el)return;el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump');setTimeout(function(){el.classList.remove('bump');},200);}catch(e){}}
+function bumpToast(){try{var el=document.getElementById('toast');if(!el)return;el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump');setTimeout(function(){el.classList.remove('bump');},200);}catch(e){}}
+function flashInvItem(key){try{var items=document.querySelectorAll('.inv-item');for(var i=0;i<items.length;i++){var lbl=items[i].querySelector('.l');if(!lbl)continue;if(lbl.textContent===CATALOG[key].name.toLowerCase()){(function(el){el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash');setTimeout(function(){el.classList.remove('flash');},400);})(items[i]);return;}}}catch(e){}}
+function shakeDigBtn(){try{var el=document.getElementById('digBtn');if(!el)return;el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake');setTimeout(function(){el.classList.remove('shake');},400);}catch(e){}}
+function flashSellBtn(){try{var el=document.getElementById('sellBtn');if(!el)return;el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash');setTimeout(function(){el.classList.remove('flash');},450);}catch(e){}}
+function flashBoughtBtn(el){if(!el)return;try{el.classList.remove('bought');void el.offsetWidth;el.classList.add('bought');setTimeout(function(){el.classList.remove('bought');},450);}catch(e){}}
+function flashPrestBtn(){try{var el=document.getElementById('prestBtn');if(!el)return;el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash');setTimeout(function(){el.classList.remove('flash');},650);}catch(e){}}
 
 var toastTimer=null;
 function flashToast(msg){var t=document.getElementById('toast');if(!t)return;t.textContent=msg;clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.textContent='';},1600);}
 var bigToastTimer=null;
 function showBigToast(msg){var el=document.getElementById('toastMsg');if(!el)return;el.textContent=msg;el.classList.add('show');clearTimeout(bigToastTimer);bigToastTimer=setTimeout(function(){el.classList.remove('show');},2200);}
 
-function pickRandomFromDef(def){
- var tw=0,i;for(i=0;i<def.loot.length;i++)tw+=def.loot[i].w;
- var r=Math.random()*tw,picked=def.loot[0];
- for(i=0;i<def.loot.length;i++){if(r<def.loot[i].w){picked=def.loot[i];break;}r-=def.loot[i].w;}
- return picked.k;
-}
-function maybeUpgradeDrop(k){
- if(k==='rare'||k==='legend'||k==='cpus'||k==='connect')return k;
- if(Math.random()<goodEyeChance()){
-  var r=Math.random();
-  if(r<0.15)return 'legend';
-  if(r<0.55)return 'rare';
-  if(r<0.8)return 'cpus';
-  return 'connect';
- }
- return k;
-}
-function playDigSound(k){
- if(k==='legend') { sndDing(); vibe(40); return; }
- if(k==='cpus'||k==='connect') { sndDigPricey(); vibe(30); return; }
- if(k==='rare') { sndDigRare(); vibe(28); return; }
- if(k==='phones'||k==='ram') { sndDigNice(); vibe(18); return; }
- if(k==='chips'||k==='hdd') { sndDigMid(); vibe(15); return; }
- sndDigJunk(); vibe(12);
-}
+function pickRandomFromDef(def){var tw=0,i;for(i=0;i<def.loot.length;i++)tw+=def.loot[i].w;var r=Math.random()*tw,picked=def.loot[0];for(i=0;i<def.loot.length;i++){if(r<def.loot[i].w){picked=def.loot[i];break;}r-=def.loot[i].w;}return picked.k;}
+function maybeUpgradeDrop(k){if(k==='rare'||k==='legend'||k==='cpus'||k==='connect')return k;if(Math.random()<goodEyeChance()){var r=Math.random();if(r<0.15)return 'legend';if(r<0.55)return 'rare';if(r<0.8)return 'cpus';return 'connect';}return k;}
+function playDigSound(k){if(k==='legend'){sndDing();vibe(40);return;}if(k==='cpus'||k==='connect'){sndDigPricey();vibe(30);return;}if(k==='rare'){sndDigRare();vibe(28);return;}if(k==='phones'||k==='ram'){sndDigNice();vibe(18);return;}if(k==='chips'||k==='hdd'){sndDigMid();vibe(15);return;}sndDigJunk();vibe(12);}
 
 function tryScavenge(locKey,silent){
  var ls=locState(locKey),def=locDef(locKey);
@@ -925,7 +575,6 @@ function tryScavenge(locKey,silent){
  }
  return true;
 }
-
 function scavenge(){
  if(s.scavCd>0)return;
  if(tryScavenge(s.activeLoc,false)){s.scavCd=scavCdMax();saveGame();}
@@ -937,7 +586,6 @@ function scavenge(){
 }
 function selectLoc(k){var ls=locState(k);if(!ls.unlocked)return;s.activeLoc=k;sndSelectLoc();vibe(8);saveGame();}
 function unlockLoc(k){var def=locDef(k),ls=locState(k);if(ls.unlocked)return;var cost=locUnlockCost(def);if(s.cash<cost){sndDeny();vibe(40);return;}s.cash-=cost;ls.unlocked=true;s.activeLoc=k;sndBuy();vibe(25);bumpCash();saveGame();}
-
 function startAcid(idx){
  var bath=s.acid[idx];if(!bath||bath.active)return;
  var gv=junkGoldValueUnlocked();if(gv<=0){sndDeny();vibe(30);return;}
@@ -988,43 +636,14 @@ function buy(k){
  else if(k==='secondfire'){if(s.lv.secondfire)return;if(s.cash<s.cost.secondfire){sndDeny();vibe(30);return;}s.cash-=s.cost.secondfire;s.lv.secondfire=1;s.fire.push({active:false,progress:0,duration:fireDuration(),yieldAmt:0});changed=true;}
  else if(k==='goodeye'){if(s.cash<s.cost.goodeye){sndDeny();vibe(30);return;}s.cash-=s.cost.goodeye;s.lv.goodeye++;s.cost.goodeye=Math.round(s.cost.goodeye*1.8);changed=true;}
  else if(k==='luck'){if(s.cash<s.cost.luck){sndDeny();vibe(30);return;}s.cash-=s.cost.luck;s.lv.luck++;s.cost.luck=Math.round(s.cost.luck*1.8);changed=true;}
- else if(k==='reputation'){
-  if(s.lv.reputation>=REPUTATION_MAX)return;
-  if(s.cash<s.cost.reputation){sndDeny();vibe(30);return;}
-  s.cash-=s.cost.reputation;s.lv.reputation++;
-  if(s.lv.reputation<REPUTATION_MAX){s.cost.reputation=reputationCostFor(s.lv.reputation);}else{s.cost.reputation=0;}
-  changed=true;
- }
- else if(k==='offlineRate'){
-  if(s.lv.offlineRate>=OFFLINE_RATE_MAX)return;
-  if(s.cash<s.cost.offlineRate){sndDeny();vibe(30);return;}
-  s.cash-=s.cost.offlineRate;s.lv.offlineRate++;
-  if(s.lv.offlineRate<OFFLINE_RATE_MAX){s.cost.offlineRate=offlineRateCostFor(s.lv.offlineRate);}else{s.cost.offlineRate=0;}
-  changed=true;
- }
- else if(k==='offlineCap'){
-  if(s.lv.offlineCap>=OFFLINE_CAP_MAX)return;
-  if(s.cash<s.cost.offlineCap){sndDeny();vibe(30);return;}
-  s.cash-=s.cost.offlineCap;s.lv.offlineCap++;
-  if(s.lv.offlineCap<OFFLINE_CAP_MAX){s.cost.offlineCap=offlineCapCostFor(s.lv.offlineCap);}else{s.cost.offlineCap=0;}
-  changed=true;
- }
- else if(k.indexOf('regen:')===0){
-  var lkey=k.substring(6),ldef=locDef(lkey),lls=locState(lkey);
-  if(!ldef||!lls||!lls.unlocked)return;
-  var rcost=regenCostFor(ldef,lls);
-  if(s.cash<rcost){sndDeny();vibe(30);return;}
-  s.cash-=rcost;lls.regenLv++;changed=true;
- }
- if(changed){
-  sndBuy();vibe(25);bumpCash();
-  if(btnEl)flashBoughtBtn(btnEl);
-  saveGame();
- }
+ else if(k==='reputation'){if(s.lv.reputation>=REPUTATION_MAX)return;if(s.cash<s.cost.reputation){sndDeny();vibe(30);return;}s.cash-=s.cost.reputation;s.lv.reputation++;if(s.lv.reputation<REPUTATION_MAX){s.cost.reputation=reputationCostFor(s.lv.reputation);}else{s.cost.reputation=0;}changed=true;}
+ else if(k==='offlineRate'){if(s.lv.offlineRate>=OFFLINE_RATE_MAX)return;if(s.cash<s.cost.offlineRate){sndDeny();vibe(30);return;}s.cash-=s.cost.offlineRate;s.lv.offlineRate++;if(s.lv.offlineRate<OFFLINE_RATE_MAX){s.cost.offlineRate=offlineRateCostFor(s.lv.offlineRate);}else{s.cost.offlineRate=0;}changed=true;}
+ else if(k==='offlineCap'){if(s.lv.offlineCap>=OFFLINE_CAP_MAX)return;if(s.cash<s.cost.offlineCap){sndDeny();vibe(30);return;}s.cash-=s.cost.offlineCap;s.lv.offlineCap++;if(s.lv.offlineCap<OFFLINE_CAP_MAX){s.cost.offlineCap=offlineCapCostFor(s.lv.offlineCap);}else{s.cost.offlineCap=0;}changed=true;}
+ else if(k.indexOf('regen:')===0){var lkey=k.substring(6),ldef=locDef(lkey),lls=locState(lkey);if(!ldef||!lls||!lls.unlocked)return;var rcost=regenCostFor(ldef,lls);if(s.cash<rcost){sndDeny();vibe(30);return;}s.cash-=rcost;lls.regenLv++;changed=true;}
+ if(changed){sndBuy();vibe(25);bumpCash();if(btnEl)flashBoughtBtn(btnEl);saveGame();}
 }
 function buyPrest(key){
- var changed=false;
- var btnEl=document.getElementById('b-'+key);
+ var changed=false;var btnEl=document.getElementById('b-'+key);
  if(key==='bonusBoost'){var c=1+p.lv.bonusBoost;if(p.points<c){sndDeny();vibe(30);return;}p.points-=c;p.lv.bonusBoost++;changed=true;}
  else if(key==='startCash'){var c2=2+p.lv.startCash*2;if(p.points<c2){sndDeny();vibe(30);return;}p.points-=c2;p.lv.startCash++;changed=true;}
  else if(key==='locDiscount'){var c3=3+p.lv.locDiscount*3;if(p.points<c3){sndDeny();vibe(30);return;}p.points-=c3;p.lv.locDiscount++;changed=true;}
@@ -1035,40 +654,25 @@ function buyPrest(key){
  if(changed){sndBuy();vibe(25);if(btnEl)flashBoughtBtn(btnEl);saveGame();}
 }
 function autoDigCost(def,lv){return Math.round(def.autoCost*Math.pow(1.5,lv));}
-function buyAutoDig(locKey){
- var def=locDef(locKey);if(!def)return;
- var lv=p.autoDig[locKey]||0,cost=autoDigCost(def,lv);
- if(p.points<cost){sndDeny();vibe(30);return;}
- p.points-=cost;p.autoDig[locKey]=lv+1;
- sndBuy();vibe(25);
- var el=document.getElementById('b-auto:'+locKey);if(el)flashBoughtBtn(el);
- saveGame();
-}
-function toggleLock(k){
- if(!CATALOG[k])return;
- s.locked[k]=!s.locked[k];
- sndSelectLoc();vibe(10);saveGame();
-}
+function buyAutoDig(locKey){var def=locDef(locKey);if(!def)return;var lv=p.autoDig[locKey]||0,cost=autoDigCost(def,lv);if(p.points<cost){sndDeny();vibe(30);return;}p.points-=cost;p.autoDig[locKey]=lv+1;sndBuy();vibe(25);var el=document.getElementById('b-auto:'+locKey);if(el)flashBoughtBtn(el);saveGame();}
+function toggleLock(k){if(!CATALOG[k])return;s.locked[k]=!s.locked[k];sndSelectLoc();vibe(10);saveGame();}
 
 function resetAll(){
  p=makePrest();
  for(var li=0;li<LOCATIONS.length;li++){p.autoDig[LOCATIONS[li].key]=0;p.autoTimers[LOCATIONS[li].key]=0;}
  var keepSettings=s&&s.settings?s.settings:{sound:true,vibe:true,music:false};
- s=makeState();
- s.settings=keepSettings;
+ s=makeState();s.settings=keepSettings;
  try{localStorage.removeItem(SAVE_KEY);localStorage.removeItem(SAVE_KEY_BACKUP);}catch(e){}
  lastSaveTs=0;
  stopAcidLoop();stopFireLoop();
  switchTab('dig');
 }
-
 function doPrestige(){
  if(s.cash<PRESTIGE_THRESHOLD){sndDeny();vibe(40);return;}
  var newLvl=p.level+1,reward=prestigeReward(newLvl);
  p.points+=reward;p.level=newLvl;
  var keepSettings=s.settings;
- s=makeState();
- s.settings=keepSettings;
+ s=makeState();s.settings=keepSettings;
  for(var li=0;li<LOCATIONS.length;li++)p.autoTimers[LOCATIONS[li].key]=0;
  s.cash=startCashAfterPrestige();
  flashToast('Престиж '+newLvl+'! Получено '+reward+' очков');
@@ -1092,7 +696,6 @@ function tickAutoDig(dt){
   }
  }
 }
-
 function tick(dt){
  if(s.scavCd>0)s.scavCd=Math.max(0,s.scavCd-dt);
  var acidRunning=false,fireRunning=false;
@@ -1113,7 +716,6 @@ function tick(dt){
  s.price+=s.priceDir*140*kk;
  s.price=Math.max(2600,Math.min(3900,s.price));
 }
-
 function calcOfflinePerHour(){
  var totalGold=0;
  for(var i=0;i<LOCATIONS.length;i++){
@@ -1145,10 +747,7 @@ function applyOfflineIncome(){
  var ratePct=offlineRatePct()/100;
  var earned=Math.floor(perHour*countedHours*ratePct);
  if(earned<=0)return 0;
- s.cash+=earned;
- s.stats.earnedTotal+=earned;
- s.stats.offlineTotal+=earned;
- s.lastSeenTs=Date.now();
+ s.cash+=earned;s.stats.earnedTotal+=earned;s.stats.offlineTotal+=earned;s.lastSeenTs=Date.now();
  return {earned:earned,elapsed:elapsedSec,hours:countedHours,cap:capHours,rate:offlineRatePct(),perHour:perHour};
 }
 function showOfflineOverlay(info){
@@ -1185,7 +784,7 @@ function buildSaveData(){
    settings:{sound:s.settings.sound,vibe:s.settings.vibe,music:s.settings.music},
    lastSeenTs:s.lastSeenTs
   },
-  ts:Date.now(),ver:5
+  ts:Date.now(),ver:6
  };
 }
 function saveGame(){try{s.lastSeenTs=Date.now();var data=buildSaveData();var prev=localStorage.getItem(SAVE_KEY);if(prev)localStorage.setItem(SAVE_KEY_BACKUP,prev);localStorage.setItem(SAVE_KEY,JSON.stringify(data));lastSaveTs=data.ts;return true;}catch(e){return false;}}
@@ -1368,9 +967,7 @@ function renderAcidInventory(){
   var div=document.createElement('div');
   div.className='inv-line'+(cnt===0?' dim':'')+(locked?' locked':'');
   div.setAttribute('data-act','lock');div.setAttribute('data-key',k);
-  div.innerHTML='<span class="il-lock">🔒</span>'+
-   '<span class="il-ic">'+c.icon+'</span><span class="il-name">'+c.name+'</span>'+
-   '<span class="il-cnt">'+cnt+' шт</span><span class="il-au">'+fmt(au,3)+' г</span>';
+  div.innerHTML='<span class="il-lock">🔒</span><span class="il-ic">'+c.icon+'</span><span class="il-name">'+c.name+'</span><span class="il-cnt">'+cnt+' шт</span><span class="il-au">'+fmt(au,3)+' г</span>';
   box.appendChild(div);
   if(cnt>0)any=true;
  }
@@ -1448,7 +1045,6 @@ function render(){
  setText('prestLvl',p.level);setText('prestPts',p.points);
  renderLocations();renderInventory();renderAcidInventory();renderAcidStages();renderFireStages();renderRegenList();renderAutoDigList();
  applyAccState();
-
  var ls=locState(s.activeLoc),def=locDef(s.activeLoc);
  var digBtn=document.getElementById('digBtn');
  if(digBtn){
@@ -1461,7 +1057,6 @@ function render(){
  }
  setText('capTxt',totalJunk()+' / '+s.cap+' на складе');
  var cf=document.getElementById('capFill');if(cf)cf.style.width=Math.min(100,totalJunk()/s.cap*100)+'%';
-
  var pe=document.getElementById('priceTxt');
  if(pe){
   var arrow=s.priceDir>0.15?'<span class="up">▲</span>':(s.priceDir<-0.15?'<span class="down">▼</span>':'');
@@ -1471,32 +1066,27 @@ function render(){
  }
  var sb=document.getElementById('sellBtn');
  if(sb){sb.disabled=s.ingots<=0.0005;sb.textContent=s.ingots<=0.0005?'Нет слитков на продажу':'Продать '+fmt(s.ingots,3)+' г за '+fmt(Math.floor(s.ingots*effectivePrice()))+' ₽';}
-
  setText('b-acid',s.cost.acid+' ₽');setDis('b-acid',s.cash<s.cost.acid);
  setText('d-acid','потери золота в кислоте: '+Math.round((1-acidEff())*100)+'% → '+Math.round((1-acidEffNext())*100)+'%');
  setText('b-fire',s.cost.fire+' ₽');setDis('b-fire',s.cash<s.cost.fire);
  setText('d-fire','потери при выпаривании: '+Math.round((1-fireEff())*100)+'% → '+Math.round((1-fireEffNext())*100)+'%');
  setText('b-cap',s.cost.cap+' ₽');setDis('b-cap',s.cash<s.cost.cap);
  setText('d-cap','вместимость склада: '+s.cap+' → '+(s.cap+8)+' мест');
-
  var bh=document.getElementById('b-hold');
  if(bh){if(s.lv.hold){bh.textContent='✓ куплено';bh.disabled=true;bh.className='upg-btn owned';}else{bh.textContent=s.cost.hold+' ₽';bh.disabled=s.cash<s.cost.hold;bh.className='upg-btn';}}
- setText('d-hold',s.lv.hold?'зажми любую кнопку — она повторяется сама':'зажми кнопку — действие будет повторяться, пока держишь палец');
-
+ setText('d-hold',s.lv.hold?'зажми любую кнопку — она повторяется сама':'зажми кнопку — действие повторяется, пока держишь палец');
  setText('b-scavspd',s.cost.scavspd+' ₽');setDis('b-scavspd',s.cash<s.cost.scavspd);
  setText('d-scavspd','кулдаун копания: '+(scavCdMax()/1000).toFixed(2)+'с → '+(Math.max(300,1600*Math.pow(0.9,s.lv.scavspd+1))/1000).toFixed(2)+'с');
  setText('b-acidspd',s.cost.acidspd+' ₽');setDis('b-acidspd',s.cash<s.cost.acidspd);
  setText('d-acidspd','время растворения: '+(acidDuration()/1000).toFixed(1)+'с → '+(Math.max(500,4200*Math.pow(0.9,s.lv.acidspd+1))/1000).toFixed(1)+'с');
  setText('b-firespd',s.cost.firespd+' ₽');setDis('b-firespd',s.cash<s.cost.firespd);
  setText('d-firespd','время выпаривания: '+(fireDuration()/1000).toFixed(1)+'с → '+(Math.max(400,3400*Math.pow(0.9,s.lv.firespd+1))/1000).toFixed(1)+'с');
-
  var bsa=document.getElementById('b-secondacid');
  if(bsa){if(s.lv.secondacid){bsa.textContent='✓ куплено';bsa.disabled=true;bsa.className='upg-btn owned';}else{bsa.textContent=s.cost.secondacid+' ₽';bsa.disabled=s.cash<s.cost.secondacid;bsa.className='upg-btn';}}
  setText('d-secondacid',s.lv.secondacid?'два бака работают параллельно':'позволяет запустить второй процесс одновременно');
  var bsf=document.getElementById('b-secondfire');
  if(bsf){if(s.lv.secondfire){bsf.textContent='✓ куплено';bsf.disabled=true;bsf.className='upg-btn owned';}else{bsf.textContent=s.cost.secondfire+' ₽';bsf.disabled=s.cash<s.cost.secondfire;bsf.className='upg-btn';}}
  setText('d-secondfire',s.lv.secondfire?'две печи работают параллельно':'позволяет запустить вторую печь');
-
  setText('b-goodeye',s.cost.goodeye+' ₽');setDis('b-goodeye',s.cash<s.cost.goodeye);
  setText('d-goodeye','шанс выпадения редкого: '+Math.round(goodEyeChance()*100)+'% → '+Math.round(Math.min((s.lv.goodeye+1)*0.04,0.5)*100)+'%');
  setText('b-luck',s.cost.luck+' ₽');setDis('b-luck',s.cash<s.cost.luck);
@@ -1504,39 +1094,23 @@ function render(){
  setText('b-dump',s.cost.dump+' ₽');setDis('b-dump',s.cash<s.cost.dump);
  if(s.lv.dump===0)setText('d-dump','лом будет капать в склад сам: 1 шт каждые 4.5с');
  else setText('d-dump','лом капает сам: '+s.lv.dump+' шт каждые 4.5с → '+(s.lv.dump+1);
-
  var br=document.getElementById('b-reputation');
- if(br){
-  if(s.lv.reputation>=REPUTATION_MAX){br.textContent='✓ макс';br.disabled=true;br.className='upg-btn owned';}
-  else{br.textContent=s.cost.reputation+' ₽';br.disabled=s.cash<s.cost.reputation;br.className='upg-btn';}
- }
+ if(br){if(s.lv.reputation>=REPUTATION_MAX){br.textContent='✓ макс';br.disabled=true;br.className='upg-btn owned';}else{br.textContent=s.cost.reputation+' ₽';br.disabled=s.cash<s.cost.reputation;br.className='upg-btn';}}
  var dr=document.getElementById('d-reputation');
- if(dr){
-  var cur=reputationPct(),nxt=Math.min(cur+REPUTATION_PER_LV,100);
-  dr.textContent='+% к цене продажи: '+cur+'% → '+nxt+'% (ур. '+s.lv.reputation+'/'+REPUTATION_MAX+')';
- }
-
+ if(dr){var cur=reputationPct(),nxt=Math.min(cur+REPUTATION_PER_LV,100);dr.textContent='+% к цене продажи: '+cur+'% → '+nxt+'% (ур. '+s.lv.reputation+'/'+REPUTATION_MAX+')';}
  var bor=document.getElementById('b-offlineRate');
- if(bor){
-  if(s.lv.offlineRate>=OFFLINE_RATE_MAX){bor.textContent='✓ макс';bor.disabled=true;bor.className='upg-btn owned';}
-  else{bor.textContent=s.cost.offlineRate+' ₽';bor.disabled=s.cash<s.cost.offlineRate;bor.className='upg-btn offline';}
- }
+ if(bor){if(s.lv.offlineRate>=OFFLINE_RATE_MAX){bor.textContent='✓ макс';bor.disabled=true;bor.className='upg-btn owned';}else{bor.textContent=s.cost.offlineRate+' ₽';bor.disabled=s.cash<s.cost.offlineRate;bor.className='upg-btn offline';}}
  var dor=document.getElementById('d-offlineRate');
- if(dor) dor.textContent='заработок в оффлайне: '+offlineRatePct()+'% → '+offlineRateNextPct()+'% от обычного (ур. '+s.lv.offlineRate+'/'+OFFLINE_RATE_MAX+')';
+ if(dor)dor.textContent='заработок в оффлайне: '+offlineRatePct()+'% → '+offlineRateNextPct()+'% от обычного (ур. '+s.lv.offlineRate+'/'+OFFLINE_RATE_MAX+')';
  var boc=document.getElementById('b-offlineCap');
- if(boc){
-  if(s.lv.offlineCap>=OFFLINE_CAP_MAX){boc.textContent='✓ макс';boc.disabled=true;boc.className='upg-btn owned';}
-  else{boc.textContent=s.cost.offlineCap+' ₽';boc.disabled=s.cash<s.cost.offlineCap;boc.className='upg-btn offline';}
- }
+ if(boc){if(s.lv.offlineCap>=OFFLINE_CAP_MAX){boc.textContent='✓ макс';boc.disabled=true;boc.className='upg-btn owned';}else{boc.textContent=s.cost.offlineCap+' ₽';boc.disabled=s.cash<s.cost.offlineCap;boc.className='upg-btn offline';}}
  var doc=document.getElementById('d-offlineCap');
- if(doc) doc.textContent='максимум часов оффлайна: '+offlineCapHours()+' → '+offlineCapNextHours()+' ч (ур. '+s.lv.offlineCap+'/'+OFFLINE_CAP_MAX+')';
-
+ if(doc)doc.textContent='максимум часов оффлайна: '+offlineCapHours()+' → '+offlineCapNextHours()+' ч (ур. '+s.lv.offlineCap+'/'+OFFLINE_CAP_MAX+')';
  setText('psLvl',p.level);setText('psPts',p.points);
  setText('psBonus','+'+prestigeBonusPct()+'%');
  setText('psReward',prestigeReward(p.level+1));
  var pb=document.getElementById('prestBtn');
  if(pb){pb.disabled=s.cash<PRESTIGE_THRESHOLD;pb.textContent=s.cash<PRESTIGE_THRESHOLD?('Нужно '+fmt(PRESTIGE_THRESHOLD)+' ₽ (сейчас '+fmt(Math.floor(s.cash))+')'):('Сделать престиж → получить '+prestigeReward(p.level+1)+' очков');}
-
  var c1=1+p.lv.bonusBoost;setText('b-bonusBoost',c1+' очк.');setDis('b-bonusBoost',p.points<c1);
  setText('d-bonusBoost','бонус за уровень престижа: +'+(5+p.lv.bonusBoost)+'% → +'+(5+p.lv.bonusBoost+1)+'%');
  var c2=2+p.lv.startCash*2;setText('b-startCash',c2+' очк.');setDis('b-startCash',p.points<c2);
@@ -1551,7 +1125,6 @@ function render(){
  setText('d-capII','доп. места на складе: +'+(p.lv.capII*4)+' → +'+((p.lv.capII+1)*4));
  var c7=3+p.lv.autoPenalty*3;setText('b-autoPenalty',c7+' очк.');setDis('b-autoPenalty',p.points<c7);
  setText('d-autoPenalty','штраф автокопания вне активной точки: −'+autoPenaltyPct()+'% → −'+Math.max(0,50-(p.lv.autoPenalty+1)*5)+'%');
-
  setText('st-junk',fmt(s.stats.junkTotal));
  setText('st-ingots',fmt(s.stats.ingotsTotal+s.ingots,3)+' г');
  setText('st-earned',fmt(Math.floor(s.stats.earnedTotal))+' ₽');
@@ -1559,7 +1132,6 @@ function render(){
  var opened=0;for(var i=0;i<s.locs.length;i++)if(s.locs[i].unlocked)opened++;
  setText('st-locs',opened+' / '+LOCATIONS.length);
  setText('st-prest',p.level);
-
  var pa=document.getElementById('prog-acid');
  if(pa){var tp=0,td=0;for(var i=0;i<s.acid.length;i++){var b=s.acid[i];if(b.active){tp+=b.progress;td+=b.duration;}}pa.style.width=td>0?(tp/td*100)+'%':'0%';}
  var pf=document.getElementById('prog-fire');
@@ -1571,22 +1143,7 @@ function startHold(fn){stopHold();fn();if(s.lv.hold){holdFn=fn;holdTimer=setInte
 function stopHold(){if(holdTimer){clearInterval(holdTimer);holdTimer=null;}holdFn=null;}
 var ACTION_BTN={digBtn:scavenge,sellBtn:sellIngots};
 
-var _lastEvt={};
-function _evtKey(e){
- var t=e.target,id=t.id||(t.getAttribute&&t.getAttribute('data-act'))||'';
- return (e.type||'')+':'+id+':'+(e.timeStamp||0);
-}
-function _dup(e){
- var k=_evtKey(e);
- if(_lastEvt[k])return true;
- _lastEvt[k]=1;
- var cnt=0;for(var kk in _lastEvt){cnt++;}
- if(cnt>100)_lastEvt={};
- return false;
-}
-
 function handleDown(e){
- if(_dup(e))return;
  window._lastHandledAt=Date.now();
  try{ initAudio(); if(audioCtx&&audioCtx.state==='suspended'){try{audioCtx.resume();}catch(er){}} }catch(er){}
  try{
@@ -1597,11 +1154,7 @@ function handleDown(e){
     e.preventDefault();
     var ok=false;
     try{ok=loadGame();}catch(err){ok=false;}
-    if(ok){
-     var off=applyOfflineIncome();
-     showScreen('game');switchTab('dig');
-     if(off&&off.earned>0)showOfflineOverlay(off);
-    }
+    if(ok){var off=applyOfflineIncome();showScreen('game');switchTab('dig');if(off&&off.earned>0)showOfflineOverlay(off);}
     else{resetAll();showScreen('game');switchTab('dig');showBigToast('Сохранение не прочиталось — начал новую игру');}
     return;
    }
@@ -1609,7 +1162,6 @@ function handleDown(e){
    if(t.id==='btnSettings'){e.preventDefault();updateSettingsScreen();showScreen('settings');return;}
    if(t.id==='btnBackToMenu'){e.preventDefault();saveGame();updateMenu();showScreen('menu');return;}
    if(t.id==='btnResetAll'){e.preventDefault();if(confirm('Сбросить весь прогресс?')){resetAll();updateSettingsScreen();updateMenu();showScreen('menu');}return;}
-
    if(t.id==='tglSound'||t.id==='tglVibe'||t.id==='tglMusic'){
     e.preventDefault();
     var newVal=!t.checked;
@@ -1622,9 +1174,7 @@ function handleDown(e){
     sndToggle();vibe(15);
     return;
    }
-
    if(currentScreen!=='game'){t=t.parentNode;continue;}
-
    if(t.classList&&t.classList.contains('acc-head')){e.preventDefault();toggleAcc(t.getAttribute('data-acc'));return;}
    if(t.classList&&t.classList.contains('tab-btn')){e.preventDefault();switchTab(t.getAttribute('data-tab'));return;}
    if(t.classList&&t.classList.contains('subtab')){e.preventDefault();switchSub(t.id==='subtab-prest'?'prest':'normal');return;}
@@ -1659,18 +1209,8 @@ function handleDown(e){
 function handleUp(e){stopHold();}
 
 document.addEventListener('pointerdown',handleDown,true);
-document.addEventListener('pointerup',handleUp,true);
-document.addEventListener('pointercancel',handleUp,true);
 document.addEventListener('touchstart',handleDown,true);
-document.addEventListener('touchend',handleUp,true);
-document.addEventListener('touchcancel',handleUp,true);
 document.addEventListener('mousedown',handleDown,true);
-document.addEventListener('mouseup',handleUp,true);
-document.addEventListener('click',function(e){
- var now=Date.now();
- if(window._lastHandledAt&&now-window._lastHandledAt<400)return;
- handleDown(e);
-},true);
 
 var last=performance.now();
 var lastSaveCheck=0;

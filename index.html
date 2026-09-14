@@ -1093,7 +1093,7 @@ function render(){
  setText('d-luck','шанс двойного дропа: '+Math.round(luckChance()*100)+'% → '+Math.round(Math.min((s.lv.luck+1)*0.05,0.7)*100)+'%');
  setText('b-dump',s.cost.dump+' ₽');setDis('b-dump',s.cash<s.cost.dump);
  if(s.lv.dump===0)setText('d-dump','лом будет капать в склад сам: 1 шт каждые 4.5с');
- else setText('d-dump','лом капает сам: '+s.lv.dump+' шт каждые 4.5с → '+(s.lv.dump+1);
+else setText('d-dump','лом капает сам: '+s.lv.dump+' шт каждые 4.5с → '+(s.lv.dump+1));
  var br=document.getElementById('b-reputation');
  if(br){if(s.lv.reputation>=REPUTATION_MAX){br.textContent='✓ макс';br.disabled=true;br.className='upg-btn owned';}else{br.textContent=s.cost.reputation+' ₽';br.disabled=s.cash<s.cost.reputation;br.className='upg-btn';}}
  var dr=document.getElementById('d-reputation');

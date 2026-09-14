@@ -255,7 +255,7 @@ h1.game-title{font-size:24px;font-weight:800;margin:0;} h1.game-title span{color
     <div class="menu-save-info" id="saveInfo"></div>
   </div>
 
-  <div class="menu-version">v0.4 · прототип</div>
+  <div class="menu-version">v0.5 · прототип</div>
 </div>
 
 <div class="screen" id="settingsScreen">
@@ -645,35 +645,217 @@ function offlineCapHours(){return OFFLINE_CAP_BASE_HOURS+s.lv.offlineCap*OFFLINE
 function offlineCapNextHours(){return OFFLINE_CAP_BASE_HOURS+(s.lv.offlineCap+1)*OFFLINE_CAP_PER_LV;}
 function offlineCapCostFor(lv){return Math.round(OFFLINE_CAP_BASE_COST*Math.pow(OFFLINE_CAP_MULT,lv));}
 
-var audioCtx = null;
-var audioBroken = false;
-var activeLoops = {};
+// ============ ЗВУК ============
+var audioCtx=null;
+var audioBroken=false;
+var activeLoops={};
 function initAudio(){
- if(audioCtx || audioBroken) return;
+ if(audioCtx||audioBroken)return;
  try{
-  var Ctx = window.AudioContext || window.webkitAudioContext;
+  var Ctx=window.AudioContext||window.webkitAudioContext;
   if(!Ctx){audioBroken=true;return;}
-  audioCtx = new Ctx();
+  audioCtx=new Ctx();
  }catch(e){audioBroken=true;audioCtx=null;}
 }
-function sndClick(){ try{ if(!audioCtx||!s.settings.sound)return; var t0=audioCtx.currentTime; var osc=audioCtx.createOscillator(); var g=audioCtx.createGain(); osc.type='triangle'; osc.frequency.setValueAtTime(220,t0); osc.frequency.exponentialRampToValueAtTime(80,t0+0.06); g.gain.setValueAtTime(0.12,t0); g.gain.exponentialRampToValueAtTime(0.0001,t0+0.08); osc.connect(g);g.connect(audioCtx.destination); osc.start(t0);osc.stop(t0+0.1); }catch(e){} }
-function sndDing(){ try{ if(!audioCtx||!s.settings.sound)return; var t0=audioCtx.currentTime; [1200,1800,2400].forEach(function(f,i){ var o=audioCtx.createOscillator(); var g=audioCtx.createGain(); o.type='sine'; o.frequency.value=f; g.gain.setValueAtTime(0.12,t0+i*0.03); g.gain.exponentialRampToValueAtTime(0.0001,t0+i*0.03+0.35); o.connect(g);g.connect(audioCtx.destination); o.start(t0+i*0.03);o.stop(t0+i*0.03+0.4); }); }catch(e){} }
-function sndCoins(){ try{ if(!audioCtx||!s.settings.sound)return; var t0=audioCtx.currentTime; [900,1350,1800,2200].forEach(function(f,i){ var o=audioCtx.createOscillator(); var g=audioCtx.createGain(); o.type='square'; o.frequency.value=f; g.gain.setValueAtTime(0.06,t0+i*0.05); g.gain.exponentialRampToValueAtTime(0.0001,t0+i*0.05+0.2); o.connect(g);g.connect(audioCtx.destination); o.start(t0+i*0.05);o.stop(t0+i*0.05+0.22); }); }catch(e){} }
-function sndBuy(){ try{ if(!audioCtx||!s.settings.sound)return; var t0=audioCtx.currentTime; var o=audioCtx.createOscillator(); var g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(400,t0); o.frequency.exponentialRampToValueAtTime(900,t0+0.12); g.gain.setValueAtTime(0.1,t0); g.gain.exponentialRampToValueAtTime(0.0001,t0+0.18); o.connect(g);g.connect(audioCtx.destination); o.start(t0);o.stop(t0+0.2); }catch(e){} }
-function sndDeny(){ try{ if(!audioCtx||!s.settings.sound)return; var t0=audioCtx.currentTime; var o=audioCtx.createOscillator(); var g=audioCtx.createGain(); o.type='sawtooth'; o.frequency.setValueAtTime(180,t0); o.frequency.exponentialRampToValueAtTime(80,t0+0.15); g.gain.setValueAtTime(0.1,t0); g.gain.exponentialRampToValueAtTime(0.0001,t0+0.18); o.connect(g);g.connect(audioCtx.destination); o.start(t0);o.stop(t0+0.2); }catch(e){} }
-function sndPrestige(){ try{ if(!audioCtx||!s.settings.sound)return; var t0=audioCtx.currentTime; [523,659,784,1047].forEach(function(f,i){ var o=audioCtx.createOscillator(); var g=audioCtx.createGain(); o.type='sine'; o.frequency.value=f; g.gain.setValueAtTime(0.12,t0+i*0.12); g.gain.exponentialRampToValueAtTime(0.0001,t0+i*0.12+0.5); o.connect(g);g.connect(audioCtx.destination); o.start(t0+i*0.12);o.stop(t0+i*0.12+0.55); }); }catch(e){} }
-function sndOfflineClaim(){ try{ if(!audioCtx||!s.settings.sound)return; var t0=audioCtx.currentTime; [660,880,1320].forEach(function(f,i){ var o=audioCtx.createOscillator(); var g=audioCtx.createGain(); o.type='triangle'; o.frequency.value=f; g.gain.setValueAtTime(0.1,t0+i*0.08); g.gain.exponentialRampToValueAtTime(0.0001,t0+i*0.08+0.3); o.connect(g);g.connect(audioCtx.destination); o.start(t0+i*0.08);o.stop(t0+i*0.08+0.35); }); }catch(e){} }
-function startAcidLoop(){ try{ if(!audioCtx||!s.settings.sound)return; if(activeLoops.acid)return; var bs=audioCtx.sampleRate*2; var buf=audioCtx.createBuffer(1,bs,audioCtx.sampleRate); var d=buf.getChannelData(0); for(var i=0;i<bs;i++)d[i]=(Math.random()*2-1)*0.25; var src=audioCtx.createBufferSource(); src.buffer=buf; src.loop=true; var f=audioCtx.createBiquadFilter(); f.type='bandpass'; f.frequency.value=2500; f.Q.value=0.8; var g=audioCtx.createGain(); g.gain.value=0.03; src.connect(f);f.connect(g);g.connect(audioCtx.destination); src.start(); activeLoops.acid={src:src,gain:g}; }catch(e){} }
-function stopAcidLoop(){ try{ if(activeLoops.acid){activeLoops.acid.src.stop();activeLoops.acid=null;} }catch(e){activeLoops.acid=null;} }
-function startFireLoop(){ try{ if(!audioCtx||!s.settings.sound)return; if(activeLoops.fire)return; var o=audioCtx.createOscillator(); o.type='sawtooth'; o.frequency.value=55; var f=audioCtx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=180; var g=audioCtx.createGain(); g.gain.value=0.05; o.connect(f);f.connect(g);g.connect(audioCtx.destination); o.start(); activeLoops.fire={osc:o,gain:g}; }catch(e){} }
-function stopFireLoop(){ try{ if(activeLoops.fire){activeLoops.fire.osc.stop();activeLoops.fire=null;} }catch(e){activeLoops.fire=null;} }
+function canPlay(){ return audioCtx && s && s.settings && s.settings.sound; }
 
-function vibe(ms){ try{ if(!s||!s.settings||!s.settings.vibe)return; if(navigator.vibrate) navigator.vibrate(ms||15); }catch(e){} }
+// Универсальный тон
+function tone(freq,dur,type,vol,delay){
+ try{
+  if(!canPlay())return;
+  var t0=audioCtx.currentTime+(delay||0);
+  var o=audioCtx.createOscillator();
+  var g=audioCtx.createGain();
+  o.type=type||'sine';
+  o.frequency.setValueAtTime(freq,t0);
+  g.gain.setValueAtTime(vol||0.1,t0);
+  g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+  o.connect(g);g.connect(audioCtx.destination);
+  o.start(t0);o.stop(t0+dur+0.02);
+ }catch(e){}
+}
+// Тон со скольжением частоты
+function slide(f1,f2,dur,type,vol,delay){
+ try{
+  if(!canPlay())return;
+  var t0=audioCtx.currentTime+(delay||0);
+  var o=audioCtx.createOscillator();
+  var g=audioCtx.createGain();
+  o.type=type||'sine';
+  o.frequency.setValueAtTime(f1,t0);
+  o.frequency.exponentialRampToValueAtTime(Math.max(f2,20),t0+dur);
+  g.gain.setValueAtTime(vol||0.1,t0);
+  g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+  o.connect(g);g.connect(audioCtx.destination);
+  o.start(t0);o.stop(t0+dur+0.02);
+ }catch(e){}
+}
+
+// --- Утилита: случайная вариация тона ±8% ---
+function rnd(f){ return f*(0.92+Math.random()*0.16); }
+
+// --- ЗВУК ВКЛАДОК (нижнее меню) ---
+function sndTab(){
+ if(!canPlay())return;
+ // глухой мягкий "тук"
+ tone(rnd(180),0.08,'sine',0.09);
+ tone(rnd(90),0.1,'triangle',0.05,0.01);
+}
+// --- ЗВУК АККОРДЕОНА ---
+function sndAccOpen(){
+ if(!canPlay())return;
+ tone(rnd(400),0.06,'sine',0.06);
+ tone(rnd(600),0.07,'sine',0.04,0.03);
+}
+function sndAccClose(){
+ if(!canPlay())return;
+ tone(rnd(600),0.06,'sine',0.05);
+ tone(rnd(400),0.08,'sine',0.04,0.03);
+}
+// --- ЗВУК ПЕРЕКЛЮЧАТЕЛЯ (тумблер) ---
+function sndToggle(){
+ if(!canPlay())return;
+ tone(rnd(500),0.05,'square',0.05);
+ tone(rnd(750),0.06,'square',0.04,0.03);
+}
+// --- ЗВУК КЛИКА ПО ЛОКАЦИИ ---
+function sndSelectLoc(){
+ if(!canPlay())return;
+ tone(rnd(600),0.05,'sine',0.06);
+ tone(rnd(900),0.06,'sine',0.04,0.03);
+}
+// --- ЗВУК КНОПКИ "РАСТВОРИТЬ/ВЫПАРИТЬ" ---
+function sndStartProcess(kind){
+ if(!canPlay())return;
+ if(kind==='acid'){
+  tone(rnd(280),0.1,'triangle',0.08);
+  tone(rnd(180),0.14,'triangle',0.06,0.05);
+ } else {
+  tone(rnd(220),0.12,'sawtooth',0.06);
+  tone(rnd(140),0.16,'sawtooth',0.05,0.06);
+ }
+}
+// --- ЗВУК ПОКУПКИ ---
+function sndBuy(){
+ if(!canPlay())return;
+ tone(rnd(400),0.08,'sine',0.08);
+ tone(rnd(600),0.09,'sine',0.07,0.05);
+ tone(rnd(800),0.1,'sine',0.06,0.1);
+}
+// --- ЗВУК ОТКАЗА ---
+function sndDeny(){
+ if(!canPlay())return;
+ slide(rnd(180),80,0.15,'sawtooth',0.08);
+}
+// --- ЗВУК ПРОДАЖИ (звон монет) ---
+function sndCoins(){
+ if(!canPlay())return;
+ [900,1350,1800,2200].forEach(function(f,i){ tone(rnd(f),0.22,'square',0.06,i*0.05); });
+}
+// --- ЗВУК ПРЕСТИЖА ---
+function sndPrestige(){
+ if(!canPlay())return;
+ [523,659,784,1047].forEach(function(f,i){ tone(f,0.5,'sine',0.12,i*0.12); });
+}
+// --- ЗВУК ОФФЛАЙН ЗАХОДА ---
+function sndOfflineClaim(){
+ if(!canPlay())return;
+ [660,880,1320].forEach(function(f,i){ tone(f,0.3,'triangle',0.1,i*0.08); });
+}
+
+// --- ЗВУКИ КОПАНИЯ ПО ТИПУ НАХОДКИ ---
+// 1) Хлам-мелочь: резисторы/конденсаторы/транзисторы - глухой "тюк"
+function sndDigJunk(){
+ if(!canPlay())return;
+ tone(rnd(140),0.06,'triangle',0.08);
+ tone(rnd(90),0.08,'sine',0.05,0.02);
+}
+// 2) Микросхемы/HDD - средний
+function sndDigMid(){
+ if(!canPlay())return;
+ tone(rnd(220),0.07,'triangle',0.09);
+ tone(rnd(150),0.09,'sine',0.05,0.02);
+}
+// 3) Телефоны/ОЗУ - чуть звонче
+function sndDigNice(){
+ if(!canPlay())return;
+ tone(rnd(340),0.07,'sine',0.09);
+ tone(rnd(500),0.09,'sine',0.06,0.03);
+}
+// 4) Редкие - звон
+function sndDigRare(){
+ if(!canPlay())return;
+ tone(rnd(800),0.12,'sine',0.10);
+ tone(rnd(1200),0.14,'sine',0.08,0.04);
+ tone(rnd(1600),0.16,'sine',0.06,0.08);
+}
+// 5) Дорогие (процессоры/разъёмы) - яркий звон
+function sndDigPricey(){
+ if(!canPlay())return;
+ [1000,1500,2000].forEach(function(f,i){ tone(rnd(f),0.18,'sine',0.09,i*0.04); });
+}
+// 6) Легендарка - фанфары
+function sndDing(){
+ if(!canPlay())return;
+ [1200,1500,1800,2400].forEach(function(f,i){ tone(rnd(f),0.35,'sine',0.12,i*0.05); });
+}
+
+// --- ФОНОВЫЕ ЗВУКИ ПРОЦЕССОВ ---
+// Кислота: цикл мелких "бульков" каждые ~0.3с
+function startAcidLoop(){
+ try{
+  if(!canPlay()||activeLoops.acid)return;
+  activeLoops.acid={tick:0};
+  var bubble=function(){
+   if(!activeLoops.acid)return;
+   // короткий бульк - скольжение вверх + случайность
+   var f1=200+Math.random()*150;
+   var f2=f1+80+Math.random()*120;
+   slide(f1,f2,0.12,'sine',0.035);
+   activeLoops.acid.tick=setTimeout(bubble, 180+Math.random()*220);
+  };
+  bubble();
+ }catch(e){}
+}
+function stopAcidLoop(){
+ try{
+  if(activeLoops.acid){
+   clearTimeout(activeLoops.acid.tick);
+   activeLoops.acid=null;
+  }
+ }catch(e){activeLoops.acid=null;}
+}
+// Печь: гул
+function startFireLoop(){
+ try{
+  if(!canPlay()||activeLoops.fire)return;
+  var o=audioCtx.createOscillator();
+  o.type='sawtooth';
+  o.frequency.value=55;
+  var f=audioCtx.createBiquadFilter();
+  f.type='lowpass';
+  f.frequency.value=200;
+  var g=audioCtx.createGain();
+  g.gain.value=0.045;
+  o.connect(f);f.connect(g);g.connect(audioCtx.destination);
+  o.start();
+  activeLoops.fire={osc:o};
+ }catch(e){}
+}
+function stopFireLoop(){
+ try{
+  if(activeLoops.fire){activeLoops.fire.osc.stop();activeLoops.fire=null;}
+ }catch(e){activeLoops.fire=null;}
+}
+
+// ============ ВИБРАЦИЯ ============
+function vibe(ms){ try{ if(!s||!s.settings||!s.settings.vibe)return; if(navigator.vibrate)navigator.vibrate(ms||15); }catch(e){} }
 var hapticInput=null;
 function initHaptic(){ try{ var el=document.createElement('input'); el.type='checkbox'; el.setAttribute('switch',''); el.style.position='absolute'; el.style.opacity='0'; el.style.pointerEvents='none'; el.style.left='-9999px'; el.setAttribute('aria-hidden','true'); document.body.appendChild(el); hapticInput=el; }catch(e){} }
 function iosHaptic(){ try{ if(!s.settings.vibe)return; if(!hapticInput)return; hapticInput.checked=!hapticInput.checked; var evt=document.createEvent('HTMLEvents'); evt.initEvent('change',true,false); hapticInput.dispatchEvent(evt); }catch(e){} }
 function tapVibe(){ vibe(12); iosHaptic(); }
 
+// ============ ВИЗУАЛЬНЫЕ ============
 function bumpCash(){ try{ var el=document.getElementById('cashWrap'); if(!el)return; el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); setTimeout(function(){el.classList.remove('bump');},200); }catch(e){} }
 function bumpToast(){ try{ var el=document.getElementById('toast'); if(!el)return; el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); setTimeout(function(){el.classList.remove('bump');},200); }catch(e){} }
 function flashInvItem(key){
@@ -716,6 +898,14 @@ function maybeUpgradeDrop(k){
  }
  return k;
 }
+function playDigSound(k){
+ if(k==='legend') { sndDing(); vibe(40); return; }
+ if(k==='cpus'||k==='connect') { sndDigPricey(); vibe(30); return; }
+ if(k==='rare') { sndDigRare(); vibe(28); return; }
+ if(k==='phones'||k==='ram') { sndDigNice(); vibe(18); return; }
+ if(k==='chips'||k==='hdd') { sndDigMid(); vibe(15); return; }
+ sndDigJunk(); vibe(12);
+}
 
 function tryScavenge(locKey,silent){
  var ls=locState(locKey),def=locDef(locKey);
@@ -727,12 +917,11 @@ function tryScavenge(locKey,silent){
  s.junk[k]++;ls.stock--;s.stats.junkTotal++;
  if(!silent){
   var msg='Нашёл: '+CATALOG[k].icon+' '+CATALOG[k].name;
-  var isRare=(k==='legend'||k==='rare'||k==='cpus'||k==='connect');
   if(k==='legend')msg='Легендарка — '+CATALOG[k].icon+' '+CATALOG[k].name;
   else if(k==='rare')msg='Редкая — '+CATALOG[k].icon+' '+CATALOG[k].name;
   else if(k==='cpus')msg='Ценный процессор — '+CATALOG[k].icon+' '+CATALOG[k].name;
   flashToast(msg);bumpToast();flashInvItem(k);
-  if(isRare){sndDing();vibe(30);} else {sndClick();tapVibe();}
+  playDigSound(k);
  }
  return true;
 }
@@ -746,7 +935,7 @@ function scavenge(){
   else if(totalJunk()>=s.cap){flashToast('Склад забит — переработай лом');shakeDigBtn();sndDeny();vibe(40);}
  }
 }
-function selectLoc(k){var ls=locState(k);if(!ls.unlocked)return;s.activeLoc=k;sndClick();vibe(8);saveGame();}
+function selectLoc(k){var ls=locState(k);if(!ls.unlocked)return;s.activeLoc=k;sndSelectLoc();vibe(8);saveGame();}
 function unlockLoc(k){var def=locDef(k),ls=locState(k);if(ls.unlocked)return;var cost=locUnlockCost(def);if(s.cash<cost){sndDeny();vibe(40);return;}s.cash-=cost;ls.unlocked=true;s.activeLoc=k;sndBuy();vibe(25);bumpCash();saveGame();}
 
 function startAcid(idx){
@@ -764,7 +953,7 @@ function startAcid(idx){
  if(takenGold<=0)return;
  bath.yieldAmt=takenGold*acidEff();
  bath.active=true;bath.progress=0;bath.duration=acidDuration();
- startAcidLoop();sndClick();vibe(20);saveGame();
+ startAcidLoop();sndStartProcess('acid');vibe(20);saveGame();
 }
 function startFurnace(idx){
  var f=s.fire[idx];if(!f||f.active)return;
@@ -775,7 +964,7 @@ function startFurnace(idx){
  if(taken<=0)return;
  s.solution-=taken;f.yieldAmt=taken*fireEff();
  f.active=true;f.progress=0;f.duration=fireDuration();
- startFireLoop();sndClick();vibe(20);saveGame();
+ startFireLoop();sndStartProcess('fire');vibe(20);saveGame();
 }
 function sellIngots(){
  if(s.ingots<=0.0005){sndDeny();vibe(30);return;}
@@ -858,7 +1047,7 @@ function buyAutoDig(locKey){
 function toggleLock(k){
  if(!CATALOG[k])return;
  s.locked[k]=!s.locked[k];
- sndClick();vibe(10);saveGame();
+ sndSelectLoc();vibe(10);saveGame();
 }
 
 function resetAll(){
@@ -1091,7 +1280,7 @@ function switchTab(name){
  var tbs=document.querySelectorAll('.tab-btn');
  for(var j=0;j<tbs.length;j++){if(tbs[j].getAttribute('data-tab')===name)tbs[j].classList.add('active');else tbs[j].classList.remove('active');}
  window.scrollTo(0,0);
- sndClick();vibe(8);
+ sndTab();vibe(8);
 }
 function switchSub(name){
  var n=document.getElementById('subview-normal'),pr=document.getElementById('subview-prest');
@@ -1099,11 +1288,12 @@ function switchSub(name){
  if(name==='prest'){n.style.display='none';pr.style.display='';bp.classList.add('active');bn.classList.remove('active');}
  else{n.style.display='';pr.style.display='none';bn.classList.add('active');bp.classList.remove('active');}
  window.scrollTo(0,0);
- sndClick();vibe(8);
+ sndTab();vibe(8);
 }
 function toggleAcc(key){
  s.accState[key]=!s.accState[key];
- sndClick();vibe(8);saveGame();
+ if(s.accState[key])sndAccOpen();else sndAccClose();
+ vibe(8);saveGame();
  var heads=document.querySelectorAll('.acc-head');
  for(var i=0;i<heads.length;i++){
   if(heads[i].getAttribute('data-acc')===key){
@@ -1313,7 +1503,7 @@ function render(){
  setText('d-luck','шанс двойного дропа: '+Math.round(luckChance()*100)+'% → '+Math.round(Math.min((s.lv.luck+1)*0.05,0.7)*100)+'%');
  setText('b-dump',s.cost.dump+' ₽');setDis('b-dump',s.cash<s.cost.dump);
  if(s.lv.dump===0)setText('d-dump','лом будет капать в склад сам: 1 шт каждые 4.5с');
- else setText('d-dump','лом капает сам: '+s.lv.dump+' шт каждые 4.5с → '+(s.lv.dump+1));
+ else setText('d-dump','лом капает сам: '+s.lv.dump+' шт каждые 4.5с → '+(s.lv.dump+1);
 
  var br=document.getElementById('b-reputation');
  if(br){
@@ -1429,7 +1619,7 @@ function handleDown(e){
     else if(t.id==='tglMusic')s.settings.music=newVal;
     saveGame();
     if(t.id==='tglSound'&&newVal)initAudio();
-    sndClick();vibe(15);
+    sndToggle();vibe(15);
     return;
    }
 
@@ -1440,7 +1630,7 @@ function handleDown(e){
    if(t.classList&&t.classList.contains('subtab')){e.preventDefault();switchSub(t.id==='subtab-prest'?'prest':'normal');return;}
    if(t.id){
     if(ACTION_BTN[t.id]){e.preventDefault();startHold(ACTION_BTN[t.id]);return;}
-    if(t.id==='invToggle'){e.preventDefault();s.invExpanded=!s.invExpanded;sndClick();vibe(8);saveGame();return;}
+    if(t.id==='invToggle'){e.preventDefault();s.invExpanded=!s.invExpanded;sndAccOpen();vibe(8);saveGame();return;}
     if(t.id==='prestBtn'){e.preventDefault();doPrestige();return;}
     if(t.id==='b-reset'){e.preventDefault();if(confirm('Сбросить весь прогресс включая престиж?')){resetAll();switchTab('dig');}return;}
     if(t.id==='b-tomenu'){e.preventDefault();saveGame();updateMenu();showScreen('menu');return;}

@@ -231,7 +231,7 @@ h1.game-title{font-size:24px;font-weight:800;margin:0;} h1.game-title span{color
     <button class="menu-btn secondary" id="btnSettings" type="button">Настройки</button>
     <div class="menu-save-info" id="saveInfo"></div>
   </div>
-  <div class="menu-version">v0.5 · прототип</div>
+  <div class="menu-version">v0.6 · прототип</div>
 </div>
 
 <div class="screen" id="settingsScreen">
@@ -502,7 +502,6 @@ function offlineCapHours(){return OFFLINE_CAP_BASE_HOURS+s.lv.offlineCap*OFFLINE
 function offlineCapNextHours(){return OFFLINE_CAP_BASE_HOURS+(s.lv.offlineCap+1)*OFFLINE_CAP_PER_LV;}
 function offlineCapCostFor(lv){return Math.round(OFFLINE_CAP_BASE_COST*Math.pow(OFFLINE_CAP_MULT,lv));}
 
-// === ЗВУК ===
 var audioCtx=null,audioBroken=false,activeLoops={};
 function initAudio(){if(audioCtx||audioBroken)return;try{var Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx){audioBroken=true;return;}audioCtx=new Ctx();}catch(e){audioBroken=true;audioCtx=null;}}
 function canPlay(){return audioCtx&&s&&s.settings&&s.settings.sound;}
@@ -531,14 +530,12 @@ function stopAcidLoop(){try{if(activeLoops.acid){clearTimeout(activeLoops.acid.t
 function startFireLoop(){try{if(!canPlay()||activeLoops.fire)return;var o=audioCtx.createOscillator();o.type='sawtooth';o.frequency.value=55;var f=audioCtx.createBiquadFilter();f.type='lowpass';f.frequency.value=200;var g=audioCtx.createGain();g.gain.value=0.045;o.connect(f);f.connect(g);g.connect(audioCtx.destination);o.start();activeLoops.fire={osc:o};}catch(e){}}
 function stopFireLoop(){try{if(activeLoops.fire){activeLoops.fire.osc.stop();activeLoops.fire=null;}}catch(e){activeLoops.fire=null;}}
 
-// === ВИБРАЦИЯ ===
 function vibe(ms){try{if(!s||!s.settings||!s.settings.vibe)return;if(navigator.vibrate)navigator.vibrate(ms||15);}catch(e){}}
 var hapticInput=null;
 function initHaptic(){try{var el=document.createElement('input');el.type='checkbox';el.setAttribute('switch','');el.style.position='absolute';el.style.opacity='0';el.style.pointerEvents='none';el.style.left='-9999px';el.setAttribute('aria-hidden','true');document.body.appendChild(el);hapticInput=el;}catch(e){}}
 function iosHaptic(){try{if(!s.settings.vibe)return;if(!hapticInput)return;hapticInput.checked=!hapticInput.checked;var evt=document.createEvent('HTMLEvents');evt.initEvent('change',true,false);hapticInput.dispatchEvent(evt);}catch(e){}}
 function tapVibe(){vibe(12);iosHaptic();}
 
-// === ВИЗУАЛЬНЫЕ ===
 function bumpCash(){try{var el=document.getElementById('cashWrap');if(!el)return;el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump');setTimeout(function(){el.classList.remove('bump');},200);}catch(e){}}
 function bumpToast(){try{var el=document.getElementById('toast');if(!el)return;el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump');setTimeout(function(){el.classList.remove('bump');},200);}catch(e){}}
 function flashInvItem(key){try{var items=document.querySelectorAll('.inv-item');for(var i=0;i<items.length;i++){var lbl=items[i].querySelector('.l');if(!lbl)continue;if(lbl.textContent===CATALOG[key].name.toLowerCase()){(function(el){el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash');setTimeout(function(){el.classList.remove('flash');},400);})(items[i]);return;}}}catch(e){}}
@@ -663,7 +660,7 @@ function resetAll(){
  s=makeState();s.settings=keepSettings;
  try{localStorage.removeItem(SAVE_KEY);localStorage.removeItem(SAVE_KEY_BACKUP);}catch(e){}
  lastSaveTs=0;
- stopAcidLoop();stopFireLoop();stopHold();
+ stopAcidLoop();stopFireLoop();cancelPress();
  switchTab('dig');
 }
 function doPrestige(){
@@ -782,7 +779,7 @@ function buildSaveData(){
    settings:{sound:s.settings.sound,vibe:s.settings.vibe,music:s.settings.music},
    lastSeenTs:s.lastSeenTs
   },
-  ts:Date.now(),ver:7
+  ts:Date.now(),ver:8
  };
 }
 function saveGame(){try{s.lastSeenTs=Date.now();var data=buildSaveData();var prev=localStorage.getItem(SAVE_KEY);if(prev)localStorage.setItem(SAVE_KEY_BACKUP,prev);localStorage.setItem(SAVE_KEY,JSON.stringify(data));lastSaveTs=data.ts;return true;}catch(e){return false;}}
@@ -1136,23 +1133,41 @@ function render(){
  if(pf){var tp2=0,td2=0;for(var i=0;i<s.fire.length;i++){var f2=s.fire[i];if(f2.active){tp2+=f2.progress;td2+=f2.duration;}}pf.style.width=td2>0?(tp2/td2*100)+'%':'0%';}
 }
 
-var HOLD_INTERVAL=220,holdTimer=null,holdFn=null;
-function startHold(fn){
- stopHold();
- fn();
- if(s && s.lv && s.lv.hold){
-  holdFn=fn;
-  holdTimer=setInterval(function(){ if(holdFn) try{holdFn();}catch(e){} },HOLD_INTERVAL);
- }
+// === ЗАЖАТИЕ: ждём 350мс прежде чем включить повтор ===
+var HOLD_DELAY = 350;
+var HOLD_INTERVAL = 220;
+var pressTimer = null;
+var holdTimer = null;
+var heldFn = null;
+var isPressed = false;
+
+function beginPress(fn){
+ cancelPress();
+ isPressed = true;
+ heldFn = fn;
+ // первый вызов сразу
+ try{ fn(); }catch(e){}
+ if(!s || !s.lv || !s.lv.hold){ return; }
+ // если палец всё ещё нажат через HOLD_DELAY — начинаем повтор
+ pressTimer = setTimeout(function(){
+  pressTimer = null;
+  if(!isPressed || !heldFn) return;
+  holdTimer = setInterval(function(){
+   if(!isPressed || !heldFn){ cancelPress(); return; }
+   try{ heldFn(); }catch(e){}
+  }, HOLD_INTERVAL);
+ }, HOLD_DELAY);
 }
-function stopHold(){
- if(holdTimer){clearInterval(holdTimer);holdTimer=null;}
- holdFn=null;
+function cancelPress(){
+ isPressed = false;
+ if(pressTimer){ clearTimeout(pressTimer); pressTimer = null; }
+ if(holdTimer){ clearInterval(holdTimer); holdTimer = null; }
+ heldFn = null;
 }
-var ACTION_BTN={digBtn:scavenge,sellBtn:sellIngots};
+
+var ACTION_BTN = {digBtn:scavenge, sellBtn:sellIngots};
 
 function handleDown(e){
- window._lastHandledAt=Date.now();
  try{ initAudio(); if(audioCtx&&audioCtx.state==='suspended'){try{audioCtx.resume();}catch(er){}} }catch(er){}
  try{
   var t=e.target;
@@ -1187,7 +1202,7 @@ function handleDown(e){
    if(t.classList&&t.classList.contains('tab-btn')){e.preventDefault();switchTab(t.getAttribute('data-tab'));return;}
    if(t.classList&&t.classList.contains('subtab')){e.preventDefault();switchSub(t.id==='subtab-prest'?'prest':'normal');return;}
    if(t.id){
-    if(ACTION_BTN[t.id]){e.preventDefault();startHold(ACTION_BTN[t.id]);return;}
+    if(ACTION_BTN[t.id]){e.preventDefault();beginPress(ACTION_BTN[t.id]);return;}
     if(t.id==='invToggle'){e.preventDefault();s.invExpanded=!s.invExpanded;sndAccOpen();vibe(8);saveGame();return;}
     if(t.id==='prestBtn'){e.preventDefault();doPrestige();return;}
     if(t.id==='b-reset'){e.preventDefault();if(confirm('Сбросить весь прогресс включая престиж?')){resetAll();switchTab('dig');}return;}
@@ -1214,17 +1229,20 @@ function handleDown(e){
   }
  }catch(err){}
 }
-function handleUp(e){ stopHold(); }
+function handleUp(){ cancelPress(); }
 
-// Навешиваем и down и up — теперь hold корректно останавливается
-document.addEventListener('pointerdown',handleDown,true);
-document.addEventListener('pointerup',handleUp,true);
-document.addEventListener('pointercancel',handleUp,true);
-document.addEventListener('touchstart',handleDown,true);
-document.addEventListener('touchend',handleUp,true);
-document.addEventListener('touchcancel',handleUp,true);
-document.addEventListener('mousedown',handleDown,true);
-document.addEventListener('mouseup',handleUp,true);
+// Один набор событий: PointerEvent если есть, иначе touch/mouse
+if(window.PointerEvent){
+ document.addEventListener('pointerdown',handleDown,true);
+ document.addEventListener('pointerup',handleUp,true);
+ document.addEventListener('pointercancel',handleUp,true);
+} else {
+ document.addEventListener('touchstart',handleDown,true);
+ document.addEventListener('touchend',handleUp,true);
+ document.addEventListener('touchcancel',handleUp,true);
+ document.addEventListener('mousedown',handleDown,true);
+ document.addEventListener('mouseup',handleUp,true);
+}
 
 var last=performance.now();
 var lastSaveCheck=0;
@@ -1242,8 +1260,8 @@ function loop(now){
 }
 window.addEventListener('beforeunload',function(){if(currentScreen==='game')saveGame();});
 window.addEventListener('pagehide',function(){if(currentScreen==='game')saveGame();});
-window.addEventListener('blur',function(){stopHold();if(currentScreen==='game')saveGame();});
-document.addEventListener('visibilitychange',function(){stopHold();if(currentScreen==='game')saveGame();});
+window.addEventListener('blur',function(){cancelPress();if(currentScreen==='game')saveGame();});
+document.addEventListener('visibilitychange',function(){cancelPress();if(currentScreen==='game')saveGame();});
 
 function boot(){
  lastSaveTs=0;

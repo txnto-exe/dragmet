@@ -470,7 +470,6 @@ var s=makeState();
 var lastSaveTs=0;
 
 function ensureSettings(){if(!s)return;if(!s.settings)s.settings={sound:true,vibe:true,music:false};if(typeof s.settings.sound==='undefined')s.settings.sound=true;if(typeof s.settings.vibe==='undefined')s.settings.vibe=true;if(typeof s.settings.music==='undefined')s.settings.music=false;}
-
 function locDef(k){for(var i=0;i<LOCATIONS.length;i++)if(LOCATIONS[i].key===k)return LOCATIONS[i];}
 function locState(k){for(var i=0;i<s.locs.length;i++)if(s.locs[i].key===k)return s.locs[i];}
 function locRegenIv(def,ls){return def.regenBase/(1+ls.regenLv*0.28);}
@@ -664,7 +663,7 @@ function resetAll(){
  s=makeState();s.settings=keepSettings;
  try{localStorage.removeItem(SAVE_KEY);localStorage.removeItem(SAVE_KEY_BACKUP);}catch(e){}
  lastSaveTs=0;
- stopAcidLoop();stopFireLoop();
+ stopAcidLoop();stopFireLoop();stopHold();
  switchTab('dig');
 }
 function doPrestige(){
@@ -679,7 +678,6 @@ function doPrestige(){
  sndPrestige();vibe(80);flashPrestBtn();saveGame();
  switchTab('dig');
 }
-
 function tickAutoDig(dt){
  for(var i=0;i<LOCATIONS.length;i++){
   var def=LOCATIONS[i],lv=p.autoDig[def.key]||0;
@@ -784,7 +782,7 @@ function buildSaveData(){
    settings:{sound:s.settings.sound,vibe:s.settings.vibe,music:s.settings.music},
    lastSeenTs:s.lastSeenTs
   },
-  ts:Date.now(),ver:6
+  ts:Date.now(),ver:7
  };
 }
 function saveGame(){try{s.lastSeenTs=Date.now();var data=buildSaveData();var prev=localStorage.getItem(SAVE_KEY);if(prev)localStorage.setItem(SAVE_KEY_BACKUP,prev);localStorage.setItem(SAVE_KEY,JSON.stringify(data));lastSaveTs=data.ts;return true;}catch(e){return false;}}
@@ -1093,7 +1091,7 @@ function render(){
  setText('d-luck','шанс двойного дропа: '+Math.round(luckChance()*100)+'% → '+Math.round(Math.min((s.lv.luck+1)*0.05,0.7)*100)+'%');
  setText('b-dump',s.cost.dump+' ₽');setDis('b-dump',s.cash<s.cost.dump);
  if(s.lv.dump===0)setText('d-dump','лом будет капать в склад сам: 1 шт каждые 4.5с');
-else setText('d-dump','лом капает сам: '+s.lv.dump+' шт каждые 4.5с → '+(s.lv.dump+1));
+ else setText('d-dump','лом капает сам: '+s.lv.dump+' шт каждые 4.5с → '+(s.lv.dump+1));
  var br=document.getElementById('b-reputation');
  if(br){if(s.lv.reputation>=REPUTATION_MAX){br.textContent='✓ макс';br.disabled=true;br.className='upg-btn owned';}else{br.textContent=s.cost.reputation+' ₽';br.disabled=s.cash<s.cost.reputation;br.className='upg-btn';}}
  var dr=document.getElementById('d-reputation');
@@ -1139,8 +1137,18 @@ else setText('d-dump','лом капает сам: '+s.lv.dump+' шт кажды
 }
 
 var HOLD_INTERVAL=220,holdTimer=null,holdFn=null;
-function startHold(fn){stopHold();fn();if(s.lv.hold){holdFn=fn;holdTimer=setInterval(function(){if(holdFn)holdFn();},HOLD_INTERVAL);}}
-function stopHold(){if(holdTimer){clearInterval(holdTimer);holdTimer=null;}holdFn=null;}
+function startHold(fn){
+ stopHold();
+ fn();
+ if(s && s.lv && s.lv.hold){
+  holdFn=fn;
+  holdTimer=setInterval(function(){ if(holdFn) try{holdFn();}catch(e){} },HOLD_INTERVAL);
+ }
+}
+function stopHold(){
+ if(holdTimer){clearInterval(holdTimer);holdTimer=null;}
+ holdFn=null;
+}
 var ACTION_BTN={digBtn:scavenge,sellBtn:sellIngots};
 
 function handleDown(e){
@@ -1206,11 +1214,17 @@ function handleDown(e){
   }
  }catch(err){}
 }
-function handleUp(e){stopHold();}
+function handleUp(e){ stopHold(); }
 
+// Навешиваем и down и up — теперь hold корректно останавливается
 document.addEventListener('pointerdown',handleDown,true);
+document.addEventListener('pointerup',handleUp,true);
+document.addEventListener('pointercancel',handleUp,true);
 document.addEventListener('touchstart',handleDown,true);
+document.addEventListener('touchend',handleUp,true);
+document.addEventListener('touchcancel',handleUp,true);
 document.addEventListener('mousedown',handleDown,true);
+document.addEventListener('mouseup',handleUp,true);
 
 var last=performance.now();
 var lastSaveCheck=0;
@@ -1228,8 +1242,8 @@ function loop(now){
 }
 window.addEventListener('beforeunload',function(){if(currentScreen==='game')saveGame();});
 window.addEventListener('pagehide',function(){if(currentScreen==='game')saveGame();});
-window.addEventListener('blur',function(){if(currentScreen==='game')saveGame();});
-document.addEventListener('visibilitychange',function(){if(currentScreen==='game')saveGame();});
+window.addEventListener('blur',function(){stopHold();if(currentScreen==='game')saveGame();});
+document.addEventListener('visibilitychange',function(){stopHold();if(currentScreen==='game')saveGame();});
 
 function boot(){
  lastSaveTs=0;

@@ -15,7 +15,8 @@
   --acid:#a8d64a;--acid-dim:#4a6020;--text:#dfe4c8;--text-dim:#8a916e;
   --prest:#c084fc;--prest-dim:#5b3d8a;--offline:#6dc4e8;--offline-dim:#2d5d73;
 }
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;scrollbar-width:none;-ms-overflow-style:none;}
+*::-webkit-scrollbar{display:none;width:0;height:0;}
 html,body{margin:0;padding:0;}
 body{background:var(--bg);background-image:radial-gradient(ellipse at top left, rgba(143,179,57,0.08), transparent 55%),radial-gradient(ellipse at bottom right, rgba(168,214,74,0.06), transparent 55%);color:var(--text);font-family:ui-sans-serif,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;min-height:100vh;-webkit-user-select:none;user-select:none;}
 .screen{display:none;min-height:100vh;}
@@ -213,11 +214,13 @@ h1.game-title{font-size:24px;font-weight:800;margin:0;} h1.game-title span{color
 .pg-card{background:linear-gradient(135deg,#2a1e0d 0%,#3d2b12 100%);border:1px solid var(--gold);border-radius:12px;padding:20px;max-width:420px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,0.8);}
 .pg-title{font-size:18px;font-weight:800;color:var(--gold);margin:0 0 4px;text-align:center;letter-spacing:0.5px;}
 .pg-sub{font-size:11px;color:var(--text-dim);text-align:center;margin-bottom:16px;}
-.pg-bar{position:relative;height:44px;background:#0f130a;border:1px solid var(--edge);border-radius:6px;overflow:hidden;}
+.pg-bar{position:relative;height:48px;background:#0f130a;border:1px solid var(--edge);border-radius:6px;overflow:hidden;}
 .pg-zone{position:absolute;top:0;bottom:0;background:linear-gradient(90deg,rgba(168,214,74,0.25),rgba(168,214,74,0.6),rgba(168,214,74,0.25));border-left:2px solid var(--acid);border-right:2px solid var(--acid);box-shadow:0 0 14px rgba(168,214,74,0.6) inset;}
 .pg-runner{position:absolute;top:-4px;bottom:-4px;width:4px;background:#fff;box-shadow:0 0 10px #fff,0 0 4px #fff;transform:translateX(-50%);border-radius:2px;pointer-events:none;}
-.pg-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--text-dim);font-family:ui-monospace,monospace;margin:8px 0 14px;}
-.pg-hint{font-size:11px;color:var(--text-dim);text-align:center;line-height:1.5;margin-bottom:16px;}
+.pg-price-strip{position:relative;height:20px;margin-top:8px;}
+.pg-price-mark{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap;font-family:ui-monospace,monospace;font-size:11px;color:var(--text-dim);}
+.pg-price-mark.max{color:var(--acid);font-weight:800;font-size:12px;}
+.pg-hint{font-size:11px;color:var(--text-dim);text-align:center;line-height:1.5;margin:14px 0 16px;}
 .pg-stop{width:100%;padding:16px;background:var(--gold);color:#1f1a06;border:none;border-radius:6px;font-size:18px;font-weight:900;cursor:pointer;touch-action:manipulation;letter-spacing:2px;}
 .pg-stop:active{background:#f0c94a;}
 .pg-stop:disabled{background:var(--gold-dim);color:#6b5f3f;}
@@ -252,7 +255,7 @@ h1.game-title{font-size:24px;font-weight:800;margin:0;} h1.game-title span{color
       <div class="pg-zone" id="pgZone"></div>
       <div class="pg-runner" id="pgRunner"></div>
     </div>
-    <div class="pg-labels"><span id="pgMinLbl">800 ₽/г</span><span id="pgMaxLbl">4000 ₽/г</span></div>
+    <div class="pg-price-strip" id="pgPriceStrip"></div>
     <div class="pg-hint">Чем ближе бегунок к зелёной зоне — тем дороже продашь. Бонусы престижа и репутации применяются сверху.</div>
     <div class="pg-result" id="pgResult"></div>
     <div class="pg-result-sub" id="pgResultSub"></div>
@@ -636,7 +639,7 @@ function startFireLoop(){
   f.frequency.value=220;
   f.Q.value=0.7;
   var g=audioCtx.createGain();
-  g.gain.value=0.10;
+  g.gain.value=Math.min(SND_VOL*VOL_MUL,0.99);
   o.connect(f);f.connect(g);g.connect(audioCtx.destination);
   o.start();
   activeLoops.fire={osc:o};
@@ -754,17 +757,33 @@ function sellIngots(){
 
 var pgActive=false;
 var pgPos=0,pgDir=1,pgLastTs=0;
-var pgZoneCenter=50,pgZoneHalf=8;
-var pgSpeed=0.55;
+var pgZoneCenter=50,pgZoneHalf=5;
+var pgSpeed=1.3;
 var pgRafId=0;
 var pgResultTimer=null;
+
+function calcPriceLabels(Z){
+ var labels=[];
+ labels.push({price:PRICE_MAX,pos:Z});
+ var step=15;
+ if(Z>=50){
+  labels.push({price:3000,pos:Math.max(Z-step,8)});
+  labels.push({price:2000,pos:Math.max(Z-step*2,8)});
+  labels.push({price:PRICE_MIN,pos:4});
+ } else {
+  labels.push({price:3000,pos:Math.min(Z+step,92)});
+  labels.push({price:2000,pos:Math.min(Z+step*2,92)});
+  labels.push({price:PRICE_MIN,pos:96});
+ }
+ return labels;
+}
 
 function openPriceGame(){
  if(pgActive)return;
  pgActive=true;
  pgPos=0;pgDir=1;pgLastTs=0;
  pgZoneCenter=25+Math.random()*50;
- pgZoneHalf=8;
+ pgZoneHalf=5;
  var zone=document.getElementById('pgZone');
  if(zone){zone.style.left=(pgZoneCenter-pgZoneHalf)+'%';zone.style.width=(pgZoneHalf*2)+'%';}
  var runner=document.getElementById('pgRunner');
@@ -776,10 +795,19 @@ function openPriceGame(){
  var btn=document.getElementById('pgStop');
  if(btn){btn.disabled=false;btn.textContent='СТОП';}
  var mult=priceMultiplier();
- var minLbl=document.getElementById('pgMinLbl');
- var maxLbl=document.getElementById('pgMaxLbl');
- if(minLbl)minLbl.textContent=fmt(Math.round(PRICE_MIN*mult))+' ₽/г';
- if(maxLbl)maxLbl.textContent=fmt(Math.round(PRICE_MAX*mult))+' ₽/г';
+ var strip=document.getElementById('pgPriceStrip');
+ if(strip){
+  strip.innerHTML='';
+  var labels=calcPriceLabels(pgZoneCenter);
+  for(var i=0;i<labels.length;i++){
+   var l=labels[i];
+   var m=document.createElement('div');
+   m.className='pg-price-mark'+(l.price===PRICE_MAX?' max':'');
+   m.style.left=l.pos+'%';
+   m.textContent=fmt(Math.round(l.price*mult))+' ₽';
+   strip.appendChild(m);
+  }
+ }
  var ov=document.getElementById('pgOverlay');
  if(ov)ov.classList.add('show');
  pgRafId=requestAnimationFrame(pgLoop);
@@ -830,7 +858,6 @@ function pgFinishSell(price,hit,msg){
  s.cash+=e;s.stats.earnedTotal+=e;s.stats.ingotsTotal+=grams;s.ingots=0;
  sndCoins();bumpCash();flashSellBtn();saveGame();
  var ov=document.getElementById('pgOverlay');
- if(ov)ov.classList.remove('ov.show');
  if(ov)ov.classList.remove('show');
  var total=Math.floor(e);
  flashToast(msg+' +'+fmt(total)+' ₽', hit?'lg':null);
@@ -1277,7 +1304,7 @@ function renderRegenList(){
   if(!ls.unlocked)continue;
   var curIv=locRegenIv(def,ls)/1000,nextIv=(def.regenBase/(1+(ls.regenLv+1)*0.28))/1000;
   var cost=regenCostFor(def,ls),dis=s.cash<cost?'disabled':'';
-  html+='<div class="upg"><div><div class="upg-name">'+def.icon+' '+def.name+'</div><div class="upg-desc">восстановление точки: '+curIv.toFixed(1)+'с → '+nextIv.toFixed(1)+'с (ур. '+ls.regenLv+')</div></div><button class="upg-btn" id="b-regen:'+def.key+'" type="button" '+dis+'>'+cost+' ₽</button></div>';
+  html+='<div class="upg"><div><div class="upg-name">'+def.icon+' '+def.name+'</div><div class="upg-desc">точка пополняется быстрее: '+curIv.toFixed(1)+'с → '+nextIv.toFixed(1)+'с на одну штуку (уровень '+ls.regenLv+')</div></div><button class="upg-btn" id="b-regen:'+def.key+'" type="button" '+dis+'>'+cost+' ₽</button></div>';
  }
  if(!html)html='<div class="upg-desc" style="padding:4px 0;">разблокируй точку, чтобы качать её скорость</div>';
  c.innerHTML=html;
@@ -1289,15 +1316,14 @@ function renderAutoDigList(){
   var def=LOCATIONS[i],owned=p.autoDig[def.key]===true;
   var cost=AUTO_DIG_COST[def.key]||0;
   var locked=!locState(def.key).unlocked;
-  var name=def.icon+' '+def.name;
   var desc;
-  if(!locked&&locState(def.key).unlocked===false)desc='точка не открыта';
-  if(owned)desc='куплен — копает в фоне';
-  else desc='покупка разовая, за кэш';
+  if(owned)desc='куплен — копает сам';
+  else if(locked)desc='сначала открой точку';
+  else desc='покупка один раз — работяга копает в этой точке без остановки';
   var dis=(owned||locked||s.cash<cost)?'disabled':'';
   var btnTxt=owned?'✓ куплен':(fmt(cost)+' ₽');
   var btnCls='upg-btn'+(owned?' owned':'');
-  html+='<div class="upg"><div><div class="upg-name">'+name+'</div><div class="upg-desc">'+desc+'</div></div><button class="'+btnCls+'" id="b-auto:'+def.key+'" type="button" '+dis+'>'+btnTxt+'</button></div>';
+  html+='<div class="upg"><div><div class="upg-name">'+def.icon+' '+def.name+'</div><div class="upg-desc">'+desc+'</div></div><button class="'+btnCls+'" id="b-auto:'+def.key+'" type="button" '+dis+'>'+btnTxt+'</button></div>';
  }
  c.innerHTML=html;
 }
@@ -1345,68 +1371,68 @@ function render(){
   else sb.textContent='Продать '+fmt(s.ingots,3)+' г за '+fmt(Math.floor(s.ingots*effectivePrice()))+' ₽';
  }
  setText('b-acid',s.cost.acid+' ₽');setDis('b-acid',s.cash<s.cost.acid);
- setText('d-acid','потери золота: '+Math.round((1-acidEff())*100)+'% → '+Math.round((1-acidEffNext())*100)+'% (ур. '+s.lv.acid+')');
+ setText('d-acid','в кислоте теряется золота: '+Math.round((1-acidEff())*100)+'% → '+Math.round((1-acidEffNext())*100)+'% (уровень '+s.lv.acid+')');
  setText('b-fire',s.cost.fire+' ₽');setDis('b-fire',s.cash<s.cost.fire);
- setText('d-fire','потери золота: '+Math.round((1-fireEff())*100)+'% → '+Math.round((1-fireEffNext())*100)+'% (ур. '+s.lv.fire+')');
+ setText('d-fire','при плавке теряется золота: '+Math.round((1-fireEff())*100)+'% → '+Math.round((1-fireEffNext())*100)+'% (уровень '+s.lv.fire+')');
  setText('b-cap',s.cost.cap+' ₽');setDis('b-cap',s.cash<s.cost.cap);
- setText('d-cap','вместимость: '+capMax()+' → '+(capMax()+8)+' мест (ур. '+s.lv.cap+')');
+ setText('d-cap','сколько лома влезает на склад: '+capMax()+' → '+(capMax()+8)+' (уровень '+s.lv.cap+')');
  var bh=document.getElementById('b-hold');
  if(bh){if(s.lv.hold){bh.textContent='✓ куплено';bh.disabled=true;bh.className='upg-btn owned';}else{bh.textContent=s.cost.hold+' ₽';bh.disabled=s.cash<s.cost.hold;bh.className='upg-btn';}}
- setText('d-hold','покупка на один раз — зажми кнопку, действие повторяется');
+ setText('d-hold',s.lv.hold?'куплено — зажми кнопку и она будет работать сама':'покупка один раз — зажми кнопку, и действие будет повторяться');
  setText('b-scavspd',s.cost.scavspd+' ₽');setDis('b-scavspd',s.cash<s.cost.scavspd);
- setText('d-scavspd','кулдаун копания: '+(scavCdMax()/1000).toFixed(2)+'с → '+(Math.max(300,1600*Math.pow(0.9,s.lv.scavspd+1))/1000).toFixed(2)+'с (ур. '+s.lv.scavspd+')');
+ setText('d-scavspd','пауза между копками: '+(scavCdMax()/1000).toFixed(2)+'с → '+(Math.max(300,1600*Math.pow(0.9,s.lv.scavspd+1))/1000).toFixed(2)+'с (уровень '+s.lv.scavspd+')');
  setText('b-acidspd',s.cost.acidspd+' ₽');setDis('b-acidspd',s.cash<s.cost.acidspd);
- setText('d-acidspd','время растворения: '+(acidDuration()/1000).toFixed(1)+'с → '+(Math.max(500,4200*Math.pow(0.9,s.lv.acidspd+1))/1000).toFixed(1)+'с (ур. '+s.lv.acidspd+')');
+ setText('d-acidspd','время растворения одной партии: '+(acidDuration()/1000).toFixed(1)+'с → '+(Math.max(500,4200*Math.pow(0.9,s.lv.acidspd+1))/1000).toFixed(1)+'с (уровень '+s.lv.acidspd+')');
  setText('b-firespd',s.cost.firespd+' ₽');setDis('b-firespd',s.cash<s.cost.firespd);
- setText('d-firespd','время выпаривания: '+(fireDuration()/1000).toFixed(1)+'с → '+(Math.max(400,3400*Math.pow(0.9,s.lv.firespd+1))/1000).toFixed(1)+'с (ур. '+s.lv.firespd+')');
+ setText('d-firespd','время выпаривания одной партии: '+(fireDuration()/1000).toFixed(1)+'с → '+(Math.max(400,3400*Math.pow(0.9,s.lv.firespd+1))/1000).toFixed(1)+'с (уровень '+s.lv.firespd+')');
  var bsa=document.getElementById('b-secondacid');
  if(bsa){if(s.lv.secondacid){bsa.textContent='✓ куплено';bsa.disabled=true;bsa.className='upg-btn owned';}else{bsa.textContent=s.cost.secondacid+' ₽';bsa.disabled=s.cash<s.cost.secondacid;bsa.className='upg-btn';}}
- setText('d-secondacid','покупка на один раз — два бака работают параллельно');
+ setText('d-secondacid',s.lv.secondacid?'куплено — два бака работают одновременно':'покупка один раз — можно запустить вторую кислоту параллельно первой');
  var bsf=document.getElementById('b-secondfire');
  if(bsf){if(s.lv.secondfire){bsf.textContent='✓ куплено';bsf.disabled=true;bsf.className='upg-btn owned';}else{bsf.textContent=s.cost.secondfire+' ₽';bsf.disabled=s.cash<s.cost.secondfire;bsf.className='upg-btn';}}
- setText('d-secondfire','покупка на один раз — две печи работают параллельно');
+ setText('d-secondfire',s.lv.secondfire?'куплено — две печи работают одновременно':'покупка один раз — можно запустить вторую печь параллельно первой');
  setText('b-goodeye',s.cost.goodeye+' ₽');setDis('b-goodeye',s.cash<s.cost.goodeye);
- setText('d-goodeye','шанс редкого дропа: '+Math.round(goodEyeChance()*100)+'% → '+Math.round(Math.min((s.lv.goodeye+1)*0.04,0.5)*100)+'% (ур. '+s.lv.goodeye+')');
+ setText('d-goodeye','шанс найти редкую вещь вместо обычной: '+Math.round(goodEyeChance()*100)+'% → '+Math.round(Math.min((s.lv.goodeye+1)*0.04,0.5)*100)+'% (уровень '+s.lv.goodeye+')');
  setText('b-luck',s.cost.luck+' ₽');setDis('b-luck',s.cash<s.cost.luck);
- setText('d-luck','шанс двойного дропа: '+Math.round(luckChance()*100)+'% → '+Math.round(Math.min((s.lv.luck+1)*0.05,0.7)*100)+'% (ур. '+s.lv.luck+')');
+ setText('d-luck','шанс найти две вещи вместо одной: '+Math.round(luckChance()*100)+'% → '+Math.round(Math.min((s.lv.luck+1)*0.05,0.7)*100)+'% (уровень '+s.lv.luck+')');
  var br=document.getElementById('b-reputation');
  if(br){if(s.lv.reputation>=REPUTATION_MAX){br.textContent='✓ макс';br.disabled=true;br.className='upg-btn owned';}else{br.textContent=s.cost.reputation+' ₽';br.disabled=s.cash<s.cost.reputation;br.className='upg-btn';}}
  var dr=document.getElementById('d-reputation');
- if(dr){var cur=reputationPct(),nxt=Math.min(cur+REPUTATION_PER_LV,100);dr.textContent='бонус к цене продажи: '+cur+'% → '+nxt+'% (ур. '+s.lv.reputation+'/'+REPUTATION_MAX+')';}
+ if(dr){var cur=reputationPct(),nxt=Math.min(cur+REPUTATION_PER_LV,100);dr.textContent='наценка скупщика к цене продажи: +'+cur+'% → +'+nxt+'% (уровень '+s.lv.reputation+'/'+REPUTATION_MAX+')';}
  var bpc=document.getElementById('b-priceControl');
  if(bpc){if(s.lv.priceControl){bpc.textContent='✓ куплено';bpc.disabled=true;bpc.className='upg-btn owned';}else{bpc.textContent=s.cost.priceControl+' ₽';bpc.disabled=s.cash<s.cost.priceControl;bpc.className='upg-btn';}}
- setText('d-priceControl',s.lv.priceControl?'покупка сделана — при продаже идёт стоп-игра (800–4000 ₽/г)':'покупка на один раз — при продаже идёт стоп-игра на удачу: попал в зону → 4000 ₽/г, промахнулся → до 800 ₽/г');
+ setText('d-priceControl',s.lv.priceControl?'куплено — при продаже играешь в стоп-игру':'покупка один раз — при продаже запускается мини-игра: попал в зелёную зону → дорого, промазал → дёшево');
  var bor=document.getElementById('b-offlineRate');
  if(bor){if(s.lv.offlineRate>=OFFLINE_RATE_MAX){bor.textContent='✓ макс';bor.disabled=true;bor.className='upg-btn owned';}else{bor.textContent=s.cost.offlineRate+' ₽';bor.disabled=s.cash<s.cost.offlineRate;bor.className='upg-btn offline';}}
  var dor=document.getElementById('d-offlineRate');
- if(dor)dor.textContent='доход в оффлайне: '+offlineRatePct()+'% → '+offlineRateNextPct()+'% (ур. '+s.lv.offlineRate+'/'+OFFLINE_RATE_MAX+')';
+ if(dor)dor.textContent='сколько зарабатываешь, пока тебя нет: '+offlineRatePct()+'% → '+offlineRateNextPct()+'% от обычного (уровень '+s.lv.offlineRate+'/'+OFFLINE_RATE_MAX+')';
  var boc=document.getElementById('b-offlineCap');
  if(boc){if(s.lv.offlineCap>=OFFLINE_CAP_MAX){boc.textContent='✓ макс';boc.disabled=true;boc.className='upg-btn owned';}else{boc.textContent=s.cost.offlineCap+' ₽';boc.disabled=s.cash<s.cost.offlineCap;boc.className='upg-btn offline';}}
  var doc=document.getElementById('d-offlineCap');
- if(doc)doc.textContent='лимит оффлайна: '+offlineCapHours()+' ч → '+offlineCapNextHours()+' ч (ур. '+s.lv.offlineCap+'/'+OFFLINE_CAP_MAX+')';
+ if(doc)doc.textContent='сколько максимум часов засчитывается, пока тебя нет: '+offlineCapHours()+' ч → '+offlineCapNextHours()+' ч (уровень '+s.lv.offlineCap+'/'+OFFLINE_CAP_MAX+')';
  var bas=document.getElementById('b-autoSpeed');
  if(bas){bas.textContent=s.cost.autoSpeed+' ₽';bas.disabled=s.cash<s.cost.autoSpeed;bas.className='upg-btn';}
- setText('d-autoSpeed','скорость всех работяг: +'+Math.round(autoSpeedBonus()*100)+'% → +'+Math.round((autoSpeedBonus()+0.10)*100)+'% (ур. '+s.lv.autoSpeed+')');
+ setText('d-autoSpeed','работяги копают быстрее: +'+Math.round(autoSpeedBonus()*100)+'% → +'+Math.round((autoSpeedBonus()+0.10)*100)+'% (уровень '+s.lv.autoSpeed+')');
  var bap=document.getElementById('b-autoPenalty');
  if(bap){if(s.lv.autoPenalty>=AUTO_PENALTY_MAX){bap.textContent='✓ макс';bap.disabled=true;bap.className='upg-btn owned';}else{bap.textContent=s.cost.autoPenalty+' ₽';bap.disabled=s.cash<s.cost.autoPenalty;bap.className='upg-btn';}}
- setText('d-autoPenalty','штраф работяг вне активной точки: −'+autoPenaltyPct()+'% → −'+Math.max(0,50-(s.lv.autoPenalty+1)*5)+'% (ур. '+s.lv.autoPenalty+'/'+AUTO_PENALTY_MAX+')');
+ setText('d-autoPenalty','работяги копают медленнее, когда ты у другой точки: −'+autoPenaltyPct()+'% → −'+Math.max(0,50-(s.lv.autoPenalty+1)*5)+'% (уровень '+s.lv.autoPenalty+'/'+AUTO_PENALTY_MAX+')');
  setText('psLvl',p.level);setText('psPts',p.points);
  setText('psBonus','+'+prestigeBonusPct()+'%');
  setText('psReward',prestigeReward(p.level+1));
  var pb=document.getElementById('prestBtn');
  if(pb){pb.disabled=s.cash<PRESTIGE_THRESHOLD;pb.textContent=s.cash<PRESTIGE_THRESHOLD?('Нужно '+fmt(PRESTIGE_THRESHOLD)+' ₽ (сейчас '+fmt(Math.floor(s.cash))+')'):('Сделать престиж → получить '+prestigeReward(p.level+1)+' очков');}
  var c1=1+p.lv.bonusBoost;setText('b-bonusBoost',c1+' очк.');setDis('b-bonusBoost',p.points<c1);
- setText('d-bonusBoost','бонус за уровень престижа: +'+(5+p.lv.bonusBoost)+'% → +'+(5+p.lv.bonusBoost+1)+'% (ур. '+p.lv.bonusBoost+')');
+ setText('d-bonusBoost','бонус за уровень престижа: +'+(5+p.lv.bonusBoost)+'% → +'+(5+p.lv.bonusBoost+1)+'% (уровень '+p.lv.bonusBoost+')');
  var c2=2+p.lv.startCash*2;setText('b-startCash',c2+' очк.');setDis('b-startCash',p.points<c2);
- setText('d-startCash','стартовый капитал после престижа: '+(p.lv.startCash*500)+' → '+((p.lv.startCash+1)*500)+' ₽ (ур. '+p.lv.startCash+')');
+ setText('d-startCash','сколько денег дают после престижа: '+(p.lv.startCash*500)+' → '+((p.lv.startCash+1)*500)+' ₽ (уровень '+p.lv.startCash+')');
  var c3=3+p.lv.locDiscount*3;setText('b-locDiscount',c3+' очк.');setDis('b-locDiscount',p.points<c3);
- setText('d-locDiscount','скидка на локации: −'+Math.min(90,p.lv.locDiscount*5)+'% → −'+Math.min(90,(p.lv.locDiscount+1)*5)+'% (ур. '+p.lv.locDiscount+')');
+ setText('d-locDiscount','скидка на открытие точек: −'+Math.min(90,p.lv.locDiscount*5)+'% → −'+Math.min(90,(p.lv.locDiscount+1)*5)+'% (уровень '+p.lv.locDiscount+')');
  var c4=2+p.lv.acidII*2;setText('b-acidII',c4+' очк.');setDis('b-acidII',p.points<c4);
- setText('d-acidII','доп. эффективность кислоты: +'+(p.lv.acidII*3)+'% → +'+((p.lv.acidII+1)*3)+'% (ур. '+p.lv.acidII+')');
+ setText('d-acidII','дополнительно уменьшает потери в кислоте: +'+(p.lv.acidII*3)+'% → +'+((p.lv.acidII+1)*3)+'% (уровень '+p.lv.acidII+')');
  var c5=2+p.lv.fireII*2;setText('b-fireII',c5+' очк.');setDis('b-fireII',p.points<c5);
- setText('d-fireII','доп. эффективность печи: +'+(p.lv.fireII*3)+'% → +'+((p.lv.fireII+1)*3)+'% (ур. '+p.lv.fireII+')');
+ setText('d-fireII','дополнительно уменьшает потери в печи: +'+(p.lv.fireII*3)+'% → +'+((p.lv.fireII+1)*3)+'% (уровень '+p.lv.fireII+')');
  var c6=2+p.lv.capII*2;setText('b-capII',c6+' очк.');setDis('b-capII',p.points<c6);
- setText('d-capII','доп. места на складе: +'+(p.lv.capII*4)+' → +'+((p.lv.capII+1)*4)+' (ур. '+p.lv.capII+')');
+ setText('d-capII','дополнительные места на складе: +'+(p.lv.capII*4)+' → +'+((p.lv.capII+1)*4)+' (уровень '+p.lv.capII+')');
  setText('st-junk',fmt(s.stats.junkTotal));
  setText('st-ingots',fmt(s.stats.ingotsTotal+s.ingots,3)+' г');
  setText('st-earned',fmt(Math.floor(s.stats.earnedTotal))+' ₽');
@@ -1626,9 +1652,7 @@ document.addEventListener('visibilitychange',function(){cancelAllPress();if(curr
 
 function boot(){
  lastSaveTs=0;
- try{
-  for(var oi=0;oi<OLD_KEYS.length;oi++)localStorage.removeItem(OLD_KEYS[oi]);
- }catch(e){}
+ try{for(var oi=0;oi<OLD_KEYS.length;oi++)localStorage.removeItem(OLD_KEYS[oi]);}catch(e){}
  try{
   var a=readSlot(SAVE_KEY_A),b=readSlot(SAVE_KEY_B);
   var best;

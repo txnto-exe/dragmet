@@ -431,6 +431,8 @@ var TAP_DELAY=30;
 var HOLD_DELAY=350;
 var HOLD_INTERVAL=220;
 
+var VOL_MUL=3;
+
 var LOCATIONS=[
  {key:'yard',name:'Баки во дворе',icon:'🗑️',unlockCost:0,maxStock:8,regenBase:5200,regenCost:350,autoCost:5,
   loot:[{k:'chips',w:35},{k:'caps',w:15},{k:'resist',w:15},{k:'phones',w:20},{k:'ram',w:10},{k:'hdd',w:5}]},
@@ -512,8 +514,8 @@ function offlineCapCostFor(lv){return Math.round(OFFLINE_CAP_BASE_COST*Math.pow(
 var audioCtx=null,audioBroken=false,activeLoops={};
 function initAudio(){if(audioCtx||audioBroken)return;try{var Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx){audioBroken=true;return;}audioCtx=new Ctx();}catch(e){audioBroken=true;audioCtx=null;}}
 function canPlay(){return audioCtx&&s&&s.settings&&s.settings.sound;}
-function tone(freq,dur,type,vol,delay){try{if(!canPlay())return;var t0=audioCtx.currentTime+(delay||0);var o=audioCtx.createOscillator();var g=audioCtx.createGain();o.type=type||'sine';o.frequency.setValueAtTime(freq,t0);g.gain.setValueAtTime(vol||0.1,t0);g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);o.connect(g);g.connect(audioCtx.destination);o.start(t0);o.stop(t0+dur+0.02);}catch(e){}}
-function slide(f1,f2,dur,type,vol,delay){try{if(!canPlay())return;var t0=audioCtx.currentTime+(delay||0);var o=audioCtx.createOscillator();var g=audioCtx.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f1,t0);o.frequency.exponentialRampToValueAtTime(Math.max(f2,20),t0+dur);g.gain.setValueAtTime(vol||0.1,t0);g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);o.connect(g);g.connect(audioCtx.destination);o.start(t0);o.stop(t0+dur+0.02);}catch(e){}}
+function tone(freq,dur,type,vol,delay){try{if(!canPlay())return;var v=Math.min((vol||0.1)*VOL_MUL,0.95);var t0=audioCtx.currentTime+(delay||0);var o=audioCtx.createOscillator();var g=audioCtx.createGain();o.type=type||'sine';o.frequency.setValueAtTime(freq,t0);g.gain.setValueAtTime(v,t0);g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);o.connect(g);g.connect(audioCtx.destination);o.start(t0);o.stop(t0+dur+0.02);}catch(e){}}
+function slide(f1,f2,dur,type,vol,delay){try{if(!canPlay())return;var v=Math.min((vol||0.1)*VOL_MUL,0.95);var t0=audioCtx.currentTime+(delay||0);var o=audioCtx.createOscillator();var g=audioCtx.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f1,t0);o.frequency.exponentialRampToValueAtTime(Math.max(f2,20),t0+dur);g.gain.setValueAtTime(v,t0);g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);o.connect(g);g.connect(audioCtx.destination);o.start(t0);o.stop(t0+dur+0.02);}catch(e){}}
 function rnd(f){return f*(0.92+Math.random()*0.16);}
 function sndTab(){tone(rnd(180),0.08,'sine',0.09);tone(rnd(90),0.1,'triangle',0.05,0.01);}
 function sndAccOpen(){tone(rnd(400),0.06,'sine',0.06);tone(rnd(600),0.07,'sine',0.04,0.03);}
@@ -534,7 +536,7 @@ function sndDigPricey(){[1000,1500,2000].forEach(function(f,i){tone(rnd(f),0.18,
 function sndDing(){[1200,1500,1800,2400].forEach(function(f,i){tone(rnd(f),0.35,'sine',0.12,i*0.05);});}
 function startAcidLoop(){try{if(!canPlay()||activeLoops.acid)return;activeLoops.acid={tick:0};var bubble=function(){if(!activeLoops.acid)return;var f1=200+Math.random()*150;var f2=f1+80+Math.random()*120;slide(f1,f2,0.12,'sine',0.035);activeLoops.acid.tick=setTimeout(bubble,180+Math.random()*220);};bubble();}catch(e){}}
 function stopAcidLoop(){try{if(activeLoops.acid){clearTimeout(activeLoops.acid.tick);activeLoops.acid=null;}}catch(e){activeLoops.acid=null;}}
-function startFireLoop(){try{if(!canPlay()||activeLoops.fire)return;var o=audioCtx.createOscillator();o.type='sawtooth';o.frequency.value=55;var f=audioCtx.createBiquadFilter();f.type='lowpass';f.frequency.value=200;var g=audioCtx.createGain();g.gain.value=0.045;o.connect(f);f.connect(g);g.connect(audioCtx.destination);o.start();activeLoops.fire={osc:o};}catch(e){}}
+function startFireLoop(){try{if(!canPlay()||activeLoops.fire)return;var o=audioCtx.createOscillator();o.type='sawtooth';o.frequency.value=55;var f=audioCtx.createBiquadFilter();f.type='lowpass';f.frequency.value=200;var g=audioCtx.createGain();g.gain.value=Math.min(0.045*VOL_MUL,0.95);o.connect(f);f.connect(g);g.connect(audioCtx.destination);o.start();activeLoops.fire={osc:o};}catch(e){}}
 function stopFireLoop(){try{if(activeLoops.fire){activeLoops.fire.osc.stop();activeLoops.fire=null;}}catch(e){activeLoops.fire=null;}}
 
 function vibe(ms){try{if(!s||!s.settings||!s.settings.vibe)return;if(navigator.vibrate)navigator.vibrate(ms||15);}catch(e){}}
@@ -1183,12 +1185,6 @@ function render(){
  if(pf){var tp2=0,td2=0;for(var i=0;i<s.fire.length;i++){var f2=s.fire[i];if(f2.active){tp2+=f2.progress;td2+=f2.duration;}}pf.style.width=td2>0?(tp2/td2*100)+'%':'0%';}
 }
 
-// === ОБРАБОТКА КАСАНИЙ ===
-// Кнопки digBtn/sellBtn — реагируют моментально (через TAP_DELAY), но отменяются при сдвиге >MOVE_THRESHOLD.
-// Всё остальное — реагирует при отпускании, если палец не сдвинулся.
-// При сдвиге на кнопках — ни действия, ни скролла (touch-action:none на них).
-// При сдвиге на остальном — обычный скролл, действия нет.
-
 var pressActive=false;
 var pressTarget=null;
 var pressX=0,pressY=0;
@@ -1249,7 +1245,6 @@ function handleDown(e){
  if(e.touches&&e.touches[0])pt=e.touches[0];
  pressX=pt.clientX||0;
  pressY=pt.clientY||0;
- // определить, является ли цель кнопкой-действием
  var t=e.target;
  while(t&&t!==document){
   if(t.id&&ACTION_BTN[t.id]){
@@ -1267,11 +1262,9 @@ function handleMove(e){
  var dy=(pt.clientY||0)-pressY;
  if(dx*dx+dy*dy>MOVE_THRESHOLD*MOVE_THRESHOLD){
   pressMoved=true;
-  // отменяем отложенный тап и турбо
   if(tapTimer){clearTimeout(tapTimer);tapTimer=null;}
   if(holdStartTimer){clearTimeout(holdStartTimer);holdStartTimer=null;}
   if(holdRepeatTimer){clearInterval(holdRepeatTimer);holdRepeatTimer=null;}
-  // если это была кнопка-действие — глушим палец, чтобы не было скролла
   if(pressIsAction){
    try{e.preventDefault();}catch(er){}
   }
@@ -1282,17 +1275,14 @@ function handleUp(e){
  var wasAction=pressIsAction;
  var wasMoved=pressMoved;
  var target=pressTarget;
- // очищаем всё
  if(tapTimer){clearTimeout(tapTimer);tapTimer=null;}
  if(holdStartTimer){clearTimeout(holdStartTimer);holdStartTimer=null;}
  if(holdRepeatTimer){clearInterval(holdRepeatTimer);holdRepeatTimer=null;}
  pressActive=false;
- // если это была кнопка-действие — ничего дополнительно делать не надо (уже отработала или отменена)
  if(wasAction){
   actionFn=null;pressTarget=null;pressIsAction=false;pressMoved=false;
   return;
  }
- // для остальных — если не сдвинулись, обрабатываем как тап
  if(!wasMoved && target){
   try{processTap(target);}catch(er){}
  }
@@ -1303,7 +1293,6 @@ function handleCancel(){cancelAllPress();}
 function processTap(target){
  var t=target;
  while(t&&t!==document){
-  // оффлайн оверлей
   if(t.id==='ocClaim'){hideOfflineOverlay();sndOfflineClaim();vibe(40);bumpCash();return;}
   if(t.id==='btnContinue'){
    var ok=false;

@@ -69,7 +69,7 @@ h1.game-title{font-size:24px;font-weight:800;margin:0;} h1.game-title span{color
 .loc-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;}
 .loc-card{flex:0 0 auto;width:118px;background:var(--panel-2);border:1px solid var(--edge);border-radius:6px;padding:9px;cursor:pointer;touch-action:manipulation;}
 .loc-card.active{border-color:var(--rust);background:#28321c;}
-.loc-card.locked{opacity:0.6;}
+.loc-card.locked{opacity:0.75;}
 .loc-card.autodig{border-color:var(--prest-dim);}
 .loc-ic{font-size:20px;}
 .loc-name{font-size:11.5px;font-weight:700;margin-top:4px;line-height:1.25;min-height:28px;}
@@ -80,7 +80,7 @@ h1.game-title{font-size:24px;font-weight:800;margin:0;} h1.game-title span{color
 .loc-unlock{font-size:11px;margin-top:6px;color:var(--gold);font-family:ui-monospace,monospace;}
 .loc-empty{color:var(--rust);}
 .dig-btn{width:100%;padding:16px;background:var(--rust);color:#0d1207;border:none;border-radius:5px;font-size:16px;font-weight:700;cursor:pointer;position:relative;overflow:hidden;touch-action:none;}
-.dig-btn:disabled{background:var(--rust-dim);color:#7a8760;}
+.dig-btn:disabled{background:#3a3520;color:#9a8f5c;}
 .dig-btn.shake{animation:shakeBtn 0.35s;}
 @keyframes shakeBtn{0%,100%{transform:translateX(0);}20%{transform:translateX(-6px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}
 .dig-fill{position:absolute;left:0;top:0;bottom:0;background:rgba(0,0,0,0.28);width:0%;pointer-events:none;}
@@ -119,7 +119,7 @@ h1.game-title{font-size:24px;font-weight:800;margin:0;} h1.game-title span{color
 .bar-fill.acid{background:var(--acid);}
 .bar-fill.fire{background:var(--rust);}
 .stage-btn{margin-top:6px;width:100%;padding:8px;font-size:13px;font-weight:600;border-radius:4px;border:1px solid var(--edge);cursor:pointer;background:var(--panel-2);color:var(--text);touch-action:manipulation;}
-.stage-btn:disabled{opacity:0.35;}
+.stage-btn:disabled{background:#181c14;color:#8a8a72;border-color:#2a2f22;opacity:1;}
 .stage-btn.ready{background:var(--acid-dim);border-color:var(--acid);}
 .market-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
 .price{font-family:ui-monospace,monospace;font-size:14px;}
@@ -129,7 +129,7 @@ h1.game-title{font-size:24px;font-weight:800;margin:0;} h1.game-title span{color
 .ingot-big{font-family:ui-monospace,monospace;font-size:26px;font-weight:800;color:var(--acid);text-align:center;padding:10px 0 4px;}
 .ingot-big small{font-size:12px;color:var(--text-dim);font-weight:400;margin-left:4px;}
 .sell-btn{width:100%;padding:14px;background:var(--gold);color:#1f1a06;border:none;border-radius:5px;font-size:15px;font-weight:700;cursor:pointer;touch-action:none;}
-.sell-btn:disabled{background:var(--gold-dim);color:#6b5f3f;}
+.sell-btn:disabled{background:#2a2618;color:#a89b5c;}
 .sell-btn.flash{background:#f0c94a;animation:sellFlash 0.4s;}
 @keyframes sellFlash{0%{transform:scale(1);}50%{transform:scale(1.05);background:#f5d560;}100%{transform:scale(1);}}
 .upg{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--edge);gap:10px;}
@@ -137,7 +137,7 @@ h1.game-title{font-size:24px;font-weight:800;margin:0;} h1.game-title span{color
 .upg-name{font-size:13.5px;font-weight:600;}
 .upg-desc{font-size:11px;color:var(--text-dim);margin-top:3px;line-height:1.35;}
 .upg-btn{flex-shrink:0;padding:8px 12px;border-radius:4px;border:1px solid var(--edge);background:var(--panel-2);color:var(--gold);font-family:ui-monospace,monospace;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap;touch-action:manipulation;}
-.upg-btn:disabled{color:var(--text-dim);opacity:0.5;}
+.upg-btn:disabled{background:#181c14;color:#a5a584;border-color:#2a2f22;opacity:1;}
 .upg-btn.owned{color:var(--acid);border-color:var(--acid-dim);}
 .upg-btn.prest{color:var(--prest);border-color:var(--prest-dim);}
 .upg-btn.offline{color:var(--offline);border-color:var(--offline-dim);}
@@ -149,16 +149,16 @@ h1.game-title{font-size:24px;font-weight:800;margin:0;} h1.game-title span{color
 .footnote{text-align:center;font-size:11px;color:var(--text-dim);margin-top:18px;}
 .inv-list{display:flex;flex-direction:column;gap:4px;}
 .inv-line{display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--panel-2);border:1px solid var(--edge);border-radius:5px;font-size:12px;cursor:pointer;touch-action:manipulation;position:relative;user-select:none;-webkit-user-select:none;}
-.inv-line.dim{opacity:0.35;}
-.inv-line.locked{opacity:0.5;background:#1a1a1a;border-color:#2a2a2a;}
+.inv-line.dim{opacity:0.55;}
+.inv-line.locked{opacity:0.75;background:#1a1a1a;border-color:#2a2a2a;}
 .inv-line.locked .il-lock{opacity:1;}
 .inv-line .il-lock{position:absolute;top:50%;left:8px;transform:translateY(-50%);font-size:14px;opacity:0;pointer-events:none;z-index:2;}
 .inv-line .il-ic{font-size:16px;width:20px;text-align:center;position:relative;z-index:1;}
-.inv-line.locked .il-ic{opacity:0.3;}
+.inv-line.locked .il-ic{opacity:0.4;}
 .inv-line .il-name{flex:1;color:var(--text-dim);font-size:11.5px;}
 .inv-line .il-cnt{font-family:ui-monospace,monospace;font-weight:600;color:var(--text);min-width:24px;text-align:right;}
 .inv-line .il-au{font-family:ui-monospace,monospace;color:var(--gold);min-width:60px;text-align:right;font-size:11.5px;}
-.inv-line.locked .il-name,.inv-line.locked .il-cnt,.inv-line.locked .il-au{color:var(--text-dim);opacity:0.6;}
+.inv-line.locked .il-name,.inv-line.locked .il-cnt,.inv-line.locked .il-au{color:#8a9170;}
 .inv-total{display:flex;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--edge);font-size:13px;}
 .inv-total span:last-child{font-family:ui-monospace,monospace;color:var(--gold);font-weight:700;}
 .empty-note{font-size:11.5px;color:var(--text-dim);text-align:center;padding:14px 8px;font-style:italic;}
@@ -172,7 +172,7 @@ h1.game-title{font-size:24px;font-weight:800;margin:0;} h1.game-title span{color
 .prest-status .ps-line{display:flex;justify-content:space-between;font-size:13px;padding:3px 0;}
 .prest-status .ps-line span:last-child{font-family:ui-monospace,monospace;color:var(--prest);font-weight:600;}
 .prest-btn{width:100%;padding:12px;margin-top:10px;background:var(--prest);color:#1a0b2e;border:none;border-radius:5px;font-size:14px;font-weight:800;cursor:pointer;touch-action:manipulation;}
-.prest-btn:disabled{background:var(--prest-dim);color:#8a6baa;}
+.prest-btn:disabled{background:#221636;color:#a482c8;}
 .prest-btn.flash{animation:prestFlash 0.6s;}
 @keyframes prestFlash{0%{transform:scale(1);}30%{transform:scale(1.06);box-shadow:0 0 30px var(--prest);}100%{transform:scale(1);}}
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:200;display:flex;justify-content:space-around;align-items:flex-end;background:linear-gradient(to top, #0e120a 70%, rgba(14,18,10,0.92));border-top:1px solid var(--edge);padding:6px 4px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -8px 16px -8px rgba(0,0,0,0.9);}
@@ -223,7 +223,7 @@ h1.game-title{font-size:24px;font-weight:800;margin:0;} h1.game-title span{color
 .pg-hint{font-size:11px;color:var(--text-dim);text-align:center;line-height:1.5;margin:14px 0 16px;}
 .pg-stop{width:100%;padding:16px;background:var(--gold);color:#1f1a06;border:none;border-radius:6px;font-size:18px;font-weight:900;cursor:pointer;touch-action:manipulation;letter-spacing:2px;}
 .pg-stop:active{background:#f0c94a;}
-.pg-stop:disabled{background:var(--gold-dim);color:#6b5f3f;}
+.pg-stop:disabled{background:#2a2618;color:#a89b5c;}
 .pg-result{text-align:center;padding:10px 0 4px;font-size:30px;font-weight:900;font-family:ui-monospace,monospace;min-height:44px;}
 .pg-result.hit{color:var(--acid);text-shadow:0 0 12px rgba(168,214,74,0.6);}
 .pg-result.miss{color:var(--rust);}
@@ -272,7 +272,7 @@ h1.game-title{font-size:24px;font-weight:800;margin:0;} h1.game-title span{color
     <button class="menu-btn secondary" id="btnSettings" type="button">Настройки</button>
     <div class="menu-save-info" id="saveInfo"></div>
   </div>
-  <div class="menu-version">v0.6 · прототип</div>
+  <div class="menu-version">v0.7 · прототип</div>
 </div>
 
 <div class="screen" id="settingsScreen">
@@ -465,6 +465,7 @@ var AUTO_PENALTY_BASE_COST=3000;
 var AUTO_PENALTY_COST_MULT=1.8;
 var AUTO_PENALTY_MAX=10;
 var AUTO_DIG_COST={yard:800,construction:2500,radiozavod:6000,garages:15000,workshop:35000,ats:80000,scrapyard:180000,institute:400000};
+var AUTO_SLOW_FACTOR=3;
 var NORMAL_UPG_KEYS=['acid','fire','cap','hold','scavspd','acidspd','firespd','secondacid','secondfire','goodeye','luck','reputation','priceControl','offlineRate','offlineCap','autoSpeed','autoPenalty'];
 var SAVE_KEY_A='dragmet_save_a_v2';
 var SAVE_KEY_B='dragmet_save_b_v2';
@@ -557,6 +558,19 @@ function autoSpeedBonus(){return s.lv.autoSpeed*0.10;}
 function autoSpeedCostFor(lv){return Math.round(AUTO_SPEED_BASE_COST*Math.pow(AUTO_SPEED_COST_MULT,lv));}
 function autoPenaltyPct(){return Math.max(0,50-s.lv.autoPenalty*5);}
 function autoPenaltyCostFor(lv){return Math.round(AUTO_PENALTY_BASE_COST*Math.pow(AUTO_PENALTY_COST_MULT,lv));}
+function autoCdBase(){
+ var cd=scavCdMax()*AUTO_SLOW_FACTOR;
+ cd=cd*(1+autoPenaltyPct()/100);
+ cd=cd/(1+autoSpeedBonus());
+ return cd;
+}
+function autoCdFor(locKey){
+ var cd=autoCdBase();
+ if(locKey===s.activeLoc){
+  cd=cd/(1+autoPenaltyPct()/100);
+ }
+ return cd;
+}
 function prestigeReward(newLevel){return Math.round(10*Math.pow(2.5,newLevel-1));}
 function prestigeBonusPct(){return (5+p.lv.bonusBoost)*p.level;}
 function reputationPct(){return s.lv.reputation*REPUTATION_PER_LV;}
@@ -584,6 +598,22 @@ function initAudio(){if(audioCtx||audioBroken)return;try{var Ctx=window.AudioCon
 function canPlay(){return audioCtx&&s&&s.settings&&s.settings.sound;}
 function tone(freq,dur,type,vol,delay){try{if(!canPlay())return;var v=Math.min(SND_VOL*VOL_MUL,0.99);var t0=audioCtx.currentTime+(delay||0);var o=audioCtx.createOscillator();var g=audioCtx.createGain();o.type=type||'sine';o.frequency.setValueAtTime(freq,t0);g.gain.setValueAtTime(0.0001,t0);g.gain.exponentialRampToValueAtTime(v,t0+0.005);g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);o.connect(g);g.connect(audioCtx.destination);o.start(t0);o.stop(t0+dur+0.02);}catch(e){}}
 function slide(f1,f2,dur,type,vol,delay){try{if(!canPlay())return;var v=Math.min(SND_VOL*VOL_MUL,0.99);var t0=audioCtx.currentTime+(delay||0);var o=audioCtx.createOscillator();var g=audioCtx.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f1,t0);o.frequency.exponentialRampToValueAtTime(Math.max(f2,20),t0+dur);g.gain.setValueAtTime(0.0001,t0);g.gain.exponentialRampToValueAtTime(v,t0+0.005);g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);o.connect(g);g.connect(audioCtx.destination);o.start(t0);o.stop(t0+dur+0.02);}catch(e){}}
+function crackle(freq,dur,vol){
+ try{
+  if(!canPlay())return;
+  var v=Math.min((vol||0.5)*SND_VOL*VOL_MUL,0.99);
+  var t0=audioCtx.currentTime;
+  var o=audioCtx.createOscillator();
+  var g=audioCtx.createGain();
+  o.type='square';
+  o.frequency.setValueAtTime(freq,t0);
+  g.gain.setValueAtTime(0.0001,t0);
+  g.gain.exponentialRampToValueAtTime(v,t0+0.002);
+  g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+  o.connect(g);g.connect(audioCtx.destination);
+  o.start(t0);o.stop(t0+dur+0.01);
+ }catch(e){}
+}
 function rnd(f){return f*(0.94+Math.random()*0.12);}
 function sndTab(){tone(rnd(1400),0.05,'square');tone(rnd(1000),0.07,'triangle',null,0.01);}
 function sndAccOpen(){tone(rnd(1100),0.06,'triangle');tone(rnd(1600),0.07,'triangle',null,0.03);}
@@ -631,21 +661,23 @@ function stopAcidLoop(){try{if(activeLoops.acid){clearTimeout(activeLoops.acid.t
 function startFireLoop(){
  try{
   if(!canPlay()||activeLoops.fire)return;
-  var o=audioCtx.createOscillator();
-  o.type='triangle';
-  o.frequency.value=85;
-  var f=audioCtx.createBiquadFilter();
-  f.type='bandpass';
-  f.frequency.value=220;
-  f.Q.value=0.7;
-  var g=audioCtx.createGain();
-  g.gain.value=Math.min(SND_VOL*VOL_MUL,0.99);
-  o.connect(f);f.connect(g);g.connect(audioCtx.destination);
-  o.start();
-  activeLoops.fire={osc:o};
+  activeLoops.fire={tick:0};
+  var woodCrackle=function(){
+   if(!activeLoops.fire)return;
+   var f=800+Math.random()*1000;
+   crackle(f,0.025,0.6);
+   if(Math.random()<0.45){
+    crackle(f*(0.6+Math.random()*0.3),0.018,0.45);
+   }
+   if(Math.random()<0.15){
+    crackle(f*1.4,0.03,0.5);
+   }
+   activeLoops.fire.tick=setTimeout(woodCrackle,80+Math.random()*120);
+  };
+  woodCrackle();
  }catch(e){}
 }
-function stopFireLoop(){try{if(activeLoops.fire){activeLoops.fire.osc.stop();activeLoops.fire=null;}}catch(e){activeLoops.fire=null;}}
+function stopFireLoop(){try{if(activeLoops.fire){clearTimeout(activeLoops.fire.tick);activeLoops.fire=null;}}catch(e){activeLoops.fire=null;}}
 
 function vibe(ms){try{if(!s||!s.settings||!s.settings.vibe)return;if(navigator.vibrate)navigator.vibrate(ms||15);}catch(e){}}
 var hapticInput=null;
@@ -942,9 +974,7 @@ function tickAutoDig(dt){
   var ls=locState(def.key);
   if(!ls||!ls.unlocked)continue;
   p.autoTimers[def.key]=(p.autoTimers[def.key]||0)+dt;
-  var cd=scavCdMax();
-  if(def.key!==s.activeLoc){cd=cd*(1+autoPenaltyPct()/100);}
-  cd=cd/(1+autoSpeedBonus());
+  var cd=autoCdBase();
   if(p.autoTimers[def.key]>=cd){
    if(tryScavenge(def.key,true,true)) p.autoTimers[def.key]=0;
    else p.autoTimers[def.key]=cd*0.9;
@@ -980,9 +1010,7 @@ function calcOfflinePerHour(){
   for(var j=0;j<def.loot.length;j++){tw+=def.loot[j].w;avgGold+=def.loot[j].w*CATALOG[def.loot[j].k].gold;}
   if(tw<=0)continue;
   avgGold=avgGold/tw;
-  var cdBase=scavCdMax();
-  cdBase=cdBase*(1+autoPenaltyPct()/100);
-  cdBase=cdBase/(1+autoSpeedBonus());
+  var cdBase=autoCdBase();
   var digsPerHour=3600000/Math.max(cdBase,100);
   totalGold+=digsPerHour*avgGold*acidEff()*fireEff();
  }
@@ -1038,7 +1066,7 @@ function buildSaveData(){
    settings:{sound:s.settings.sound,vibe:s.settings.vibe,music:s.settings.music},
    lastSeenTs:s.lastSeenTs
   },
-  ts:Date.now(),ver:11
+  ts:Date.now(),ver:12
  };
 }
 
@@ -1313,18 +1341,17 @@ function renderAutoDigList(){
  var c=document.getElementById('autoDigList');if(!c)return;
  var html='';
  for(var i=0;i<LOCATIONS.length;i++){
-  var def=LOCATIONS[i],owned=p.autoDig[def.key]===true;
+  var def=LOCATIONS[i];
+  if(!locState(def.key).unlocked)continue;
+  var owned=p.autoDig[def.key]===true;
   var cost=AUTO_DIG_COST[def.key]||0;
-  var locked=!locState(def.key).unlocked;
-  var desc;
-  if(owned)desc='куплен — копает сам';
-  else if(locked)desc='сначала открой точку';
-  else desc='покупка один раз — работяга копает в этой точке без остановки';
-  var dis=(owned||locked||s.cash<cost)?'disabled':'';
+  var desc=owned?'куплен — копает сам':'покупка один раз — работяга копает в этой точке без остановки';
+  var dis=(owned||s.cash<cost)?'disabled':'';
   var btnTxt=owned?'✓ куплен':(fmt(cost)+' ₽');
   var btnCls='upg-btn'+(owned?' owned':'');
   html+='<div class="upg"><div><div class="upg-name">'+def.icon+' '+def.name+'</div><div class="upg-desc">'+desc+'</div></div><button class="'+btnCls+'" id="b-auto:'+def.key+'" type="button" '+dis+'>'+btnTxt+'</button></div>';
  }
+ if(!html)html='<div class="upg-desc" style="padding:4px 0;">разблокируй точку, чтобы нанять работягу</div>';
  c.innerHTML=html;
 }
 function setText(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}

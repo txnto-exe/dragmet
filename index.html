@@ -211,15 +211,12 @@ h1.game-title{font-size:22px;font-weight:800;margin:0;flex-shrink:0;cursor:point
 .pg-result.hit{color:var(--acid);text-shadow:0 0 12px rgba(168,214,74,0.6);}
 .pg-result.miss{color:var(--rust);}
 .pg-result-sub{text-align:center;font-size:12px;color:var(--text-dim);margin-bottom:12px;min-height:16px;}
-.forge-stage{position:relative;width:100%;height:340px;border-radius:8px;overflow:hidden;margin-bottom:12px;background:linear-gradient(180deg,#1a1408 0%,#0e0a04 100%);border:1px solid var(--edge);}
-.forge-blacksmith{position:absolute;left:0;right:0;bottom:0;top:0;display:flex;align-items:center;justify-content:center;pointer-events:none;user-select:none;}
-.forge-blacksmith img{max-width:100%;max-height:100%;object-fit:contain;image-rendering:pixelated;image-rendering:crisp-edges;}
+/* === КУЗНИЦА === */
+.forge-frame{width:100%;max-width:340px;margin:0 auto 12px;aspect-ratio:1/1;border-radius:10px;overflow:hidden;background:linear-gradient(180deg,#1a1408 0%,#0e0a04 100%);border:1px solid var(--edge);position:relative;box-shadow:0 8px 24px -10px rgba(0,0,0,0.9);}
+.forge-blacksmith{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;user-select:none;pointer-events:none;}
+.forge-blacksmith img{width:100%;height:100%;object-fit:contain;image-rendering:pixelated;image-rendering:crisp-edges;}
 .forge-locked .forge-blacksmith{filter:brightness(0) opacity(0.55);}
-.forge-coming{position:absolute;left:0;right:0;bottom:14px;text-align:center;font-size:12px;color:var(--text-dim);letter-spacing:0.5px;text-transform:uppercase;font-weight:700;}
-.forge-sheet{position:absolute;left:0;right:0;bottom:0;top:auto;transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.2,0.8,0.2,1);max-height:78%;overflow-y:auto;background:var(--panel);border-top-left-radius:14px;border-top-right-radius:14px;border-top:1px solid var(--edge);padding:14px 14px calc(20px + env(safe-area-inset-bottom));box-shadow:0 -12px 32px rgba(0,0,0,0.7);}
-.forge-sheet.open{transform:translateY(0);}
-.forge-sheet-handle{width:40px;height:4px;border-radius:2px;background:var(--edge);margin:0 auto 12px;}
-.forge-sheet-title{font-size:13px;font-weight:700;color:var(--rust);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;}
+.forge-coming{position:absolute;left:0;right:0;bottom:14px;text-align:center;font-size:11px;color:var(--text-dim);letter-spacing:0.5px;text-transform:uppercase;font-weight:700;padding:0 12px;line-height:1.4;}
 .amulet-row{display:flex;align-items:center;gap:10px;padding:10px;background:var(--panel-2);border:1px solid var(--edge);border-radius:6px;position:relative;overflow:hidden;transition:transform 0.25s ease-out;}
 .amulet-row.swiping{transition:none;}
 .amulet-row .am-icon{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(255,255,255,0.06);}
@@ -373,15 +370,14 @@ h1.game-title{font-size:22px;font-weight:800;margin:0;flex-shrink:0;cursor:point
   </header>
 
   <section class="tab-section" data-tab="forge">
-    <div class="forge-stage" id="forgeStage">
+    <div class="forge-frame" id="forgeFrame">
       <div class="forge-blacksmith"><img src="kuznec.png" alt="Кузнец"></div>
       <div class="forge-coming" id="forgeComing">Кузнец появится после первого престижа</div>
-      <div class="forge-sheet" id="forgeSheet">
-        <div class="forge-sheet-handle"></div>
-        <div class="forge-sheet-title">Кузница · амулеты</div>
-        <div id="craftStatusBox"></div>
-        <div id="amuletList"></div>
-      </div>
+    </div>
+    <div class="panel">
+      <p class="panel-title">Кузница · амулеты</p>
+      <div id="craftStatusBox"></div>
+      <div id="amuletList"></div>
     </div>
   </section>
 
@@ -899,7 +895,6 @@ function applyDev(action){
 }
 
 var currentScreen='menu';
-var forgeSheetTimer=null;
 function showScreen(name){
  currentScreen=name;
  var screens=document.querySelectorAll('.screen');
@@ -920,8 +915,6 @@ function switchTab(name){
  var tbs=document.querySelectorAll('.tab-btn');
  for(var j=0;j<tbs.length;j++){if(tbs[j].getAttribute('data-tab')===name)tbs[j].classList.add('active');else tbs[j].classList.remove('active');}
  window.scrollTo(0,0);sndTab();vibe(8);
- var sheet=document.getElementById('forgeSheet');
- if(sheet){if(name==='forge'){if(forgeSheetTimer){clearTimeout(forgeSheetTimer);forgeSheetTimer=null;}setTimeout(function(){sheet.classList.add('open');},50);}else{if(forgeSheetTimer)clearTimeout(forgeSheetTimer);forgeSheetTimer=setTimeout(function(){sheet.classList.remove('open');},5000);}}
 }
 function switchSub(name){var n=document.getElementById('subview-normal'),pr=document.getElementById('subview-prest');var bn=document.getElementById('subtab-normal'),bp=document.getElementById('subtab-prest');if(name==='prest'){n.style.display='none';pr.style.display='';bp.classList.add('active');bn.classList.remove('active');}else{n.style.display='';pr.style.display='none';bn.classList.add('active');bp.classList.remove('active');}window.scrollTo(0,0);sndTab();vibe(8);}
 function toggleAcc(key){s.accState[key]=!s.accState[key];if(s.accState[key])sndAccOpen();else sndAccClose();vibe(8);saveGame();var heads=document.querySelectorAll('.acc-head');for(var i=0;i<heads.length;i++){if(heads[i].getAttribute('data-acc')===key){if(s.accState[key])heads[i].classList.add('open');else heads[i].classList.remove('open');}}var bodies=document.querySelectorAll('.acc-body');for(var j=0;j<bodies.length;j++){if(bodies[j].getAttribute('data-accbody')===key){if(s.accState[key])bodies[j].classList.add('open');else bodies[j].classList.remove('open');}}}
@@ -962,8 +955,8 @@ function render(){
  var ph=document.getElementById('prestHdr');if(ph){if(p.level>0||p.points>0)ph.style.display='';else ph.style.display='none';}
  setText('prestLvl',p.level);setText('prestPts',p.points);
  renderAmuletHeader();renderLocations();renderInventory();renderAcidInventory();renderAcidStages();renderFireStages();renderRegenList();renderAutoDigList();renderCraftStatus();renderAmuletList();applyAccState();
- var fs=document.getElementById('forgeStage'),fc=document.getElementById('forgeComing');
- if(fs&&fc){if(s.forgeUnlocked){fs.classList.remove('forge-locked');fc.textContent='';fc.style.display='none';}else{fs.classList.add('forge-locked');fc.style.display='';fc.textContent='Кузнец появится после первого престижа';}}
+ var ff=document.getElementById('forgeFrame'),fc=document.getElementById('forgeComing');
+ if(ff&&fc){if(s.forgeUnlocked){ff.classList.remove('forge-locked');fc.textContent='';fc.style.display='none';}else{ff.classList.add('forge-locked');fc.style.display='';fc.textContent='Кузнец появится после первого престижа';}}
  var tf=document.getElementById('tabForge');if(tf){if(s.forgeUnlocked)tf.classList.remove('locked');else tf.classList.add('locked');}
  var ls=locState(s.activeLoc),def=locDef(s.activeLoc);
  var digBtn=document.getElementById('digBtn');
@@ -1059,7 +1052,6 @@ function handleUp(e){if(!pressActive){cancelAllPress();return;}var wasAction=pre
 function handleCancel(){cancelAllPress();}
 
 function processTap(target){
- // DEV overlay — самый верхний приоритет
  var devO=document.getElementById('devOverlay');
  if(devO&&devO.classList.contains('show')){
   var dt=target;

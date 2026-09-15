@@ -167,8 +167,6 @@ h1.game-title{font-size:22px;font-weight:800;margin:0;flex-shrink:0;cursor:point
 .tab-btn.center.active{color:var(--acid);}
 .tab-btn.center .tab-ic{background:var(--rust);color:#0d1207;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;margin-top:-18px;margin-bottom:2px;box-shadow:0 4px 10px rgba(0,0,0,0.6), 0 0 0 4px var(--bg);border:1px solid var(--edge);}
 .tab-btn.center.active .tab-ic{background:var(--acid);}
-.tab-btn.locked{opacity:0.7;}
-.tab-btn.locked .tab-ic::after{content:'🔒';position:absolute;top:-6px;right:-10px;font-size:13px;filter:drop-shadow(0 2px 3px rgba(0,0,0,0.9));pointer-events:none;}
 .tab-prog{position:absolute;left:8px;right:8px;bottom:0;height:2px;background:transparent;border-radius:1px;overflow:hidden;}
 .tab-prog span{display:block;height:100%;width:0%;background:var(--acid);}
 .acc-head{display:flex;justify-content:space-between;align-items:center;padding:12px 0;cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none;border-bottom:1px solid var(--edge);}
@@ -216,18 +214,21 @@ h1.game-title{font-size:22px;font-weight:800;margin:0;flex-shrink:0;cursor:point
 .forge-blacksmith{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;user-select:none;pointer-events:none;transform-origin:center bottom;animation:forgeBreathe 4.2s ease-in-out infinite;}
 @keyframes forgeBreathe{0%,100%{transform:scale(1);}50%{transform:scale(1.008) translateY(-1px);}}
 .forge-blacksmith img{width:100%;height:100%;object-fit:contain;image-rendering:pixelated;image-rendering:crisp-edges;}
-.forge-locked .forge-blacksmith{filter:brightness(0.35) saturate(0.15) opacity(0.85);animation:none;}
+.forge-locked .forge-blacksmith{animation:none;}
+.forge-locked .forge-glow,
+.forge-locked .forge-glow-lamp,
+.forge-locked .forge-glow-warm,
+.forge-locked .forge-smoke,
+.forge-locked .forge-fireflies{display:none !important;}
 .forge-glow{position:absolute;left:0;right:0;top:0;bottom:0;pointer-events:none;opacity:0;transition:opacity 0.6s;mix-blend-mode:screen;}
-.forge-locked .forge-glow{opacity:0 !important;animation:none !important;}
 .forge-unlocked .forge-glow{opacity:1;}
-.forge-glow-lamp{background:radial-gradient(circle at 90% 60%, rgba(255,190,90,0.55) 0%, rgba(255,150,50,0.25) 8%, transparent 22%);animation:forgeLampPulse 2.4s ease-in-out infinite;}
+.forge-glow-lamp{background:radial-gradient(circle at 91% 58%, rgba(255,190,90,0.55) 0%, rgba(255,150,50,0.25) 8%, transparent 22%);animation:forgeLampPulse 2.4s ease-in-out infinite;}
 @keyframes forgeLampPulse{0%,100%{opacity:0.75;}45%{opacity:1;}55%{opacity:0.9;}}
-.forge-glow-warm{background:radial-gradient(ellipse at 50% 75%, rgba(255,140,60,0.14) 0%, transparent 55%);animation:forgeWarmPulse 5s ease-in-out infinite;}
+.forge-glow-warm{background:radial-gradient(ellipse at 50% 72%, rgba(255,140,60,0.14) 0%, transparent 55%);animation:forgeWarmPulse 5s ease-in-out infinite;}
 @keyframes forgeWarmPulse{0%,100%{opacity:0.5;}50%{opacity:0.9;}}
 .forge-smoke{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;opacity:0;transition:opacity 0.6s;}
-.forge-locked .forge-smoke{opacity:0 !important;}
 .forge-unlocked .forge-smoke{opacity:1;}
-.forge-smoke-particle{position:absolute;width:3px;height:3px;border-radius:50%;background:rgba(220,220,220,0.55);filter:blur(1.2px);left:52%;top:31%;opacity:0;animation:forgeSmoke 3.6s linear infinite;}
+.forge-smoke-particle{position:absolute;width:3px;height:3px;border-radius:50%;background:rgba(220,220,220,0.55);filter:blur(1.2px);left:50%;top:24%;opacity:0;animation:forgeSmoke 3.6s linear infinite;}
 .forge-smoke-particle:nth-child(1){animation-delay:0s;}
 .forge-smoke-particle:nth-child(2){animation-delay:0.5s;}
 .forge-smoke-particle:nth-child(3){animation-delay:1s;}
@@ -237,14 +238,13 @@ h1.game-title{font-size:22px;font-weight:800;margin:0;flex-shrink:0;cursor:point
 .forge-smoke-particle:nth-child(7){animation-delay:3.2s;}
 @keyframes forgeSmoke{0%{opacity:0;transform:translate(0,0) scale(0.4);}15%{opacity:0.7;}50%{opacity:0.5;transform:translate(6px,-22px) scale(1);}85%{opacity:0.2;}100%{opacity:0;transform:translate(12px,-48px) scale(1.3);}}
 .forge-fireflies{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;opacity:0;transition:opacity 0.6s;}
-.forge-locked .forge-fireflies{opacity:0 !important;}
 .forge-unlocked .forge-fireflies{opacity:1;}
 .forge-firefly{position:absolute;width:5px;height:5px;border-radius:50%;background:radial-gradient(circle, rgba(255,235,160,1) 0%, rgba(255,190,90,0.7) 45%, rgba(255,150,50,0) 100%);box-shadow:0 0 6px rgba(255,210,120,0.95), 0 0 14px rgba(255,170,70,0.55);opacity:0.9;}
-.forge-firefly:nth-child(1){left:84%;top:52%;animation:ffOrbit1 6.5s ease-in-out infinite;}
-.forge-firefly:nth-child(2){left:88%;top:50%;animation:ffOrbit2 8s ease-in-out infinite;animation-delay:-2s;}
-.forge-firefly:nth-child(3){left:82%;top:56%;animation:ffOrbit3 7.2s ease-in-out infinite;animation-delay:-4s;}
-.forge-firefly:nth-child(4){left:87%;top:56%;animation:ffOrbit1 9.2s ease-in-out infinite;animation-delay:-1.5s;}
-.forge-firefly:nth-child(5){left:80%;top:50%;animation:ffOrbit2 7.8s ease-in-out infinite;animation-delay:-3.5s;}
+.forge-firefly:nth-child(1){left:88%;top:52%;animation:ffOrbit1 6.5s ease-in-out infinite;}
+.forge-firefly:nth-child(2){left:92%;top:50%;animation:ffOrbit2 8s ease-in-out infinite;animation-delay:-2s;}
+.forge-firefly:nth-child(3){left:86%;top:56%;animation:ffOrbit3 7.2s ease-in-out infinite;animation-delay:-4s;}
+.forge-firefly:nth-child(4){left:91%;top:56%;animation:ffOrbit1 9.2s ease-in-out infinite;animation-delay:-1.5s;}
+.forge-firefly:nth-child(5){left:85%;top:50%;animation:ffOrbit2 7.8s ease-in-out infinite;animation-delay:-3.5s;}
 @keyframes ffOrbit1{0%{transform:translate(0,0);opacity:0.4;}25%{transform:translate(-7px,-9px);opacity:1;}50%{transform:translate(5px,-13px);opacity:0.7;}75%{transform:translate(9px,-3px);opacity:1;}100%{transform:translate(0,0);opacity:0.4;}}
 @keyframes ffOrbit2{0%{transform:translate(0,0);opacity:0.5;}25%{transform:translate(7px,-7px);opacity:1;}50%{transform:translate(-4px,-14px);opacity:0.6;}75%{transform:translate(-9px,-5px);opacity:0.9;}100%{transform:translate(0,0);opacity:0.5;}}
 @keyframes ffOrbit3{0%{transform:translate(0,0);opacity:0.6;}33%{transform:translate(-9px,-10px);opacity:1;}66%{transform:translate(7px,-7px);opacity:0.5;}100%{transform:translate(0,0);opacity:0.6;}}
@@ -408,8 +408,8 @@ h1.game-title{font-size:22px;font-weight:800;margin:0;flex-shrink:0;cursor:point
   </header>
 
   <section class="tab-section" data-tab="forge">
-    <div class="forge-frame" id="forgeFrame">
-      <div class="forge-blacksmith"><img src="kuznec.png" alt="Кузнец"></div>
+    <div class="forge-frame forge-locked" id="forgeFrame">
+      <div class="forge-blacksmith"><img src="kuznec-locked.png" alt=""></div>
       <div class="forge-glow forge-glow-warm"></div>
       <div class="forge-glow forge-glow-lamp"></div>
       <div class="forge-smoke">
@@ -430,7 +430,7 @@ h1.game-title{font-size:22px;font-weight:800;margin:0;flex-shrink:0;cursor:point
       </div>
     </div>
     <div class="panel" id="forgeAmuletPanel">
-      <p class="panel-title">Кузница</p>
+      <p class="panel-title" id="forgePanelTitle">Кузница</p>
       <div id="craftStatusBox"></div>
       <div id="amuletList"></div>
     </div>
@@ -516,11 +516,13 @@ h1.game-title{font-size:22px;font-weight:800;margin:0;flex-shrink:0;cursor:point
           <div class="upg"><div><div class="upg-name">Снижение штрафа</div><div class="upg-desc" id="d-autoPenalty"></div></div><button class="upg-btn" id="b-autoPenalty" type="button"></button></div>
           <div id="autoDigList"></div>
         </div>
-        <div class="acc-head no-border" data-acc="forge"><span class="acc-title">Кузница</span><span class="acc-arrow">▼</span></div>
-        <div class="acc-body" data-accbody="forge">
-          <div class="upg"><div><div class="upg-name">Быстрее куём</div><div class="upg-desc" id="d-forgeSpeed"></div></div><button class="upg-btn" id="b-forgeSpeed" type="button"></button></div>
-          <div class="upg"><div><div class="upg-name">Дешевле рецепты</div><div class="upg-desc" id="d-forgeDiscount"></div></div><button class="upg-btn" id="b-forgeDiscount" type="button"></button></div>
-          <div class="upg"><div><div class="upg-name">Дольше живут</div><div class="upg-desc" id="d-forgeDuration"></div></div><button class="upg-btn" id="b-forgeDuration" type="button"></button></div>
+        <div id="forgeAccordionWrap" style="display:none;">
+          <div class="acc-head no-border" data-acc="forge"><span class="acc-title">Кузница</span><span class="acc-arrow">▼</span></div>
+          <div class="acc-body" data-accbody="forge">
+            <div class="upg"><div><div class="upg-name">Быстрее куём</div><div class="upg-desc" id="d-forgeSpeed"></div></div><button class="upg-btn" id="b-forgeSpeed" type="button"></button></div>
+            <div class="upg"><div><div class="upg-name">Дешевле рецепты</div><div class="upg-desc" id="d-forgeDiscount"></div></div><button class="upg-btn" id="b-forgeDiscount" type="button"></button></div>
+            <div class="upg"><div><div class="upg-name">Дольше живут</div><div class="upg-desc" id="d-forgeDuration"></div></div><button class="upg-btn" id="b-forgeDuration" type="button"></button></div>
+          </div>
         </div>
       </div>
     </div>
@@ -552,7 +554,7 @@ h1.game-title{font-size:22px;font-weight:800;margin:0;flex-shrink:0;cursor:point
 </div>
 
 <nav class="tabbar">
-  <button class="tab-btn" data-tab="forge" type="button" id="tabForge"><span class="tab-ic">⚒️</span><span class="tab-lbl">Кузнец</span></button>
+  <button class="tab-btn" data-tab="forge" type="button" id="tabForge"><span class="tab-ic">🔒</span><span class="tab-lbl"></span></button>
   <button class="tab-btn" data-tab="fire" type="button"><span class="tab-ic">🔥</span><span class="tab-lbl">Печь</span><span class="tab-prog"><span id="prog-fire"></span></span></button>
   <button class="tab-btn center active" data-tab="dig" type="button"><span class="tab-ic">⛏️</span><span class="tab-lbl">Копать</span></button>
   <button class="tab-btn" data-tab="acid" type="button"><span class="tab-ic">🧪</span><span class="tab-lbl">Кислота</span><span class="tab-prog"><span id="prog-acid"></span></span></button>
@@ -1056,12 +1058,25 @@ function render(){
  var ph=document.getElementById('prestHdr');if(ph){if(p.level>0||p.points>0)ph.style.display='';else ph.style.display='none';}
  setText('prestLvl',p.level);setText('prestPts',p.points);
  renderAmuletHeader();renderLocations();renderInventory();renderAcidInventory();renderAcidStages();renderFireStages();renderRegenList();renderAutoDigList();renderCraftStatus();renderAmuletList();applyAccState();
+
  var ff=document.getElementById('forgeFrame');
  if(ff){
   if(s.forgeUnlocked){ff.classList.remove('forge-locked');ff.classList.add('forge-unlocked');}
   else{ff.classList.add('forge-locked');ff.classList.remove('forge-unlocked');}
  }
- var tf=document.getElementById('tabForge');if(tf){if(s.forgeUnlocked)tf.classList.remove('locked');else tf.classList.add('locked');}
+ var fimg=document.querySelector('.forge-blacksmith img');
+ if(fimg){var want=s.forgeUnlocked?'kuznec.png':'kuznec-locked.png';if(fimg.getAttribute('src')!==want)fimg.setAttribute('src',want);}
+ var tf=document.getElementById('tabForge');
+ if(tf){
+  var tfi=tf.querySelector('.tab-ic'),tfl=tf.querySelector('.tab-lbl');
+  if(tfi)tfi.textContent=s.forgeUnlocked?'⚒️':'🔒';
+  if(tfl){tfl.textContent=s.forgeUnlocked?'Кузнец':'';tfl.style.visibility=s.forgeUnlocked?'visible':'hidden';}
+ }
+ var ftitle=document.getElementById('forgePanelTitle');
+ if(ftitle)ftitle.style.display=s.forgeUnlocked?'':'none';
+ var fw=document.getElementById('forgeAccordionWrap');
+ if(fw)fw.style.display=s.forgeUnlocked?'':'none';
+
  var ls=locState(s.activeLoc),def=locDef(s.activeLoc);
  var digBtn=document.getElementById('digBtn');
  if(digBtn){var digFill=document.getElementById('digFill'),digLabel=document.getElementById('digLabel');digFill.style.background='rgba(0,0,0,0.28)';if(ls.stock<=0){digBtn.disabled=true;digFill.style.width='0%';var iv=locRegenIv(def,ls);var left=Math.max(0,iv-ls.regenTimer);digLabel.textContent=def.name+': пусто, ~'+Math.ceil(left/1000)+'с';}else if(totalJunk()>=capMax()){digBtn.disabled=true;digFill.style.width='100%';digFill.style.background='rgba(143,179,57,0.5)';digLabel.textContent='Склад забит — переработай лом';}else if(s.scavCd>0){digBtn.disabled=false;digFill.style.width=(100-s.scavCd/scavCdMax()*100)+'%';digLabel.textContent=currentDigLabel;}else{digBtn.disabled=false;digFill.style.width='0%';digLabel.textContent='Порыться: '+def.name;}}

@@ -75,11 +75,11 @@ h1.game-title{font-size:22px;font-weight:800;margin:0;flex-shrink:0;cursor:point
 .toast.t-rp{color:#c084fc;font-weight:600;}
 .toast.t-lg{color:#f0c94a;font-weight:700;text-shadow:0 0 8px rgba(240,201,74,0.5);}
 .inv-row{display:flex;justify-content:space-between;margin-top:8px;gap:6px;flex-wrap:wrap;}
-.inv-item{flex:1;min-width:60px;text-align:center;background:var(--panel-2);border-radius:5px;padding:8px 4px;border:1px solid var(--edge);transition:transform 0.15s,border-color 0.15s;overflow:hidden;}
+.inv-item{flex:1;min-width:60px;text-align:center;background:var(--panel-2);border-radius:5px;padding:8px 4px;border:1px solid var(--edge);transition:transform 0.15s,border-color 0.15s;}
 .inv-item.flash{border-color:var(--gold);transform:scale(1.05);}
 .inv-item .ic{font-size:18px;}
 .inv-item .n{font-family:ui-monospace,monospace;font-size:14px;font-weight:600;}
-.inv-item .l{font-size:9.5px;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.inv-item .l{font-size:9px;color:var(--text-dim);line-height:1.15;margin-top:2px;word-break:break-word;}
 .inv-item .g{font-size:9.5px;color:var(--gold-dim);font-family:ui-monospace,monospace;margin-top:2px;}
 .cap-bar{height:6px;background:var(--panel-2);border-radius:3px;margin-top:10px;overflow:hidden;border:1px solid var(--edge);}
 .cap-fill{height:100%;background:var(--text-dim);width:0%;}
@@ -137,7 +137,7 @@ h1.game-title{font-size:22px;font-weight:800;margin:0;flex-shrink:0;cursor:point
 .inv-line .il-lock{position:absolute;top:50%;left:8px;transform:translateY(-50%);font-size:14px;opacity:0;pointer-events:none;z-index:2;}
 .inv-line .il-ic{font-size:16px;width:20px;text-align:center;position:relative;z-index:1;}
 .inv-line.locked .il-ic{opacity:0.4;}
-.inv-line .il-name{flex:1;color:var(--text-dim);font-size:11.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.inv-line .il-name{flex:1;color:var(--text-dim);font-size:11.5px;line-height:1.2;}
 .inv-line .il-cnt{font-family:ui-monospace,monospace;font-weight:600;color:var(--text);min-width:24px;text-align:right;}
 .inv-line .il-au{font-family:ui-monospace,monospace;color:var(--gold);min-width:60px;text-align:right;font-size:11.5px;}
 .inv-line.locked .il-name,.inv-line.locked .il-cnt,.inv-line.locked .il-au{color:#8a9170;}
@@ -216,7 +216,7 @@ h1.game-title{font-size:22px;font-weight:800;margin:0;flex-shrink:0;cursor:point
 .forge-blacksmith{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;user-select:none;pointer-events:none;transform-origin:center bottom;animation:forgeBreathe 4.2s ease-in-out infinite;}
 @keyframes forgeBreathe{0%,100%{transform:scale(1);}50%{transform:scale(1.008) translateY(-1px);}}
 .forge-blacksmith img{width:100%;height:100%;object-fit:contain;image-rendering:pixelated;image-rendering:crisp-edges;}
-.forge-locked .forge-blacksmith{filter:brightness(0) opacity(0.55);animation:none;}
+.forge-locked .forge-blacksmith{filter:brightness(0) opacity(0.75);animation:none;}
 .forge-glow{position:absolute;left:0;right:0;top:0;bottom:0;pointer-events:none;opacity:0;transition:opacity 0.6s;mix-blend-mode:screen;}
 .forge-locked .forge-glow{opacity:0 !important;animation:none !important;}
 .forge-unlocked .forge-glow{opacity:1;}
@@ -248,9 +248,8 @@ h1.game-title{font-size:22px;font-weight:800;margin:0;flex-shrink:0;cursor:point
 @keyframes ffOrbit1{0%{transform:translate(0,0);opacity:0.4;}25%{transform:translate(-7px,-9px);opacity:1;}50%{transform:translate(5px,-13px);opacity:0.7;}75%{transform:translate(9px,-3px);opacity:1;}100%{transform:translate(0,0);opacity:0.4;}}
 @keyframes ffOrbit2{0%{transform:translate(0,0);opacity:0.5;}25%{transform:translate(7px,-7px);opacity:1;}50%{transform:translate(-4px,-14px);opacity:0.6;}75%{transform:translate(-9px,-5px);opacity:0.9;}100%{transform:translate(0,0);opacity:0.5;}}
 @keyframes ffOrbit3{0%{transform:translate(0,0);opacity:0.6;}33%{transform:translate(-9px,-10px);opacity:1;}66%{transform:translate(7px,-7px);opacity:0.5;}100%{transform:translate(0,0);opacity:0.6;}}
-.forge-locked-badge{position:absolute;inset:0;background:rgba(10,14,8,0.75);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;z-index:5;}
-.forge-locked-badge .lock{font-size:64px;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.9));}
-.forge-locked-badge .lock-sub{font-size:11px;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;font-weight:700;}
+.forge-locked-badge{position:absolute;inset:0;background:transparent;display:none;align-items:center;justify-content:center;flex-direction:column;gap:8px;z-index:5;}
+.forge-locked .forge-locked-badge{display:none;}
 .amulet-row{display:flex;align-items:center;gap:10px;padding:10px;background:var(--panel-2);border:1px solid var(--edge);border-radius:6px;position:relative;overflow:hidden;transition:transform 0.25s ease-out;touch-action:pan-y;}
 .amulet-row.swiping{transition:none;}
 .amulet-row .am-icon{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(255,255,255,0.06);}
@@ -266,6 +265,7 @@ h1.game-title{font-size:22px;font-weight:800;margin:0;flex-shrink:0;cursor:point
 .amulet-row .am-btn:disabled{background:#181c14;color:#a5a584;border-color:#2a2f22;opacity:1;}
 .amulet-row .am-recipe{font-size:10px;color:var(--text-dim);margin-top:4px;font-family:ui-monospace,monospace;line-height:1.5;}
 .amulet-row .am-recipe .miss{color:var(--rust);}
+.amulet-row .am-recipe .sep{color:#3a4230;margin:0 2px;}
 .amulet-trash{position:absolute;top:0;right:0;bottom:0;width:78px;background:#c73a3a;display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;border-radius:0 6px 6px 0;cursor:pointer;touch-action:manipulation;}
 .amulet-row-wrap{position:relative;margin-bottom:8px;border-radius:6px;overflow:hidden;}
 .craft-status{padding:10px;background:var(--panel-2);border:1px solid var(--acid-dim);border-radius:6px;margin-bottom:12px;font-size:12px;}
@@ -424,10 +424,9 @@ h1.game-title{font-size:22px;font-weight:800;margin:0;flex-shrink:0;cursor:point
         <div class="forge-firefly"></div>
         <div class="forge-firefly"></div>
       </div>
-      <div class="forge-locked-badge" id="forgeLockedBadge"><div class="lock">🔒</div><div class="lock-sub">Кузнец закрыт</div></div>
     </div>
     <div class="panel" id="forgeAmuletPanel">
-      <p class="panel-title">Кузница · амулеты</p>
+      <p class="panel-title">Кузница</p>
       <div id="craftStatusBox"></div>
       <div id="amuletList"></div>
     </div>
@@ -560,7 +559,7 @@ h1.game-title{font-size:22px;font-weight:800;margin:0;flex-shrink:0;cursor:point
 <script>
 (function(){
 "use strict";
-var CATALOG={chips:{name:'Микросхемы',icon:'🔌',gold:0.02},phones:{name:'Старые телефоны',icon:'📱',gold:0.045},ram:{name:'Планки ОЗУ',icon:'💾',gold:0.07},rare:{name:'Советская плата',icon:'🟩',gold:0.25},legend:{name:'Плата шифратора',icon:'🟨',gold:0.75},caps:{name:'Конденсаторы',icon:'🔋',gold:0.008},resist:{name:'Резисторы',icon:'🔘',gold:0.005},trans:{name:'Транзисторы',icon:'🔻',gold:0.015},hdd:{name:'Жёсткие диски',icon:'💽',gold:0.04},cpus:{name:'Процессоры',icon:'🧠',gold:0.18},connect:{name:'Позолоч. разъёмы',icon:'🟡',gold:0.09}};
+var CATALOG={chips:{name:'Микросхемы',icon:'🔌',gold:0.02},phones:{name:'Телефоны',icon:'📱',gold:0.045},ram:{name:'ОЗУ',icon:'💾',gold:0.07},rare:{name:'Советская плата',icon:'🟩',gold:0.25},legend:{name:'Плата шифратора',icon:'🟨',gold:0.75},caps:{name:'Конденсаторы',icon:'🔋',gold:0.008},resist:{name:'Резисторы',icon:'🔘',gold:0.005},trans:{name:'Транзисторы',icon:'🔻',gold:0.015},hdd:{name:'Жёсткие диски',icon:'💽',gold:0.04},cpus:{name:'Процессоры',icon:'🧠',gold:0.18},connect:{name:'Разъёмы',icon:'🟡',gold:0.09}};
 var CATALOG_ORDER=['resist','caps','trans','chips','hdd','phones','ram','connect','cpus','rare','legend'];
 var INV_PREVIEW=5;
 var PRESTIGE_THRESHOLD=100000;
@@ -938,7 +937,7 @@ function toggleAcc(key){s.accState[key]=!s.accState[key];if(s.accState[key])sndA
 function applyAccState(){var heads=document.querySelectorAll('.acc-head');for(var i=0;i<heads.length;i++){var k=heads[i].getAttribute('data-acc');if(s.accState[k])heads[i].classList.add('open');else heads[i].classList.remove('open');}var bodies=document.querySelectorAll('.acc-body');for(var j=0;j<bodies.length;j++){var k2=bodies[j].getAttribute('data-accbody');if(s.accState[k2])bodies[j].classList.add('open');else bodies[j].classList.remove('open');}}
 
 function renderLocations(){var row=document.getElementById('locRow');if(!row)return;row.innerHTML='';for(var i=0;i<LOCATIONS.length;i++){(function(def){var ls=locState(def.key);var card=document.createElement('div');var hasAuto=p.autoDig[def.key]===true;card.className='loc-card'+(s.activeLoc===def.key?' active':'')+(!ls.unlocked?' locked':'')+(hasAuto?' autodig':'');if(ls.unlocked){var pct=ls.stock/def.maxStock*100;card.setAttribute('data-act','loc');card.setAttribute('data-key',def.key);var autoLine=hasAuto?'<div class="loc-auto-txt">★ авто</div>':'';card.innerHTML='<div class="loc-ic">'+def.icon+'</div><div class="loc-name">'+def.name+'</div><div class="loc-stock-bar"><div class="loc-stock-fill" style="width:'+pct+'%"></div></div><div class="loc-stock-txt'+(ls.stock===0?' loc-empty':'')+'">'+ls.stock+' / '+def.maxStock+(ls.stock===0?' пусто':'')+'</div>'+autoLine;}else{card.setAttribute('data-act','unlock');card.setAttribute('data-key',def.key);var cost=locUnlockCost(def);var disc=p.lv.locDiscount>0?'<div class="loc-auto-txt">скидка −'+Math.round((1-cost/def.unlockCost)*100)+'%</div>':'';card.innerHTML='<div class="loc-ic">'+def.icon+'</div><div class="loc-name">'+def.name+'</div><div class="loc-unlock">🔒 '+fmt(cost)+' ₽</div>'+disc;}row.appendChild(card);})(LOCATIONS[i]);}}
-function renderInventory(){var row=document.getElementById('invRow');if(!row)return;row.innerHTML='';var order=s.invExpanded?CATALOG_ORDER:CATALOG_ORDER.slice(0,INV_PREVIEW);for(var i=0;i<order.length;i++){var k=order[i],c=CATALOG[k];var div=document.createElement('div');div.className='inv-item';div.innerHTML='<div class="ic">'+c.icon+'</div><div class="n">'+s.junk[k]+'</div><div class="l">'+c.name.toLowerCase()+'</div><div class="g">'+(c.gold*1000).toFixed(0)+' мг Au</div>';row.appendChild(div);}var tb=document.getElementById('invToggle');if(tb)tb.textContent=s.invExpanded?'Свернуть ▴':'Показать все виды ('+CATALOG_ORDER.length+') ▾';}
+function renderInventory(){var row=document.getElementById('invRow');if(!row)return;row.innerHTML='';var order=s.invExpanded?CATALOG_ORDER:CATALOG_ORDER.slice(0,INV_PREVIEW);for(var i=0;i<order.length;i++){var k=order[i],c=CATALOG[k];var div=document.createElement('div');div.className='inv-item';div.innerHTML='<div class="ic">'+c.icon+'</div><div class="n">'+s.junk[k]+'</div><div class="l">'+c.name+'</div><div class="g">'+(c.gold*1000).toFixed(0)+' мг Au</div>';row.appendChild(div);}var tb=document.getElementById('invToggle');if(tb)tb.textContent=s.invExpanded?'Свернуть ▴':'Показать все виды ('+CATALOG_ORDER.length+') ▾';}
 function renderAcidInventory(){var box=document.getElementById('acidInvList');if(!box)return;box.innerHTML='';var any=false;for(var i=0;i<CATALOG_ORDER.length;i++){var k=CATALOG_ORDER[i],c=CATALOG[k],cnt=s.junk[k],au=cnt*c.gold;var locked=!!s.locked[k];var div=document.createElement('div');div.className='inv-line'+(cnt===0?' dim':'')+(locked?' locked':'');div.setAttribute('data-act','lock');div.setAttribute('data-key',k);div.innerHTML='<span class="il-lock">🔒</span><span class="il-ic">'+c.icon+'</span><span class="il-name">'+c.name+'</span><span class="il-cnt">'+cnt+' шт</span><span class="il-au">'+fmt(au,3)+' г</span>';box.appendChild(div);if(cnt>0)any=true;}if(!any)box.innerHTML='<div class="empty-note">Склад пуст — иди покопайся в мусорке</div>';var tot=document.getElementById('acidInvTotal');if(tot)tot.textContent=fmt(junkGoldValue(),3)+' г';var hdr=document.getElementById('acidStockAu');if(hdr)hdr.textContent=fmt(junkGoldValueUnlocked(),3)+' г Au';}
 function renderAcidStages(){var box=document.getElementById('acidStages');if(!box)return;var html='',freeCount=0,jv=junkGoldValueUnlocked();for(var j=0;j<s.acid.length;j++)if(!s.acid[j].active)freeCount++;for(var i=0;i<s.acid.length;i++){var b=s.acid[i],label=s.acid.length>1?'Ванна #'+(i+1):'Процесс';var status,btnTxt='',btnDis='',btnCls='',prog=0;if(b.active){prog=b.progress/b.duration*100;status=fmt(b.yieldAmt,2)+' г Au';btnTxt='Растворяется...';btnDis='disabled';}else{status=fmt(s.solution,2)+' л раствора';if(jv<=0){btnTxt='Нечего растворять';btnDis='disabled';}else{var frac=freeCount>1?1/freeCount:1;btnTxt='Растворить ~'+fmt(jv*frac*acidEffEffective(),2)+' г Au';btnCls=' ready';}}var activeCls=b.active?' active':'';html+='<div class="stage"><div class="stage-icon ic-acid'+activeCls+'">🧪</div><div class="stage-body"><div class="stage-top"><span>'+label+'</span><b>'+status+'</b></div><div class="bar"><div class="bar-fill acid" style="width:'+prog+'%"></div></div><button class="stage-btn'+btnCls+'" data-act="acid-start" data-idx="'+i+'" '+btnDis+'>'+btnTxt+'</button></div></div>';}box.innerHTML=html;}
 function renderFireStages(){var box=document.getElementById('fireStages');if(!box)return;var html='',freeCount=0;for(var j=0;j<s.fire.length;j++)if(!s.fire[j].active)freeCount++;for(var i=0;i<s.fire.length;i++){var f=s.fire[i],label=s.fire.length>1?'Печь #'+(i+1):'Процесс';var status,btnTxt='',btnDis='',btnCls='',prog=0;if(f.active){prog=f.progress/f.duration*100;status=fmt(f.yieldAmt,3)+' г слитков';btnTxt='Плавится...';btnDis='disabled';}else{status=fmt(s.solution,2)+' л раствора';if(s.solution<=0){btnTxt='Нет раствора';btnDis='disabled';}else{var frac=freeCount>1?1/freeCount:1;btnTxt='Выпарить ~'+fmt(s.solution*frac*fireEffEffective(),3)+' г';btnCls=' ready';}}var activeCls=f.active?' active':'';html+='<div class="stage"><div class="stage-icon ic-fire'+activeCls+'">🔥</div><div class="stage-body"><div class="stage-top"><span>'+label+'</span><b>'+status+'</b></div><div class="bar"><div class="bar-fill fire" style="width:'+prog+'%"></div></div><button class="stage-btn'+btnCls+'" data-act="fire-start" data-idx="'+i+'" '+btnDis+'>'+btnTxt+'</button></div></div>';}box.innerHTML=html;}
@@ -952,17 +951,13 @@ function renderAmuletList(){
   var lockWrap=document.createElement('div');
   lockWrap.style.cssText='position:relative;border-radius:6px;overflow:hidden;';
   var blurred=document.createElement('div');
-  blurred.style.cssText='filter:blur(7px);pointer-events:none;user-select:none;';
+  blurred.style.cssText='filter:blur(3px);pointer-events:none;user-select:none;';
   for(var bi=0;bi<3;bi++){
    var bl=document.createElement('div');bl.className='amulet-row';bl.style.marginBottom='8px';
    bl.innerHTML='<div class="am-icon" style="background:rgba(255,255,255,0.06);">?</div><div class="am-body"><p class="am-name">???</p><div class="am-effect">???</div></div>';
    blurred.appendChild(bl);
   }
   lockWrap.appendChild(blurred);
-  var lockOverlay=document.createElement('div');
-  lockOverlay.style.cssText='position:absolute;inset:0;background:rgba(10,14,8,0.55);display:flex;align-items:center;justify-content:center;';
-  lockOverlay.innerHTML='<div style="font-size:56px;filter:drop-shadow(0 4px 14px rgba(0,0,0,0.9));">🔒</div>';
-  lockWrap.appendChild(lockOverlay);
   box.appendChild(lockWrap);
   return;
  }
@@ -971,7 +966,14 @@ function renderAmuletList(){
   var wrap=document.createElement('div');wrap.className='amulet-row-wrap';
   if(owned){var trash=document.createElement('div');trash.className='amulet-trash';trash.setAttribute('data-act','amulet-dissolve');trash.setAttribute('data-key',a.key);trash.textContent='🗑️';wrap.appendChild(trash);}
   var row=document.createElement('div');row.className='amulet-row';row.setAttribute('data-act','amulet-row');row.setAttribute('data-key',a.key);
-  var recipeHtml='';for(var k in rec){var have=s.junk[k]||0,need=rec[k];var cls=have>=need?'':'miss';recipeHtml+='<span class="'+cls+'">'+CATALOG[k].icon+' '+have+'/'+need+'</span> ';}
+  var recipeHtml='';
+  var first=true;
+  for(var k in rec){
+   if(!first)recipeHtml+='<span class="sep">|</span> ';
+   first=false;
+   var have=s.junk[k]||0,need=rec[k];var cls=have>=need?'':'miss';
+   recipeHtml+='<span class="'+cls+'">'+CATALOG[k].icon+' '+have+'/'+need+'</span> ';
+  }
   var actionHtml='';
   if(owned){if(equipped){actionHtml='<button class="am-btn unequip" data-act="amulet-unequip" data-key="'+a.key+'">Снять</button>';}else{actionHtml='<button class="am-btn equip" data-act="amulet-equip" data-key="'+a.key+'">Одеть</button>';}actionHtml+='<div style="font-size:9px;color:var(--text-dim);margin-top:4px;text-align:right;">свайп ← удалить</div>';}
   else{var dis=canCraft&&!s.forgeCraft?'':'disabled';var btnTxt='Создать';if(s.forgeCraft)btnTxt='Кузнец занят';else if(!canCraft)btnTxt='Мало материалов';actionHtml='<button class="am-btn craft" data-act="amulet-craft" data-key="'+a.key+'" '+dis+'>'+btnTxt+'</button>';}
@@ -1049,10 +1051,10 @@ function render(){
  var ph=document.getElementById('prestHdr');if(ph){if(p.level>0||p.points>0)ph.style.display='';else ph.style.display='none';}
  setText('prestLvl',p.level);setText('prestPts',p.points);
  renderAmuletHeader();renderLocations();renderInventory();renderAcidInventory();renderAcidStages();renderFireStages();renderRegenList();renderAutoDigList();renderCraftStatus();renderAmuletList();applyAccState();
- var ff=document.getElementById('forgeFrame'),badge=document.getElementById('forgeLockedBadge');
- if(ff&&badge){
-  if(s.forgeUnlocked){ff.classList.remove('forge-locked');ff.classList.add('forge-unlocked');badge.style.display='none';}
-  else{ff.classList.add('forge-locked');ff.classList.remove('forge-unlocked');badge.style.display='flex';}
+ var ff=document.getElementById('forgeFrame');
+ if(ff){
+  if(s.forgeUnlocked){ff.classList.remove('forge-locked');ff.classList.add('forge-unlocked');}
+  else{ff.classList.add('forge-locked');ff.classList.remove('forge-unlocked');}
  }
  var tf=document.getElementById('tabForge');if(tf){if(s.forgeUnlocked)tf.classList.remove('locked');else tf.classList.add('locked');}
  var ls=locState(s.activeLoc),def=locDef(s.activeLoc);

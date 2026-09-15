@@ -532,6 +532,7 @@ function locDef(k){for(var i=0;i<LOCATIONS.length;i++)if(LOCATIONS[i].key===k)re
 function locState(k){for(var i=0;i<s.locs.length;i++)if(s.locs[i].key===k)return s.locs[i];}
 function locRegenIv(def,ls){return def.regenBase/(1+ls.regenLv*0.28);}
 function fmt(n,d){d=d||0;try{return n.toLocaleString('ru-RU',{minimumFractionDigits:d,maximumFractionDigits:d});}catch(e){return n.toFixed(d);}}
+function capMax(){return s.cap+p.lv.capII*4;}
 function totalJunk(){var t=0;for(var k in s.junk)t+=s.junk[k];return t;}
 function junkGoldValue(){var sum=0;for(var k in s.junk)if(CATALOG[k])sum+=s.junk[k]*CATALOG[k].gold;return sum;}
 function junkGoldValueUnlocked(){var sum=0;for(var k in s.junk)if(CATALOG[k]&&!s.locked[k])sum+=s.junk[k]*CATALOG[k].gold;return sum;}
@@ -593,6 +594,7 @@ function sndDigPricey(){[1800,2300,2900].forEach(function(f,i){tone(rnd(f),0.16,
 function sndDing(){[1800,2200,2700,3300].forEach(function(f,i){tone(rnd(f),0.35,'triangle',null,i*0.05);});}
 function sndPriceHit(){[1600,2000,2600,3200].forEach(function(f,i){tone(rnd(f),0.18,'square',null,i*0.04);});}
 function sndPriceMiss(){slide(rnd(500),rnd(250),0.22,'sawtooth');}
+function sndDoubleDrop(){tone(rnd(2200),0.08,'square');tone(rnd(2800),0.1,'square',null,0.05);tone(rnd(3400),0.12,'square',null,0.1);}
 
 function avgAcidProgress(){
  var active=0,sum=0;
@@ -671,17 +673,23 @@ function tryScavenge(locKey,silent){
  var ls=locState(locKey),def=locDef(locKey);
  if(!ls||!ls.unlocked)return false;
  if(ls.stock<=0)return false;
- if(totalJunk()>=s.cap)return false;
+ if(totalJunk()>=capMax())return false;
  var baseK=pickRandomFromDef(def);
  var k=maybeUpgradeDrop(baseK);
- s.junk[k]++;ls.stock--;s.stats.junkTotal++;
+ var amount=1,doubleDrop=false;
+ if(Math.random()<luckChance()&&totalJunk()+2<=capMax()){
+  amount=2;doubleDrop=true;
+ }
+ s.junk[k]+=amount;ls.stock--;s.stats.junkTotal+=amount;
  if(!silent){
   var msg='Нашёл: '+CATALOG[k].icon+' '+CATALOG[k].name;
   if(k==='legend')msg='Легендарка — '+CATALOG[k].icon+' '+CATALOG[k].name;
   else if(k==='rare')msg='Редкая — '+CATALOG[k].icon+' '+CATALOG[k].name;
   else if(k==='cpus')msg='Ценный процессор — '+CATALOG[k].icon+' '+CATALOG[k].name;
+  if(doubleDrop)msg='Двойной дроп! '+msg.replace('Нашёл: ','').replace('Легендарка — ','').replace('Редкая — ','').replace('Ценный процессор — ','')+' ×2';
   flashToast(msg,itemTier(k));bumpToast();flashInvItem(k);
   playDigSound(k);
+  if(doubleDrop)sndDoubleDrop();
  }
  return true;
 }
@@ -695,7 +703,7 @@ function scavenge(){
  else{
   var ls=locState(s.activeLoc);
   if(ls.stock<=0){flashToast('Точка пуста — жди');shakeDigBtn();sndDeny();vibe(40);}
-  else if(totalJunk()>=s.cap){flashToast('Склад забит — переработай лом');shakeDigBtn();sndDeny();vibe(40);}
+  else if(totalJunk()>=capMax()){flashToast('Склад забит — переработай лом');shakeDigBtn();sndDeny();vibe(40);}
  }
 }
 function selectLoc(k){var ls=locState(k);if(!ls.unlocked)return;s.activeLoc=k;sndSelectLoc();vibe(8);saveGame();}
@@ -736,7 +744,6 @@ function sellIngots(){
  sndCoins();vibe(30);bumpCash();flashSellBtn();saveGame();
 }
 
-// === Стоп-игра «Контроль цены» ===
 var pgActive=false;
 var pgPos=0,pgDir=1,pgLastTs=0;
 var pgZoneCenter=50,pgZoneHalf=8;
@@ -911,7 +918,7 @@ function tick(dt){
  for(var i=0;i<LOCATIONS.length;i++){var def=LOCATIONS[i],ls=locState(def.key);if(!ls.unlocked)continue;
   if(ls.stock<def.maxStock){ls.regenTimer+=dt;var iv=locRegenIv(def,ls);if(ls.regenTimer>=iv){ls.regenTimer-=iv;ls.stock++;}}}
  if(s.lv.dump>0){s.dumpTimer+=dt;if(s.dumpTimer>=4500){s.dumpTimer-=4500;
-  if(totalJunk()<s.cap){var keys=['chips','phones','ram'];var k=keys[Math.floor(Math.random()*3)];s.junk[k]+=s.lv.dump;s.stats.junkTotal+=s.lv.dump;}}}
+  if(totalJunk()<capMax()){var keys=['chips','phones','ram'];var k=keys[Math.floor(Math.random()*3)];var amount=1;if(totalJunk()+2<=capMax()&&Math.random()<luckChance())amount=2;s.junk[k]+=amount;s.stats.junkTotal+=amount;}}}
  tickAutoDig(dt);
  var kk=dt/1000;
  s.priceDir+=((Math.random()-0.5)*1.6-s.priceDir*0.5)*kk;
@@ -987,7 +994,7 @@ function buildSaveData(){
    settings:{sound:s.settings.sound,vibe:s.settings.vibe,music:s.settings.music},
    lastSeenTs:s.lastSeenTs
   },
-  ts:Date.now(),ver:9
+  ts:Date.now(),ver:10
  };
 }
 
@@ -1299,12 +1306,12 @@ function render(){
   var digFill=document.getElementById('digFill'),digLabel=document.getElementById('digLabel');
   digFill.style.background='rgba(0,0,0,0.28)';
   if(ls.stock<=0){digBtn.disabled=true;digFill.style.width='0%';var iv=locRegenIv(def,ls);var left=Math.max(0,iv-ls.regenTimer);digLabel.textContent=def.name+': пусто, ~'+Math.ceil(left/1000)+'с';}
-  else if(totalJunk()>=s.cap){digBtn.disabled=true;digFill.style.width='100%';digFill.style.background='rgba(143,179,57,0.5)';digLabel.textContent='Склад забит — переработай лом';}
+  else if(totalJunk()>=capMax()){digBtn.disabled=true;digFill.style.width='100%';digFill.style.background='rgba(143,179,57,0.5)';digLabel.textContent='Склад забит — переработай лом';}
   else if(s.scavCd>0){digBtn.disabled=false;digFill.style.width=(100-s.scavCd/scavCdMax()*100)+'%';digLabel.textContent=currentDigLabel;}
   else{digBtn.disabled=false;digFill.style.width='0%';digLabel.textContent='Порыться: '+def.name;}
  }
- setText('capTxt',totalJunk()+' / '+s.cap+' на складе');
- var cf=document.getElementById('capFill');if(cf)cf.style.width=Math.min(100,totalJunk()/s.cap*100)+'%';
+ setText('capTxt',totalJunk()+' / '+capMax()+' на складе');
+ var cf=document.getElementById('capFill');if(cf)cf.style.width=Math.min(100,totalJunk()/capMax()*100)+'%';
  var pe=document.getElementById('priceTxt');
  if(pe){
   if(s.lv.priceControl){
@@ -1329,7 +1336,7 @@ function render(){
  setText('b-fire',s.cost.fire+' ₽');setDis('b-fire',s.cash<s.cost.fire);
  setText('d-fire','потери золота: '+Math.round((1-fireEff())*100)+'% → '+Math.round((1-fireEffNext())*100)+'% (ур. '+s.lv.fire+')');
  setText('b-cap',s.cost.cap+' ₽');setDis('b-cap',s.cash<s.cost.cap);
- setText('d-cap','вместимость: '+s.cap+' → '+(s.cap+8)+' мест (ур. '+s.lv.cap+')');
+ setText('d-cap','вместимость: '+capMax()+' → '+(capMax()+8)+' мест (ур. '+s.lv.cap+')');
  var bh=document.getElementById('b-hold');
  if(bh){if(s.lv.hold){bh.textContent='✓ куплено';bh.disabled=true;bh.className='upg-btn owned';}else{bh.textContent=s.cost.hold+' ₽';bh.disabled=s.cash<s.cost.hold;bh.className='upg-btn';}}
  setText('d-hold',s.lv.hold?'покупка на один раз — зажми кнопку, действие повторяется':'покупка на один раз — зажми кнопку, действие повторяется');

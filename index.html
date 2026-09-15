@@ -418,8 +418,10 @@ var CATALOG_ORDER=['resist','caps','trans','chips','hdd','phones','ram','connect
 var INV_PREVIEW=5;
 var PRESTIGE_THRESHOLD=100000;
 var NORMAL_UPG_KEYS=['acid','fire','cap','dump','hold','scavspd','acidspd','firespd','secondacid','secondfire','goodeye','luck','reputation','offlineRate','offlineCap'];
-var SAVE_KEY='dragmet_save_v1';
-var SAVE_KEY_BACKUP='dragmet_save_v1_backup';
+var SAVE_KEY_A='dragmet_save_a';
+var SAVE_KEY_B='dragmet_save_b';
+var SAVE_KEY_OLD='dragmet_save_v1';
+var SAVE_KEY_OLD_BACKUP='dragmet_save_v1_backup';
 var REPUTATION_MAX=10,REPUTATION_PER_LV=10,REPUTATION_BASE_COST=2500,REPUTATION_COST_MULT=1.7;
 var OFFLINE_RATE_MAX=15,OFFLINE_RATE_PER_LV=5,OFFLINE_RATE_BASE_COST=2000,OFFLINE_RATE_MULT=1.55;
 var OFFLINE_CAP_MAX=9,OFFLINE_CAP_BASE_HOURS=1,OFFLINE_CAP_PER_LV=1,OFFLINE_CAP_BASE_COST=1500,OFFLINE_CAP_MULT=1.7;
@@ -658,7 +660,7 @@ function resetAll(){
  for(var li=0;li<LOCATIONS.length;li++){p.autoDig[LOCATIONS[li].key]=0;p.autoTimers[LOCATIONS[li].key]=0;}
  var keepSettings=s&&s.settings?s.settings:{sound:true,vibe:true,music:false};
  s=makeState();s.settings=keepSettings;
- try{localStorage.removeItem(SAVE_KEY);localStorage.removeItem(SAVE_KEY_BACKUP);}catch(e){}
+ try{localStorage.removeItem(SAVE_KEY_A);localStorage.removeItem(SAVE_KEY_B);localStorage.removeItem(SAVE_KEY_OLD);localStorage.removeItem(SAVE_KEY_OLD_BACKUP);}catch(e){}
  lastSaveTs=0;
  stopAcidLoop();stopFireLoop();cancelPress();
  switchTab('dig');
@@ -782,59 +784,102 @@ function buildSaveData(){
   ts:Date.now(),ver:8
  };
 }
-function saveGame(){try{s.lastSeenTs=Date.now();var data=buildSaveData();var prev=localStorage.getItem(SAVE_KEY);if(prev)localStorage.setItem(SAVE_KEY_BACKUP,prev);localStorage.setItem(SAVE_KEY,JSON.stringify(data));lastSaveTs=data.ts;return true;}catch(e){return false;}}
-function hasSave(){try{return !!localStorage.getItem(SAVE_KEY);}catch(e){return false;}}
-function loadGame(){
+
+function readSlot(key){
  try{
-  var raw=localStorage.getItem(SAVE_KEY);
-  if(!raw){var bk=localStorage.getItem(SAVE_KEY_BACKUP);if(bk)raw=bk;else return false;}
-  var data=JSON.parse(raw);
-  if(!data||!data.s||!data.p)return false;
-  var newP=makePrest();
-  newP.level=data.p.level||0;newP.points=data.p.points||0;
-  if(data.p.lv)for(var kk in newP.lv)if(typeof data.p.lv[kk]!=='undefined')newP.lv[kk]=data.p.lv[kk];
-  if(data.p.autoDig)for(var lk in data.p.autoDig)newP.autoDig[lk]=data.p.autoDig[lk];
-  if(data.p.autoTimers)for(var lt in data.p.autoTimers)newP.autoTimers[lt]=data.p.autoTimers[lt];
-  for(var li=0;li<LOCATIONS.length;li++){
-   if(typeof newP.autoDig[LOCATIONS[li].key]==='undefined')newP.autoDig[LOCATIONS[li].key]=0;
-   if(typeof newP.autoTimers[LOCATIONS[li].key]==='undefined')newP.autoTimers[LOCATIONS[li].key]=0;
-  }
-  var newS=makeState();
-  newS.cash=data.s.cash||0;newS.ingots=data.s.ingots||0;
-  if(data.s.junk)for(var jk in newS.junk)if(typeof data.s.junk[jk]!=='undefined')newS.junk[jk]=data.s.junk[jk];
-  if(data.s.locked)for(var lkk in newS.locked)if(typeof data.s.locked[lkk]!=='undefined')newS.locked[lkk]=!!data.s.locked[lkk];
-  newS.cap=data.s.cap||16;newS.scavCd=0;newS.solution=data.s.solution||0;
-  if(data.s.acid&&data.s.acid.length)newS.acid=data.s.acid;
-  if(data.s.fire&&data.s.fire.length)newS.fire=data.s.fire;
-  newS.price=data.s.price||3200;newS.priceDir=0;newS.dumpTimer=data.s.dumpTimer||0;
-  newS.activeLoc=data.s.activeLoc||'yard';newS.invExpanded=!!data.s.invExpanded;
-  if(data.s.accState)for(var ak in newS.accState)if(typeof data.s.accState[ak]!=='undefined')newS.accState[ak]=!!data.s.accState[ak];
-  if(data.s.locs&&data.s.locs.length){
-   for(var i=0;i<newS.locs.length;i++){
-    for(var j=0;j<data.s.locs.length;j++){
-     if(data.s.locs[j].key===newS.locs[i].key){
-      newS.locs[i].stock=data.s.locs[j].stock;
-      newS.locs[i].regenTimer=data.s.locs[j].regenTimer||0;
-      newS.locs[i].regenLv=data.s.locs[j].regenLv||0;
-      newS.locs[i].unlocked=!!data.s.locs[j].unlocked;
-      break;
-     }
+  var raw=localStorage.getItem(key);
+  if(!raw)return null;
+  var d=JSON.parse(raw);
+  if(!d||!d.s||!d.p)return null;
+  return d;
+ }catch(e){return null;}
+}
+
+function saveGame(){
+ try{
+  s.lastSeenTs=Date.now();
+  var data=buildSaveData();
+  var a=readSlot(SAVE_KEY_A),b=readSlot(SAVE_KEY_B);
+  var aTs=a?a.ts:0,bTs=b?b.ts:0;
+  var targetKey=(aTs<=bTs)?SAVE_KEY_A:SAVE_KEY_B;
+  localStorage.setItem(targetKey,JSON.stringify(data));
+  lastSaveTs=data.ts;
+  return true;
+ }catch(e){return false;}
+}
+
+function hasSave(){
+ try{
+  if(localStorage.getItem(SAVE_KEY_A)||localStorage.getItem(SAVE_KEY_B))return true;
+  if(localStorage.getItem(SAVE_KEY_OLD)||localStorage.getItem(SAVE_KEY_OLD_BACKUP))return true;
+  return false;
+ }catch(e){return false;}
+}
+
+function applyLoad(data){
+ var newP=makePrest();
+ newP.level=data.p.level||0;newP.points=data.p.points||0;
+ if(data.p.lv)for(var kk in newP.lv)if(typeof data.p.lv[kk]!=='undefined')newP.lv[kk]=data.p.lv[kk];
+ if(data.p.autoDig)for(var lk in data.p.autoDig)newP.autoDig[lk]=data.p.autoDig[lk];
+ if(data.p.autoTimers)for(var lt in data.p.autoTimers)newP.autoTimers[lt]=data.p.autoTimers[lt];
+ for(var li=0;li<LOCATIONS.length;li++){
+  if(typeof newP.autoDig[LOCATIONS[li].key]==='undefined')newP.autoDig[LOCATIONS[li].key]=0;
+  if(typeof newP.autoTimers[LOCATIONS[li].key]==='undefined')newP.autoTimers[LOCATIONS[li].key]=0;
+ }
+ var newS=makeState();
+ newS.cash=data.s.cash||0;newS.ingots=data.s.ingots||0;
+ if(data.s.junk)for(var jk in newS.junk)if(typeof data.s.junk[jk]!=='undefined')newS.junk[jk]=data.s.junk[jk];
+ if(data.s.locked)for(var lkk in newS.locked)if(typeof data.s.locked[lkk]!=='undefined')newS.locked[lkk]=!!data.s.locked[lkk];
+ newS.cap=data.s.cap||16;newS.scavCd=0;newS.solution=data.s.solution||0;
+ if(data.s.acid&&data.s.acid.length)newS.acid=data.s.acid;
+ if(data.s.fire&&data.s.fire.length)newS.fire=data.s.fire;
+ newS.price=data.s.price||3200;newS.priceDir=0;newS.dumpTimer=data.s.dumpTimer||0;
+ newS.activeLoc=data.s.activeLoc||'yard';newS.invExpanded=!!data.s.invExpanded;
+ if(data.s.accState)for(var ak in newS.accState)if(typeof data.s.accState[ak]!=='undefined')newS.accState[ak]=!!data.s.accState[ak];
+ if(data.s.locs&&data.s.locs.length){
+  for(var i=0;i<newS.locs.length;i++){
+   for(var j=0;j<data.s.locs.length;j++){
+    if(data.s.locs[j].key===newS.locs[i].key){
+     newS.locs[i].stock=data.s.locs[j].stock;
+     newS.locs[i].regenTimer=data.s.locs[j].regenTimer||0;
+     newS.locs[i].regenLv=data.s.locs[j].regenLv||0;
+     newS.locs[i].unlocked=!!data.s.locs[j].unlocked;
+     break;
     }
    }
   }
-  if(data.s.lv)for(var lvk in newS.lv)if(typeof data.s.lv[lvk]!=='undefined')newS.lv[lvk]=data.s.lv[lvk];
-  if(data.s.cost)for(var ck in newS.cost)if(typeof data.s.cost[ck]!=='undefined')newS.cost[ck]=data.s.cost[ck];
-  if(data.s.stats)for(var sk in newS.stats)if(typeof data.s.stats[sk]!=='undefined')newS.stats[sk]=data.s.stats[sk];
-  if(data.s.settings){
-   if(typeof data.s.settings.sound!=='undefined')newS.settings.sound=!!data.s.settings.sound;
-   if(typeof data.s.settings.vibe!=='undefined')newS.settings.vibe=!!data.s.settings.vibe;
-   if(typeof data.s.settings.music!=='undefined')newS.settings.music=!!data.s.settings.music;
+ }
+ if(data.s.lv)for(var lvk in newS.lv)if(typeof data.s.lv[lvk]!=='undefined')newS.lv[lvk]=data.s.lv[lvk];
+ if(data.s.cost)for(var ck in newS.cost)if(typeof data.s.cost[ck]!=='undefined')newS.cost[ck]=data.s.cost[ck];
+ if(data.s.stats)for(var sk in newS.stats)if(typeof data.s.stats[sk]!=='undefined')newS.stats[sk]=data.s.stats[sk];
+ if(data.s.settings){
+  if(typeof data.s.settings.sound!=='undefined')newS.settings.sound=!!data.s.settings.sound;
+  if(typeof data.s.settings.vibe!=='undefined')newS.settings.vibe=!!data.s.settings.vibe;
+  if(typeof data.s.settings.music!=='undefined')newS.settings.music=!!data.s.settings.music;
+ }
+ newS.lastSeenTs=data.s.lastSeenTs||Date.now();
+ if(newS.lv.reputation>=REPUTATION_MAX){newS.cost.reputation=0;}else{newS.cost.reputation=reputationCostFor(newS.lv.reputation);}
+ if(newS.lv.offlineRate>=OFFLINE_RATE_MAX){newS.cost.offlineRate=0;}else{newS.cost.offlineRate=offlineRateCostFor(newS.lv.offlineRate);}
+ if(newS.lv.offlineCap>=OFFLINE_CAP_MAX){newS.cost.offlineCap=0;}else{newS.cost.offlineCap=offlineCapCostFor(newS.lv.offlineCap);}
+ p=newP;s=newS;lastSaveTs=data.ts||0;
+}
+
+function loadGame(){
+ try{
+  var a=readSlot(SAVE_KEY_A),b=readSlot(SAVE_KEY_B);
+  if(!a&&!b){
+   var oldD=readSlot(SAVE_KEY_OLD)||readSlot(SAVE_KEY_OLD_BACKUP);
+   if(oldD){
+    applyLoad(oldD);
+    try{localStorage.removeItem(SAVE_KEY_OLD);localStorage.removeItem(SAVE_KEY_OLD_BACKUP);}catch(e){}
+    return true;
+   }
+   return false;
   }
-  newS.lastSeenTs=data.s.lastSeenTs||Date.now();
-  if(newS.lv.reputation>=REPUTATION_MAX){newS.cost.reputation=0;}else{newS.cost.reputation=reputationCostFor(newS.lv.reputation);}
-  if(newS.lv.offlineRate>=OFFLINE_RATE_MAX){newS.cost.offlineRate=0;}else{newS.cost.offlineRate=offlineRateCostFor(newS.lv.offlineRate);}
-  if(newS.lv.offlineCap>=OFFLINE_CAP_MAX){newS.cost.offlineCap=0;}else{newS.cost.offlineCap=offlineCapCostFor(newS.lv.offlineCap);}
-  p=newP;s=newS;lastSaveTs=data.ts||0;
+  var best;
+  if(a&&b)best=(a.ts>=b.ts)?a:b;
+  else best=a||b;
+  applyLoad(best);
   return true;
  }catch(e){return false;}
 }
@@ -1133,7 +1178,6 @@ function render(){
  if(pf){var tp2=0,td2=0;for(var i=0;i<s.fire.length;i++){var f2=s.fire[i];if(f2.active){tp2+=f2.progress;td2+=f2.duration;}}pf.style.width=td2>0?(tp2/td2*100)+'%':'0%';}
 }
 
-// === ЗАЖАТИЕ: ждём 350мс прежде чем включить повтор ===
 var HOLD_DELAY = 350;
 var HOLD_INTERVAL = 220;
 var pressTimer = null;
@@ -1145,10 +1189,8 @@ function beginPress(fn){
  cancelPress();
  isPressed = true;
  heldFn = fn;
- // первый вызов сразу
  try{ fn(); }catch(e){}
  if(!s || !s.lv || !s.lv.hold){ return; }
- // если палец всё ещё нажат через HOLD_DELAY — начинаем повтор
  pressTimer = setTimeout(function(){
   pressTimer = null;
   if(!isPressed || !heldFn) return;
@@ -1231,7 +1273,6 @@ function handleDown(e){
 }
 function handleUp(){ cancelPress(); }
 
-// Один набор событий: PointerEvent если есть, иначе touch/mouse
 if(window.PointerEvent){
  document.addEventListener('pointerdown',handleDown,true);
  document.addEventListener('pointerup',handleUp,true);
@@ -1265,7 +1306,14 @@ document.addEventListener('visibilitychange',function(){cancelPress();if(current
 
 function boot(){
  lastSaveTs=0;
- try{var raw=localStorage.getItem(SAVE_KEY);if(raw){var d=JSON.parse(raw);if(d&&d.ts)lastSaveTs=d.ts;}}catch(e){}
+ try{
+  var a=readSlot(SAVE_KEY_A),b=readSlot(SAVE_KEY_B);
+  var best;
+  if(a&&b)best=(a.ts>=b.ts)?a:b;
+  else best=a||b;
+  if(!best)best=readSlot(SAVE_KEY_OLD)||readSlot(SAVE_KEY_OLD_BACKUP);
+  if(best&&best.ts)lastSaveTs=best.ts;
+ }catch(e){}
  ensureSettings();
  initHaptic();
  updateMenu();

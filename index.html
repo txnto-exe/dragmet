@@ -78,7 +78,7 @@ h1.game-title{font-size:24px;font-weight:800;margin:0;} h1.game-title span{color
 .loc-auto-txt{font-size:9.5px;color:var(--prest);margin-top:2px;font-family:ui-monospace,monospace;}
 .loc-unlock{font-size:11px;margin-top:6px;color:var(--gold);font-family:ui-monospace,monospace;}
 .loc-empty{color:var(--rust);}
-.dig-btn{width:100%;padding:16px;background:var(--rust);color:#0d1207;border:none;border-radius:5px;font-size:16px;font-weight:700;cursor:pointer;position:relative;overflow:hidden;touch-action:manipulation;}
+.dig-btn{width:100%;padding:16px;background:var(--rust);color:#0d1207;border:none;border-radius:5px;font-size:16px;font-weight:700;cursor:pointer;position:relative;overflow:hidden;touch-action:none;}
 .dig-btn:disabled{background:var(--rust-dim);color:#7a8760;}
 .dig-btn.shake{animation:shakeBtn 0.35s;}
 @keyframes shakeBtn{0%,100%{transform:translateX(0);}20%{transform:translateX(-6px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}
@@ -122,7 +122,7 @@ h1.game-title{font-size:24px;font-weight:800;margin:0;} h1.game-title span{color
 .price .reput{color:var(--gold);font-size:11px;margin-left:4px;}
 .ingot-big{font-family:ui-monospace,monospace;font-size:26px;font-weight:800;color:var(--acid);text-align:center;padding:10px 0 4px;}
 .ingot-big small{font-size:12px;color:var(--text-dim);font-weight:400;margin-left:4px;}
-.sell-btn{width:100%;padding:14px;background:var(--gold);color:#1f1a06;border:none;border-radius:5px;font-size:15px;font-weight:700;cursor:pointer;touch-action:manipulation;}
+.sell-btn{width:100%;padding:14px;background:var(--gold);color:#1f1a06;border:none;border-radius:5px;font-size:15px;font-weight:700;cursor:pointer;touch-action:none;}
 .sell-btn:disabled{background:var(--gold-dim);color:#6b5f3f;}
 .sell-btn.flash{background:#f0c94a;animation:sellFlash 0.4s;}
 @keyframes sellFlash{0%{transform:scale(1);}50%{transform:scale(1.05);background:#f5d560;}100%{transform:scale(1);}}
@@ -426,6 +426,11 @@ var REPUTATION_MAX=10,REPUTATION_PER_LV=10,REPUTATION_BASE_COST=2500,REPUTATION_
 var OFFLINE_RATE_MAX=15,OFFLINE_RATE_PER_LV=5,OFFLINE_RATE_BASE_COST=2000,OFFLINE_RATE_MULT=1.55;
 var OFFLINE_CAP_MAX=9,OFFLINE_CAP_BASE_HOURS=1,OFFLINE_CAP_PER_LV=1,OFFLINE_CAP_BASE_COST=1500,OFFLINE_CAP_MULT=1.7;
 
+var MOVE_THRESHOLD=12;
+var TAP_DELAY=30;
+var HOLD_DELAY=350;
+var HOLD_INTERVAL=220;
+
 var LOCATIONS=[
  {key:'yard',name:'Баки во дворе',icon:'🗑️',unlockCost:0,maxStock:8,regenBase:5200,regenCost:350,autoCost:5,
   loot:[{k:'chips',w:35},{k:'caps',w:15},{k:'resist',w:15},{k:'phones',w:20},{k:'ram',w:10},{k:'hdd',w:5}]},
@@ -662,7 +667,7 @@ function resetAll(){
  s=makeState();s.settings=keepSettings;
  try{localStorage.removeItem(SAVE_KEY_A);localStorage.removeItem(SAVE_KEY_B);localStorage.removeItem(SAVE_KEY_OLD);localStorage.removeItem(SAVE_KEY_OLD_BACKUP);}catch(e){}
  lastSaveTs=0;
- stopAcidLoop();stopFireLoop();cancelPress();
+ stopAcidLoop();stopFireLoop();cancelAllPress();
  switchTab('dig');
 }
 function doPrestige(){
@@ -1178,110 +1183,192 @@ function render(){
  if(pf){var tp2=0,td2=0;for(var i=0;i<s.fire.length;i++){var f2=s.fire[i];if(f2.active){tp2+=f2.progress;td2+=f2.duration;}}pf.style.width=td2>0?(tp2/td2*100)+'%':'0%';}
 }
 
-var HOLD_DELAY = 350;
-var HOLD_INTERVAL = 220;
-var pressTimer = null;
-var holdTimer = null;
-var heldFn = null;
-var isPressed = false;
+// === ОБРАБОТКА КАСАНИЙ ===
+// Кнопки digBtn/sellBtn — реагируют моментально (через TAP_DELAY), но отменяются при сдвиге >MOVE_THRESHOLD.
+// Всё остальное — реагирует при отпускании, если палец не сдвинулся.
+// При сдвиге на кнопках — ни действия, ни скролла (touch-action:none на них).
+// При сдвиге на остальном — обычный скролл, действия нет.
 
-function beginPress(fn){
- cancelPress();
- isPressed = true;
- heldFn = fn;
- try{ fn(); }catch(e){}
- if(!s || !s.lv || !s.lv.hold){ return; }
- pressTimer = setTimeout(function(){
-  pressTimer = null;
-  if(!isPressed || !heldFn) return;
-  holdTimer = setInterval(function(){
-   if(!isPressed || !heldFn){ cancelPress(); return; }
-   try{ heldFn(); }catch(e){}
-  }, HOLD_INTERVAL);
- }, HOLD_DELAY);
-}
-function cancelPress(){
- isPressed = false;
- if(pressTimer){ clearTimeout(pressTimer); pressTimer = null; }
- if(holdTimer){ clearInterval(holdTimer); holdTimer = null; }
- heldFn = null;
+var pressActive=false;
+var pressTarget=null;
+var pressX=0,pressY=0;
+var pressMoved=false;
+var pressIsAction=false;
+var tapTimer=null;
+var holdStartTimer=null;
+var holdRepeatTimer=null;
+var actionFn=null;
+
+function cancelAllPress(){
+ pressActive=false;
+ if(tapTimer){clearTimeout(tapTimer);tapTimer=null;}
+ if(holdStartTimer){clearTimeout(holdStartTimer);holdStartTimer=null;}
+ if(holdRepeatTimer){clearInterval(holdRepeatTimer);holdRepeatTimer=null;}
+ actionFn=null;
+ pressTarget=null;
+ pressMoved=false;
+ pressIsAction=false;
 }
 
-var ACTION_BTN = {digBtn:scavenge, sellBtn:sellIngots};
+function runHoldStart(){
+ if(!s||!s.lv||!s.lv.hold){return;}
+ if(!pressActive||!actionFn||pressMoved)return;
+ holdRepeatTimer=setInterval(function(){
+  if(!pressActive||!actionFn||pressMoved){cancelAllPress();return;}
+  try{actionFn();}catch(e){}
+ },HOLD_INTERVAL);
+}
+
+function beginActionPress(fn){
+ pressIsAction=true;
+ actionFn=fn;
+ pressMoved=false;
+ tapTimer=setTimeout(function(){
+  tapTimer=null;
+  if(!pressActive||pressMoved)return;
+  try{fn();}catch(e){}
+  if(s&&s.lv&&s.lv.hold){
+   holdStartTimer=setTimeout(function(){
+    holdStartTimer=null;
+    runHoldStart();
+   },HOLD_DELAY);
+  }
+ },TAP_DELAY);
+}
+
+var ACTION_BTN={digBtn:scavenge,sellBtn:sellIngots};
 
 function handleDown(e){
  try{ initAudio(); if(audioCtx&&audioCtx.state==='suspended'){try{audioCtx.resume();}catch(er){}} }catch(er){}
- try{
-  var t=e.target;
-  while(t&&t!==document){
-   if(t.id==='ocClaim'){e.preventDefault();hideOfflineOverlay();sndOfflineClaim();vibe(40);bumpCash();return;}
-   if(t.id==='btnContinue'){
-    e.preventDefault();
-    var ok=false;
-    try{ok=loadGame();}catch(err){ok=false;}
-    if(ok){var off=applyOfflineIncome();showScreen('game');switchTab('dig');if(off&&off.earned>0)showOfflineOverlay(off);}
-    else{resetAll();showScreen('game');switchTab('dig');showBigToast('Сохранение не прочиталось — начал новую игру');}
-    return;
-   }
-   if(t.id==='btnNewGame'){e.preventDefault();if(hasSave()){if(!confirm('Стереть сохранение и начать заново?'))return;}resetAll();showScreen('game');switchTab('dig');return;}
-   if(t.id==='btnSettings'){e.preventDefault();updateSettingsScreen();showScreen('settings');return;}
-   if(t.id==='btnBackToMenu'){e.preventDefault();saveGame();updateMenu();showScreen('menu');return;}
-   if(t.id==='btnResetAll'){e.preventDefault();if(confirm('Сбросить весь прогресс?')){resetAll();updateSettingsScreen();updateMenu();showScreen('menu');}return;}
-   if(t.id==='tglSound'||t.id==='tglVibe'||t.id==='tglMusic'){
-    e.preventDefault();
-    var newVal=!t.checked;
-    t.checked=newVal;
-    if(t.id==='tglSound')s.settings.sound=newVal;
-    else if(t.id==='tglVibe')s.settings.vibe=newVal;
-    else if(t.id==='tglMusic')s.settings.music=newVal;
-    saveGame();
-    if(t.id==='tglSound'&&newVal)initAudio();
-    sndToggle();vibe(15);
-    return;
-   }
-   if(currentScreen!=='game'){t=t.parentNode;continue;}
-   if(t.classList&&t.classList.contains('acc-head')){e.preventDefault();toggleAcc(t.getAttribute('data-acc'));return;}
-   if(t.classList&&t.classList.contains('tab-btn')){e.preventDefault();switchTab(t.getAttribute('data-tab'));return;}
-   if(t.classList&&t.classList.contains('subtab')){e.preventDefault();switchSub(t.id==='subtab-prest'?'prest':'normal');return;}
-   if(t.id){
-    if(ACTION_BTN[t.id]){e.preventDefault();beginPress(ACTION_BTN[t.id]);return;}
-    if(t.id==='invToggle'){e.preventDefault();s.invExpanded=!s.invExpanded;sndAccOpen();vibe(8);saveGame();return;}
-    if(t.id==='prestBtn'){e.preventDefault();doPrestige();return;}
-    if(t.id==='b-reset'){e.preventDefault();if(confirm('Сбросить весь прогресс включая престиж?')){resetAll();switchTab('dig');}return;}
-    if(t.id==='b-tomenu'){e.preventDefault();saveGame();updateMenu();showScreen('menu');return;}
-    if(t.id.indexOf('b-auto:')===0){e.preventDefault();buyAutoDig(t.id.substring(7));return;}
-    if(t.id.indexOf('b-regen:')===0){e.preventDefault();buy('regen:'+t.id.substring(8));return;}
-    if(t.id.indexOf('b-')===0){
-     e.preventDefault();
-     var key=t.id.substring(2);
-     if(NORMAL_UPG_KEYS.indexOf(key)>=0)buy(key);
-     else buyPrest(key);
-     return;
-    }
-   }
-   if(t.getAttribute){
-    var act=t.getAttribute('data-act');
-    if(act==='loc'){e.preventDefault();selectLoc(t.getAttribute('data-key'));return;}
-    if(act==='unlock'){e.preventDefault();unlockLoc(t.getAttribute('data-key'));return;}
-    if(act==='acid-start'){e.preventDefault();startAcid(parseInt(t.getAttribute('data-idx'),10)||0);return;}
-    if(act==='fire-start'){e.preventDefault();startFurnace(parseInt(t.getAttribute('data-idx'),10)||0);return;}
-    if(act==='lock'){e.preventDefault();toggleLock(t.getAttribute('data-key'));return;}
-   }
-   t=t.parentNode;
+ pressActive=true;
+ pressTarget=e.target;
+ pressMoved=false;
+ pressIsAction=false;
+ actionFn=null;
+ var pt=e;
+ if(e.touches&&e.touches[0])pt=e.touches[0];
+ pressX=pt.clientX||0;
+ pressY=pt.clientY||0;
+ // определить, является ли цель кнопкой-действием
+ var t=e.target;
+ while(t&&t!==document){
+  if(t.id&&ACTION_BTN[t.id]){
+   beginActionPress(ACTION_BTN[t.id]);
+   return;
   }
- }catch(err){}
+  t=t.parentNode;
+ }
 }
-function handleUp(){ cancelPress(); }
+function handleMove(e){
+ if(!pressActive)return;
+ var pt=e;
+ if(e.touches&&e.touches[0])pt=e.touches[0];
+ var dx=(pt.clientX||0)-pressX;
+ var dy=(pt.clientY||0)-pressY;
+ if(dx*dx+dy*dy>MOVE_THRESHOLD*MOVE_THRESHOLD){
+  pressMoved=true;
+  // отменяем отложенный тап и турбо
+  if(tapTimer){clearTimeout(tapTimer);tapTimer=null;}
+  if(holdStartTimer){clearTimeout(holdStartTimer);holdStartTimer=null;}
+  if(holdRepeatTimer){clearInterval(holdRepeatTimer);holdRepeatTimer=null;}
+  // если это была кнопка-действие — глушим палец, чтобы не было скролла
+  if(pressIsAction){
+   try{e.preventDefault();}catch(er){}
+  }
+ }
+}
+function handleUp(e){
+ if(!pressActive){cancelAllPress();return;}
+ var wasAction=pressIsAction;
+ var wasMoved=pressMoved;
+ var target=pressTarget;
+ // очищаем всё
+ if(tapTimer){clearTimeout(tapTimer);tapTimer=null;}
+ if(holdStartTimer){clearTimeout(holdStartTimer);holdStartTimer=null;}
+ if(holdRepeatTimer){clearInterval(holdRepeatTimer);holdRepeatTimer=null;}
+ pressActive=false;
+ // если это была кнопка-действие — ничего дополнительно делать не надо (уже отработала или отменена)
+ if(wasAction){
+  actionFn=null;pressTarget=null;pressIsAction=false;pressMoved=false;
+  return;
+ }
+ // для остальных — если не сдвинулись, обрабатываем как тап
+ if(!wasMoved && target){
+  try{processTap(target);}catch(er){}
+ }
+ actionFn=null;pressTarget=null;pressIsAction=false;pressMoved=false;
+}
+function handleCancel(){cancelAllPress();}
+
+function processTap(target){
+ var t=target;
+ while(t&&t!==document){
+  // оффлайн оверлей
+  if(t.id==='ocClaim'){hideOfflineOverlay();sndOfflineClaim();vibe(40);bumpCash();return;}
+  if(t.id==='btnContinue'){
+   var ok=false;
+   try{ok=loadGame();}catch(err){ok=false;}
+   if(ok){var off=applyOfflineIncome();showScreen('game');switchTab('dig');if(off&&off.earned>0)showOfflineOverlay(off);}
+   else{resetAll();showScreen('game');switchTab('dig');showBigToast('Сохранение не прочиталось — начал новую игру');}
+   return;
+  }
+  if(t.id==='btnNewGame'){if(hasSave()){if(!confirm('Стереть сохранение и начать заново?'))return;}resetAll();showScreen('game');switchTab('dig');return;}
+  if(t.id==='btnSettings'){updateSettingsScreen();showScreen('settings');return;}
+  if(t.id==='btnBackToMenu'){saveGame();updateMenu();showScreen('menu');return;}
+  if(t.id==='btnResetAll'){if(confirm('Сбросить весь прогресс?')){resetAll();updateSettingsScreen();updateMenu();showScreen('menu');}return;}
+  if(t.id==='tglSound'||t.id==='tglVibe'||t.id==='tglMusic'){
+   var newVal=!t.checked;
+   t.checked=newVal;
+   if(t.id==='tglSound')s.settings.sound=newVal;
+   else if(t.id==='tglVibe')s.settings.vibe=newVal;
+   else if(t.id==='tglMusic')s.settings.music=newVal;
+   saveGame();
+   if(t.id==='tglSound'&&newVal)initAudio();
+   sndToggle();vibe(15);
+   return;
+  }
+  if(currentScreen!=='game'){t=t.parentNode;continue;}
+  if(t.classList&&t.classList.contains('acc-head')){toggleAcc(t.getAttribute('data-acc'));return;}
+  if(t.classList&&t.classList.contains('tab-btn')){switchTab(t.getAttribute('data-tab'));return;}
+  if(t.classList&&t.classList.contains('subtab')){switchSub(t.id==='subtab-prest'?'prest':'normal');return;}
+  if(t.id){
+   if(t.id==='invToggle'){s.invExpanded=!s.invExpanded;sndAccOpen();vibe(8);saveGame();return;}
+   if(t.id==='prestBtn'){doPrestige();return;}
+   if(t.id==='b-reset'){if(confirm('Сбросить весь прогресс включая престиж?')){resetAll();switchTab('dig');}return;}
+   if(t.id==='b-tomenu'){saveGame();updateMenu();showScreen('menu');return;}
+   if(t.id.indexOf('b-auto:')===0){buyAutoDig(t.id.substring(7));return;}
+   if(t.id.indexOf('b-regen:')===0){buy('regen:'+t.id.substring(8));return;}
+   if(t.id.indexOf('b-')===0){
+    var key=t.id.substring(2);
+    if(NORMAL_UPG_KEYS.indexOf(key)>=0)buy(key);
+    else buyPrest(key);
+    return;
+   }
+  }
+  if(t.getAttribute){
+   var act=t.getAttribute('data-act');
+   if(act==='loc'){selectLoc(t.getAttribute('data-key'));return;}
+   if(act==='unlock'){unlockLoc(t.getAttribute('data-key'));return;}
+   if(act==='acid-start'){startAcid(parseInt(t.getAttribute('data-idx'),10)||0);return;}
+   if(act==='fire-start'){startFurnace(parseInt(t.getAttribute('data-idx'),10)||0);return;}
+   if(act==='lock'){toggleLock(t.getAttribute('data-key'));return;}
+  }
+  t=t.parentNode;
+ }
+}
 
 if(window.PointerEvent){
  document.addEventListener('pointerdown',handleDown,true);
+ document.addEventListener('pointermove',handleMove,true);
  document.addEventListener('pointerup',handleUp,true);
- document.addEventListener('pointercancel',handleUp,true);
+ document.addEventListener('pointercancel',handleCancel,true);
 } else {
  document.addEventListener('touchstart',handleDown,true);
+ document.addEventListener('touchmove',handleMove,true);
  document.addEventListener('touchend',handleUp,true);
- document.addEventListener('touchcancel',handleUp,true);
+ document.addEventListener('touchcancel',handleCancel,true);
  document.addEventListener('mousedown',handleDown,true);
+ document.addEventListener('mousemove',handleMove,true);
  document.addEventListener('mouseup',handleUp,true);
 }
 
@@ -1301,8 +1388,8 @@ function loop(now){
 }
 window.addEventListener('beforeunload',function(){if(currentScreen==='game')saveGame();});
 window.addEventListener('pagehide',function(){if(currentScreen==='game')saveGame();});
-window.addEventListener('blur',function(){cancelPress();if(currentScreen==='game')saveGame();});
-document.addEventListener('visibilitychange',function(){cancelPress();if(currentScreen==='game')saveGame();});
+window.addEventListener('blur',function(){cancelAllPress();if(currentScreen==='game')saveGame();});
+document.addEventListener('visibilitychange',function(){cancelAllPress();if(currentScreen==='game')saveGame();});
 
 function boot(){
  lastSaveTs=0;

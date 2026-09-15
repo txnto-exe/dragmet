@@ -216,7 +216,7 @@ h1.game-title{font-size:22px;font-weight:800;margin:0;flex-shrink:0;cursor:point
 .forge-blacksmith{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;user-select:none;pointer-events:none;transform-origin:center bottom;animation:forgeBreathe 4.2s ease-in-out infinite;}
 @keyframes forgeBreathe{0%,100%{transform:scale(1);}50%{transform:scale(1.008) translateY(-1px);}}
 .forge-blacksmith img{width:100%;height:100%;object-fit:contain;image-rendering:pixelated;image-rendering:crisp-edges;}
-.forge-locked .forge-blacksmith{filter:brightness(0) opacity(0.75);animation:none;}
+.forge-locked .forge-blacksmith{filter:brightness(0.35) saturate(0.15) opacity(0.85);animation:none;}
 .forge-glow{position:absolute;left:0;right:0;top:0;bottom:0;pointer-events:none;opacity:0;transition:opacity 0.6s;mix-blend-mode:screen;}
 .forge-locked .forge-glow{opacity:0 !important;animation:none !important;}
 .forge-unlocked .forge-glow{opacity:1;}
@@ -248,24 +248,28 @@ h1.game-title{font-size:22px;font-weight:800;margin:0;flex-shrink:0;cursor:point
 @keyframes ffOrbit1{0%{transform:translate(0,0);opacity:0.4;}25%{transform:translate(-7px,-9px);opacity:1;}50%{transform:translate(5px,-13px);opacity:0.7;}75%{transform:translate(9px,-3px);opacity:1;}100%{transform:translate(0,0);opacity:0.4;}}
 @keyframes ffOrbit2{0%{transform:translate(0,0);opacity:0.5;}25%{transform:translate(7px,-7px);opacity:1;}50%{transform:translate(-4px,-14px);opacity:0.6;}75%{transform:translate(-9px,-5px);opacity:0.9;}100%{transform:translate(0,0);opacity:0.5;}}
 @keyframes ffOrbit3{0%{transform:translate(0,0);opacity:0.6;}33%{transform:translate(-9px,-10px);opacity:1;}66%{transform:translate(7px,-7px);opacity:0.5;}100%{transform:translate(0,0);opacity:0.6;}}
-.forge-locked-badge{position:absolute;inset:0;background:transparent;display:none;align-items:center;justify-content:center;flex-direction:column;gap:8px;z-index:5;}
-.forge-locked .forge-locked-badge{display:none;}
-.amulet-row{display:flex;align-items:center;gap:10px;padding:10px;background:var(--panel-2);border:1px solid var(--edge);border-radius:6px;position:relative;overflow:hidden;transition:transform 0.25s ease-out;touch-action:pan-y;}
+.locked-amulets{position:relative;border-radius:6px;overflow:hidden;}
+.locked-amulets .locked-blur{filter:blur(3px);pointer-events:none;user-select:none;}
+.locked-amulets .locked-overlay{position:absolute;inset:0;background:rgba(10,14,8,0.6);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;z-index:5;}
+.locked-amulets .locked-overlay .big-lock{font-size:64px;filter:drop-shadow(0 4px 14px rgba(0,0,0,0.9));}
+.locked-amulets .locked-overlay .lock-label{font-size:11px;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;font-weight:700;}
+.amulet-row{display:flex;align-items:flex-start;gap:10px;padding:10px;background:var(--panel-2);border:1px solid var(--edge);border-radius:6px;position:relative;overflow:hidden;transition:transform 0.25s ease-out;touch-action:pan-y;}
 .amulet-row.swiping{transition:none;}
 .amulet-row .am-icon{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(255,255,255,0.06);}
 .amulet-row .am-body{flex:1;min-width:0;}
 .amulet-row .am-name{font-size:13px;font-weight:700;margin:0;}
 .amulet-row .am-effect{font-size:10.5px;color:var(--text-dim);margin-top:2px;line-height:1.35;}
 .amulet-row .am-time{font-size:10px;color:var(--gold);margin-top:3px;font-family:ui-monospace,monospace;}
+.amulet-row .am-recipe{font-size:9.5px;color:var(--text-dim);margin-top:4px;font-family:ui-monospace,monospace;line-height:1.4;white-space:nowrap;overflow:hidden;}
+.amulet-row .am-recipe .miss{color:var(--rust);}
+.amulet-row .am-recipe .sep{color:#3a4230;margin:0 1px;}
 .amulet-row .am-action{flex-shrink:0;display:flex;flex-direction:column;gap:4px;align-items:flex-end;}
 .amulet-row .am-btn{padding:6px 10px;font-size:11px;font-weight:700;border-radius:4px;border:1px solid var(--edge);background:var(--panel);color:var(--text);cursor:pointer;touch-action:manipulation;font-family:inherit;}
 .amulet-row .am-btn.craft{color:var(--acid);border-color:var(--acid-dim);}
 .amulet-row .am-btn.equip{color:var(--gold);border-color:var(--gold-dim);}
 .amulet-row .am-btn.unequip{color:var(--rust);border-color:var(--rust-dim);}
 .amulet-row .am-btn:disabled{background:#181c14;color:#a5a584;border-color:#2a2f22;opacity:1;}
-.amulet-row .am-recipe{font-size:10px;color:var(--text-dim);margin-top:4px;font-family:ui-monospace,monospace;line-height:1.5;}
-.amulet-row .am-recipe .miss{color:var(--rust);}
-.amulet-row .am-recipe .sep{color:#3a4230;margin:0 2px;}
+.amulet-row .am-time-to-craft{font-size:9.5px;color:var(--text-dim);margin-top:3px;font-family:ui-monospace,monospace;text-align:right;}
 .amulet-trash{position:absolute;top:0;right:0;bottom:0;width:78px;background:#c73a3a;display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;border-radius:0 6px 6px 0;cursor:pointer;touch-action:manipulation;}
 .amulet-row-wrap{position:relative;margin-bottom:8px;border-radius:6px;overflow:hidden;}
 .craft-status{padding:10px;background:var(--panel-2);border:1px solid var(--acid-dim);border-radius:6px;margin-bottom:12px;font-size:12px;}
@@ -867,7 +871,7 @@ function hideOfflineOverlay(){var el=document.getElementById('offlineOverlay');i
 
 function buildSaveData(){
  var jk={},lk={};for(var k in s.junk)jk[k]=s.junk[k];for(var k2 in s.locked)lk[k2]=s.locked[k2];
- return {p:{level:p.level,points:p.points,lv:{bonusBoost:p.lv.bonusBoost,startCash:p.lv.startCash,locDiscount:p.lv.locDiscount,acidII:p.lv.acidII,fireII:p.lv.fireII,capII:p.lv.capII},autoDig:p.autoDig,autoTimers:p.autoTimers},s:{cash:s.cash,ingots:s.ingots,junk:jk,locked:lk,cap:s.cap,scavCd:s.scavCd,solution:s.solution,acid:s.acid.map(function(x){return{active:x.active,progress:x.progress,duration:x.duration,yieldAmt:x.yieldAmt};}),fire:s.fire.map(function(x){return{active:x.active,progress:x.progress,duration:x.duration,yieldAmt:x.yieldAmt};}),price:s.price,priceDir:s.priceDir,activeLoc:s.activeLoc,invExpanded:s.invExpanded,accState:s.accState,locs:s.locs.map(function(x){return{key:x.key,stock:x.stock,regenTimer:x.regenTimer,regenLv:x.regenLv,unlocked:x.unlocked};}),lv:{acid:s.lv.acid,fire:s.lv.fire,cap:s.lv.cap,hold:s.lv.hold,scavspd:s.lv.scavspd,acidspd:s.lv.acidspd,firespd:s.lv.firespd,secondacid:s.lv.secondacid,secondfire:s.lv.secondfire,goodeye:s.lv.goodeye,luck:s.lv.luck,reputation:s.lv.reputation,priceControl:s.lv.priceControl,offlineRate:s.lv.offlineRate,offlineCap:s.lv.offlineCap,autoSpeed:s.lv.autoSpeed,autoPenalty:s.lv.autoPenalty,forgeSpeed:s.lv.forgeSpeed,forgeDiscount:s.lv.forgeDiscount,forgeDuration:s.lv.forgeDuration},cost:{acid:s.cost.acid,fire:s.cost.fire,cap:s.cost.cap,hold:s.cost.hold,scavspd:s.cost.scavspd,acidspd:s.cost.acidspd,firespd:s.cost.firespd,secondacid:s.cost.secondacid,secondfire:s.cost.secondfire,goodeye:s.cost.goodeye,luck:s.cost.luck,reputation:s.cost.reputation,priceControl:s.cost.priceControl,offlineRate:s.cost.offlineRate,offlineCap:s.cost.offlineCap,autoSpeed:s.cost.autoSpeed,autoPenalty:s.cost.autoPenalty,forgeSpeed:s.cost.forgeSpeed,forgeDiscount:s.cost.forgeDiscount,forgeDuration:s.cost.forgeDuration},stats:{junkTotal:s.stats.junkTotal,ingotsTotal:s.stats.ingotsTotal,earnedTotal:s.stats.earnedTotal,offlineTotal:s.stats.offlineTotal},settings:{sound:s.settings.sound,vibe:s.settings.vibe,music:s.settings.music},forgeUnlocked:s.forgeUnlocked,amulets:s.amulets,equippedAmulet:s.equippedAmulet,forgeCraft:s.forgeCraft,lastSeenTs:s.lastSeenTs},ts:Date.now(),ver:15};
+ return {p:{level:p.level,points:p.points,lv:{bonusBoost:p.lv.bonusBoost,startCash:p.lv.startCash,locDiscount:p.lv.locDiscount,acidII:p.lv.acidII,fireII:p.lv.fireII,capII:p.lv.capII},autoDig:p.autoDig,autoTimers:p.autoTimers},s:{cash:s.cash,ingots:s.ingots,junk:jk,locked:lk,cap:s.cap,scavCd:s.scavCd,solution:s.solution,acid:s.acid.map(function(x){return{active:x.active,progress:x.progress,duration:x.duration,yieldAmt:x.yieldAmt};}),fire:s.fire.map(function(x){return{active:x.active,progress:x.progress,duration:x.duration,yieldAmt:x.yieldAmt};}),price:s.price,priceDir:s.priceDir,activeLoc:s.activeLoc,invExpanded:s.invExpanded,accState:s.accState,locs:s.locs.map(function(x){return{key:x.key,stock:x.stock,regenTimer:x.regenTimer,regenLv:x.regenLv,unlocked:x.unlocked};}),lv:{acid:s.lv.acid,fire:s.lv.fire,cap:s.lv.cap,hold:s.lv.hold,scavspd:s.lv.scavspd,acidspd:s.lv.acidspd,firespd:s.lv.firespd,secondacid:s.lv.secondacid,secondfire:s.lv.secondfire,goodeye:s.lv.goodeye,luck:s.lv.luck,reputation:s.lv.reputation,priceControl:s.lv.priceControl,offlineRate:s.lv.offlineRate,offlineCap:s.lv.offlineCap,autoSpeed:s.lv.autoSpeed,autoPenalty:s.lv.autoPenalty,forgeSpeed:s.lv.forgeSpeed,forgeDiscount:s.lv.forgeDiscount,forgeDuration:s.lv.forgeDuration},cost:{acid:s.cost.acid,fire:s.cost.fire,cap:s.cost.cap,hold:s.cost.hold,scavspd:s.cost.scavspd,acidspd:s.cost.acidspd,firespd:s.cost.firespd,secondacid:s.cost.secondacid,secondfire:s.cost.secondfire,goodeye:s.cost.goodeye,luck:s.cost.luck,reputation:s.cost.reputation,priceControl:s.cost.priceControl,offlineRate:s.cost.offlineRate,offlineCap:s.cost.offlineCap,autoSpeed:s.cost.autoSpeed,autoPenalty:s.cost.autoPenalty,forgeSpeed:s.cost.forgeSpeed,forgeDiscount:s.cost.forgeDiscount,forgeDuration:s.cost.forgeDuration},stats:{junkTotal:s.stats.junkTotal,ingotsTotal:s.stats.ingotsTotal,earnedTotal:s.stats.earnedTotal,offlineTotal:s.stats.offlineTotal},settings:{sound:s.settings.sound,vibe:s.settings.vibe,music:s.settings.music},forgeUnlocked:s.forgeUnlocked,amulets:s.amulets,equippedAmulet:s.equippedAmulet,forgeCraft:s.forgeCraft,lastSeenTs:s.lastSeenTs},ts:Date.now(),ver:16};
 }
 function readSlot(key){try{var raw=localStorage.getItem(key);if(!raw)return null;var d=JSON.parse(raw);if(!d||!d.s||!d.p)return null;return d;}catch(e){return null;}}
 function saveGame(){try{s.lastSeenTs=Date.now();var data=buildSaveData();var a=readSlot(SAVE_KEY_A),b=readSlot(SAVE_KEY_B);var aTs=a?a.ts:0,bTs=b?b.ts:0;var targetKey=(aTs<=bTs)?SAVE_KEY_A:SAVE_KEY_B;localStorage.setItem(targetKey,JSON.stringify(data));lastSaveTs=data.ts;return true;}catch(e){return false;}}
@@ -948,16 +952,17 @@ function renderAmuletList(){
  if(window._amuletDragging)return;
  var box=document.getElementById('amuletList');if(!box)return;box.innerHTML='';
  if(!s.forgeUnlocked){
-  var lockWrap=document.createElement('div');
-  lockWrap.style.cssText='position:relative;border-radius:6px;overflow:hidden;';
-  var blurred=document.createElement('div');
-  blurred.style.cssText='filter:blur(3px);pointer-events:none;user-select:none;';
+  var lockWrap=document.createElement('div');lockWrap.className='locked-amulets';
+  var blurred=document.createElement('div');blurred.className='locked-blur';
   for(var bi=0;bi<3;bi++){
    var bl=document.createElement('div');bl.className='amulet-row';bl.style.marginBottom='8px';
    bl.innerHTML='<div class="am-icon" style="background:rgba(255,255,255,0.06);">?</div><div class="am-body"><p class="am-name">???</p><div class="am-effect">???</div></div>';
    blurred.appendChild(bl);
   }
   lockWrap.appendChild(blurred);
+  var lockOv=document.createElement('div');lockOv.className='locked-overlay';
+  lockOv.innerHTML='<div class="big-lock">🔒</div><div class="lock-label">Закрыто</div>';
+  lockWrap.appendChild(lockOv);
   box.appendChild(lockWrap);
   return;
  }
@@ -966,17 +971,17 @@ function renderAmuletList(){
   var wrap=document.createElement('div');wrap.className='amulet-row-wrap';
   if(owned){var trash=document.createElement('div');trash.className='amulet-trash';trash.setAttribute('data-act','amulet-dissolve');trash.setAttribute('data-key',a.key);trash.textContent='🗑️';wrap.appendChild(trash);}
   var row=document.createElement('div');row.className='amulet-row';row.setAttribute('data-act','amulet-row');row.setAttribute('data-key',a.key);
-  var recipeHtml='';
-  var first=true;
+  var recipeHtml='';var first=true;
   for(var k in rec){
-   if(!first)recipeHtml+='<span class="sep">|</span> ';
+   if(!first)recipeHtml+='<span class="sep">|</span>';
    first=false;
    var have=s.junk[k]||0,need=rec[k];var cls=have>=need?'':'miss';
-   recipeHtml+='<span class="'+cls+'">'+CATALOG[k].icon+' '+have+'/'+need+'</span> ';
+   recipeHtml+='<span class="'+cls+'">'+CATALOG[k].icon+' '+have+'/'+need+'</span>';
   }
+  var craftMin=Math.ceil(forgeCraftTimeMs(a.key)/60000);
   var actionHtml='';
   if(owned){if(equipped){actionHtml='<button class="am-btn unequip" data-act="amulet-unequip" data-key="'+a.key+'">Снять</button>';}else{actionHtml='<button class="am-btn equip" data-act="amulet-equip" data-key="'+a.key+'">Одеть</button>';}actionHtml+='<div style="font-size:9px;color:var(--text-dim);margin-top:4px;text-align:right;">свайп ← удалить</div>';}
-  else{var dis=canCraft&&!s.forgeCraft?'':'disabled';var btnTxt='Создать';if(s.forgeCraft)btnTxt='Кузнец занят';else if(!canCraft)btnTxt='Мало материалов';actionHtml='<button class="am-btn craft" data-act="amulet-craft" data-key="'+a.key+'" '+dis+'>'+btnTxt+'</button>';}
+  else{var dis=canCraft&&!s.forgeCraft?'':'disabled';var btnTxt='Создать';if(s.forgeCraft)btnTxt='Занят';else if(!canCraft)btnTxt='Мало';actionHtml='<button class="am-btn craft" data-act="amulet-craft" data-key="'+a.key+'" '+dis+'>'+btnTxt+'</button>';actionHtml+='<div class="am-time-to-craft">~'+craftMin+' мин</div>';}
   row.innerHTML='<div class="am-icon" style="color:'+a.color+';background:'+a.color+'22;box-shadow:0 0 10px '+a.color+'55;">'+a.icon+'</div>'+'<div class="am-body"><p class="am-name">'+a.name+'</p><div class="am-effect">'+a.effect+'</div>'+(owned?'<div class="am-time">'+amuletRemainingText(a.key)+'</div>':'<div class="am-recipe">'+recipeHtml+'</div>')+'</div><div class="am-action">'+actionHtml+'</div>';
   if(owned){attachSwipe(row,a.key);}
   wrap.appendChild(row);box.appendChild(wrap);

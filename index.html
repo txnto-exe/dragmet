@@ -377,9 +377,11 @@ h1.game-title{font-size:24px;font-weight:800;margin:0;} h1.game-title span{color
         </div>
         <div class="acc-head" data-acc="regen"><span class="acc-title">Восстановление точек</span><span class="acc-arrow">▼</span></div>
         <div class="acc-body" data-accbody="regen"><div id="regenList"></div></div>
-        <div class="acc-head no-border" data-acc="misc"><span class="acc-title">Прочее</span><span class="acc-arrow">▼</span></div>
-        <div class="acc-body" data-accbody="misc">
-          <div class="upg"><div><div class="upg-name">Своя свалка</div><div class="upg-desc" id="d-dump"></div></div><button class="upg-btn" id="b-dump" type="button"></button></div>
+        <div class="acc-head no-border" data-acc="auto"><span class="acc-title">Автоматизация</span><span class="acc-arrow">▼</span></div>
+        <div class="acc-body" data-accbody="auto">
+          <div class="upg"><div><div class="upg-name">Скорость работяг</div><div class="upg-desc" id="d-autoSpeed"></div></div><button class="upg-btn" id="b-autoSpeed" type="button"></button></div>
+          <div class="upg"><div><div class="upg-name">Снижение штрафа</div><div class="upg-desc" id="d-autoPenalty"></div></div><button class="upg-btn" id="b-autoPenalty" type="button"></button></div>
+          <div id="autoDigList"></div>
         </div>
       </div>
     </div>
@@ -399,16 +401,11 @@ h1.game-title{font-size:24px;font-weight:800;margin:0;} h1.game-title span{color
           <div class="upg"><div><div class="upg-name">Стартовый капитал</div><div class="upg-desc" id="d-startCash"></div></div><button class="upg-btn prest" id="b-startCash" type="button"></button></div>
           <div class="upg"><div><div class="upg-name">Скидка на локации</div><div class="upg-desc" id="d-locDiscount"></div></div><button class="upg-btn prest" id="b-locDiscount" type="button"></button></div>
         </div>
-        <div class="acc-head prest" data-acc="pupg2"><span class="acc-title">Улучшения II</span><span class="acc-arrow">▼</span></div>
+        <div class="acc-head no-border prest" data-acc="pupg2"><span class="acc-title">Улучшения II</span><span class="acc-arrow">▼</span></div>
         <div class="acc-body" data-accbody="pupg2">
           <div class="upg"><div><div class="upg-name">Кислота II</div><div class="upg-desc" id="d-acidII"></div></div><button class="upg-btn prest" id="b-acidII" type="button"></button></div>
           <div class="upg"><div><div class="upg-name">Печь II</div><div class="upg-desc" id="d-fireII"></div></div><button class="upg-btn prest" id="b-fireII" type="button"></button></div>
           <div class="upg"><div><div class="upg-name">Склад II</div><div class="upg-desc" id="d-capII"></div></div><button class="upg-btn prest" id="b-capII" type="button"></button></div>
-        </div>
-        <div class="acc-head no-border prest" data-acc="pauto"><span class="acc-title">Автоматизация</span><span class="acc-arrow">▼</span></div>
-        <div class="acc-body" data-accbody="pauto">
-          <div class="upg"><div><div class="upg-name">Снижение штрафа автокопания</div><div class="upg-desc" id="d-autoPenalty"></div></div><button class="upg-btn prest" id="b-autoPenalty" type="button"></button></div>
-          <div id="autoDigList"></div>
         </div>
       </div>
     </div>
@@ -459,14 +456,21 @@ var PRESTIGE_THRESHOLD=100000;
 var PRICE_CONTROL_COST=10000;
 var PRICE_MAX=4000;
 var PRICE_MIN=800;
-var NORMAL_UPG_KEYS=['acid','fire','cap','dump','hold','scavspd','acidspd','firespd','secondacid','secondfire','goodeye','luck','reputation','priceControl','offlineRate','offlineCap'];
-var SAVE_KEY_A='dragmet_save_a';
-var SAVE_KEY_B='dragmet_save_b';
-var SAVE_KEY_OLD='dragmet_save_v1';
-var SAVE_KEY_OLD_BACKUP='dragmet_save_v1_backup';
+var AUTO_SPEED_BASE_COST=5000;
+var AUTO_SPEED_COST_MULT=1.6;
+var AUTO_PENALTY_BASE_COST=3000;
+var AUTO_PENALTY_COST_MULT=1.8;
+var AUTO_PENALTY_MAX=10;
+var AUTO_DIG_COST={yard:800,construction:2500,radiozavod:6000,garages:15000,workshop:35000,ats:80000,scrapyard:180000,institute:400000};
+var NORMAL_UPG_KEYS=['acid','fire','cap','hold','scavspd','acidspd','firespd','secondacid','secondfire','goodeye','luck','reputation','priceControl','offlineRate','offlineCap','autoSpeed','autoPenalty'];
+var SAVE_KEY_A='dragmet_save_a_v2';
+var SAVE_KEY_B='dragmet_save_b_v2';
+var OLD_KEYS=['dragmet_save_a','dragmet_save_b','dragmet_save_v1','dragmet_save_v1_backup'];
 var REPUTATION_MAX=10,REPUTATION_PER_LV=10,REPUTATION_BASE_COST=2500,REPUTATION_COST_MULT=1.7;
 var OFFLINE_RATE_MAX=15,OFFLINE_RATE_PER_LV=5,OFFLINE_RATE_BASE_COST=2000,OFFLINE_RATE_MULT=1.55;
 var OFFLINE_CAP_MAX=9,OFFLINE_CAP_BASE_HOURS=1,OFFLINE_CAP_PER_LV=1,OFFLINE_CAP_BASE_COST=1500,OFFLINE_CAP_MULT=1.7;
+
+var OFFLINE_MIN_SEC=300;
 
 var MOVE_THRESHOLD=12;
 var TAP_DELAY=30;
@@ -483,26 +487,26 @@ var SUCCESS_MSGS=['В точку!','В яблочко!','Удача!','Идеа�
 var FAIL_MSGS=['Мимо.','Промах.','Не повезло.','Мимо кассы.','Упустил момент.'];
 
 var LOCATIONS=[
- {key:'yard',name:'Баки во дворе',icon:'🗑️',unlockCost:0,maxStock:8,regenBase:5200,regenCost:350,autoCost:5,
+ {key:'yard',name:'Баки во дворе',icon:'🗑️',unlockCost:0,maxStock:8,regenBase:5200,regenCost:350,
   loot:[{k:'chips',w:35},{k:'caps',w:15},{k:'resist',w:15},{k:'phones',w:20},{k:'ram',w:10},{k:'hdd',w:5}]},
- {key:'construction',name:'Заброшенная стройка',icon:'🏗️',unlockCost:650,maxStock:6,regenBase:7200,regenCost:700,autoCost:15,
+ {key:'construction',name:'Заброшенная стройка',icon:'🏗️',unlockCost:650,maxStock:6,regenBase:7200,regenCost:700,
   loot:[{k:'phones',w:25},{k:'caps',w:10},{k:'trans',w:20},{k:'hdd',w:15},{k:'ram',w:20},{k:'chips',w:5},{k:'rare',w:5}]},
- {key:'radiozavod',name:'Свалка радиозавода',icon:'🏭',unlockCost:2600,maxStock:5,regenBase:10400,regenCost:1600,autoCost:30,
+ {key:'radiozavod',name:'Свалка радиозавода',icon:'🏭',unlockCost:2600,maxStock:5,regenBase:10400,regenCost:1600,
   loot:[{k:'ram',w:15},{k:'trans',w:10},{k:'hdd',w:15},{k:'cpus',w:10},{k:'connect',w:15},{k:'rare',w:25},{k:'chips',w:5},{k:'legend',w:5}]},
- {key:'garages',name:'Гаражный кооператив',icon:'🚪',unlockCost:6500,maxStock:4,regenBase:14400,regenCost:3200,autoCost:60,
+ {key:'garages',name:'Гаражный кооператив',icon:'🚪',unlockCost:6500,maxStock:4,regenBase:14400,regenCost:3200,
   loot:[{k:'connect',w:10},{k:'cpus',w:10},{k:'legend',w:20},{k:'rare',w:30},{k:'ram',w:15},{k:'hdd',w:10},{k:'chips',w:5}]},
- {key:'workshop',name:'Ремонтная мастерская',icon:'🔧',unlockCost:14000,maxStock:4,regenBase:18000,regenCost:5500,autoCost:120,
+ {key:'workshop',name:'Ремонтная мастерская',icon:'🔧',unlockCost:14000,maxStock:4,regenBase:18000,regenCost:5500,
   loot:[{k:'trans',w:15},{k:'hdd',w:25},{k:'cpus',w:15},{k:'rare',w:25},{k:'connect',w:15},{k:'ram',w:5}]},
- {key:'ats',name:'Заброшенная АТС',icon:'📡',unlockCost:32000,maxStock:3,regenBase:22000,regenCost:9000,autoCost:250,
+ {key:'ats',name:'Заброшенная АТС',icon:'📡',unlockCost:32000,maxStock:3,regenBase:22000,regenCost:9000,
   loot:[{k:'cpus',w:20},{k:'connect',w:25},{k:'legend',w:20},{k:'rare',w:25},{k:'hdd',w:10}]},
- {key:'scrapyard',name:'Приёмка металлолома',icon:'⚙️',unlockCost:75000,maxStock:5,regenBase:28000,regenCost:15000,autoCost:500,
+ {key:'scrapyard',name:'Приёмка металлолома',icon:'⚙️',unlockCost:75000,maxStock:5,regenBase:28000,regenCost:15000,
   loot:[{k:'chips',w:15},{k:'phones',w:15},{k:'ram',w:15},{k:'hdd',w:15},{k:'cpus',w:15},{k:'connect',w:10},{k:'rare',w:10},{k:'legend',w:5}]},
- {key:'institute',name:'Институтский склад',icon:'🎓',unlockCost:180000,maxStock:3,regenBase:34000,regenCost:24000,autoCost:1000,
+ {key:'institute',name:'Институтский склад',icon:'🎓',unlockCost:180000,maxStock:3,regenBase:34000,regenCost:24000,
   loot:[{k:'cpus',w:20},{k:'connect',w:20},{k:'rare',w:35},{k:'legend',w:25}]}
 ];
 
 function makePrest(){return{level:0,points:0,
- lv:{bonusBoost:0,startCash:0,locDiscount:0,acidII:0,fireII:0,capII:0,autoPenalty:0},
+ lv:{bonusBoost:0,startCash:0,locDiscount:0,acidII:0,fireII:0,capII:0},
  autoDig:{},autoTimers:{}};}
 function makeState(){return{
  cash:0,ingots:0,
@@ -511,19 +515,19 @@ function makeState(){return{
  cap:16,scavCd:0,solution:0,
  acid:[{active:false,progress:0,duration:4200,yieldAmt:0}],
  fire:[{active:false,progress:0,duration:3400,yieldAmt:0}],
- price:3200,priceDir:0,dumpTimer:0,activeLoc:'yard',
+ price:3200,priceDir:0,activeLoc:'yard',
  invExpanded:false,
- accState:{eq:true,spd:false,luck:false,income:false,regen:false,misc:false,pbonus:true,pupg2:false,pauto:false},
+ accState:{eq:true,spd:false,luck:false,income:false,regen:false,auto:false,pbonus:true,pupg2:false},
  locs:LOCATIONS.map(function(l){return{key:l.key,stock:l.maxStock,regenTimer:0,regenLv:0,unlocked:l.unlockCost===0};}),
- lv:{acid:1,fire:1,cap:1,dump:0,hold:0,scavspd:0,acidspd:0,firespd:0,secondacid:0,secondfire:0,goodeye:0,luck:0,reputation:0,priceControl:0,offlineRate:0,offlineCap:0},
- cost:{acid:150,fire:150,cap:120,dump:450,hold:1200,scavspd:400,acidspd:400,firespd:400,secondacid:3000,secondfire:5000,goodeye:500,luck:700,reputation:REPUTATION_BASE_COST,priceControl:PRICE_CONTROL_COST,offlineRate:OFFLINE_RATE_BASE_COST,offlineCap:OFFLINE_CAP_BASE_COST},
+ lv:{acid:1,fire:1,cap:1,hold:0,scavspd:0,acidspd:0,firespd:0,secondacid:0,secondfire:0,goodeye:0,luck:0,reputation:0,priceControl:0,offlineRate:0,offlineCap:0,autoSpeed:0,autoPenalty:0},
+ cost:{acid:150,fire:150,cap:120,hold:1200,scavspd:400,acidspd:400,firespd:400,secondacid:3000,secondfire:5000,goodeye:500,luck:700,reputation:REPUTATION_BASE_COST,priceControl:PRICE_CONTROL_COST,offlineRate:OFFLINE_RATE_BASE_COST,offlineCap:OFFLINE_CAP_BASE_COST,autoSpeed:AUTO_SPEED_BASE_COST,autoPenalty:AUTO_PENALTY_BASE_COST},
  stats:{junkTotal:0,ingotsTotal:0,earnedTotal:0,offlineTotal:0},
  settings:{sound:true,vibe:true,music:false},
  lastSeenTs:Date.now()
 };}
 
 var p=makePrest();
-for(var li=0;li<LOCATIONS.length;li++){p.autoDig[LOCATIONS[li].key]=0;p.autoTimers[LOCATIONS[li].key]=0;}
+for(var li=0;li<LOCATIONS.length;li++){p.autoDig[LOCATIONS[li].key]=false;p.autoTimers[LOCATIONS[li].key]=0;}
 var s=makeState();
 var lastSaveTs=0;
 
@@ -546,13 +550,16 @@ function fireDuration(){return Math.max(400,3400*Math.pow(0.9,s.lv.firespd));}
 function scavCdMax(){return Math.max(300,1600*Math.pow(0.9,s.lv.scavspd));}
 function goodEyeChance(){return Math.min(s.lv.goodeye*0.04,0.5);}
 function luckChance(){return Math.min(s.lv.luck*0.05,0.7);}
+function autoSpeedBonus(){return s.lv.autoSpeed*0.10;}
+function autoSpeedCostFor(lv){return Math.round(AUTO_SPEED_BASE_COST*Math.pow(AUTO_SPEED_COST_MULT,lv));}
+function autoPenaltyPct(){return Math.max(0,50-s.lv.autoPenalty*5);}
+function autoPenaltyCostFor(lv){return Math.round(AUTO_PENALTY_BASE_COST*Math.pow(AUTO_PENALTY_COST_MULT,lv));}
 function prestigeReward(newLevel){return Math.round(10*Math.pow(2.5,newLevel-1));}
 function prestigeBonusPct(){return (5+p.lv.bonusBoost)*p.level;}
 function reputationPct(){return s.lv.reputation*REPUTATION_PER_LV;}
 function reputationCostFor(lv){return Math.round(REPUTATION_BASE_COST*Math.pow(REPUTATION_COST_MULT,lv));}
 function locUnlockCost(def){var base=def.unlockCost;var disc=1-p.lv.locDiscount*0.05;if(disc<0.1)disc=0.1;return Math.round(base*disc);}
 function startCashAfterPrestige(){return p.lv.startCash*500;}
-function autoPenaltyPct(){return Math.max(0,50-p.lv.autoPenalty*5);}
 function priceMultiplier(){return (1+prestigeBonusPct()/100)*(1+reputationPct()/100);}
 function effectivePrice(){return s.price*priceMultiplier();}
 function offlineRatePct(){return s.lv.offlineRate*OFFLINE_RATE_PER_LV;}
@@ -641,7 +648,6 @@ function vibe(ms){try{if(!s||!s.settings||!s.settings.vibe)return;if(navigator.v
 var hapticInput=null;
 function initHaptic(){try{var el=document.createElement('input');el.type='checkbox';el.setAttribute('switch','');el.style.position='absolute';el.style.opacity='0';el.style.pointerEvents='none';el.style.left='-9999px';el.setAttribute('aria-hidden','true');document.body.appendChild(el);hapticInput=el;}catch(e){}}
 function iosHaptic(){try{if(!s.settings.vibe)return;if(!hapticInput)return;hapticInput.checked=!hapticInput.checked;var evt=document.createEvent('HTMLEvents');evt.initEvent('change',true,false);hapticInput.dispatchEvent(evt);}catch(e){}}
-function tapVibe(){vibe(12);iosHaptic();}
 
 function bumpCash(){try{var el=document.getElementById('cashWrap');if(!el)return;el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump');setTimeout(function(){el.classList.remove('bump');},200);}catch(e){}}
 function bumpToast(){try{var el=document.getElementById('toast');if(!el)return;el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump');setTimeout(function(){el.classList.remove('bump');},200);}catch(e){}}
@@ -669,10 +675,10 @@ function pickRandomFromDef(def){var tw=0,i;for(i=0;i<def.loot.length;i++)tw+=def
 function maybeUpgradeDrop(k){if(k==='rare'||k==='legend'||k==='cpus'||k==='connect')return k;if(Math.random()<goodEyeChance()){var r=Math.random();if(r<0.15)return 'legend';if(r<0.55)return 'rare';if(r<0.8)return 'cpus';return 'connect';}return k;}
 function playDigSound(k){if(k==='legend'){sndDing();vibe(40);return;}if(k==='cpus'||k==='connect'){sndDigPricey();vibe(30);return;}if(k==='rare'){sndDigRare();vibe(28);return;}if(k==='phones'||k==='ram'){sndDigNice();vibe(18);return;}if(k==='chips'||k==='hdd'){sndDigMid();vibe(15);return;}sndDigJunk();vibe(12);}
 
-function tryScavenge(locKey,silent){
+function tryScavenge(locKey,silent,ignoreStock){
  var ls=locState(locKey),def=locDef(locKey);
  if(!ls||!ls.unlocked)return false;
- if(ls.stock<=0)return false;
+ if(!ignoreStock&&ls.stock<=0)return false;
  if(totalJunk()>=capMax())return false;
  var baseK=pickRandomFromDef(def);
  var k=maybeUpgradeDrop(baseK);
@@ -680,13 +686,15 @@ function tryScavenge(locKey,silent){
  if(Math.random()<luckChance()&&totalJunk()+2<=capMax()){
   amount=2;doubleDrop=true;
  }
- s.junk[k]+=amount;ls.stock--;s.stats.junkTotal+=amount;
+ s.junk[k]+=amount;
+ if(!ignoreStock)ls.stock--;
+ s.stats.junkTotal+=amount;
  if(!silent){
   var msg='Нашёл: '+CATALOG[k].icon+' '+CATALOG[k].name;
   if(k==='legend')msg='Легендарка — '+CATALOG[k].icon+' '+CATALOG[k].name;
   else if(k==='rare')msg='Редкая — '+CATALOG[k].icon+' '+CATALOG[k].name;
   else if(k==='cpus')msg='Ценный процессор — '+CATALOG[k].icon+' '+CATALOG[k].name;
-  if(doubleDrop)msg='Двойной дроп! '+msg.replace('Нашёл: ','').replace('Легендарка — ','').replace('Редкая — ','').replace('Ценный процессор — ','')+' ×2';
+  if(doubleDrop)msg='Двойной дроп! '+CATALOG[k].icon+' '+CATALOG[k].name+' ×2';
   flashToast(msg,itemTier(k));bumpToast();flashInvItem(k);
   playDigSound(k);
   if(doubleDrop)sndDoubleDrop();
@@ -695,7 +703,7 @@ function tryScavenge(locKey,silent){
 }
 function scavenge(){
  if(s.scavCd>0)return;
- if(tryScavenge(s.activeLoc,false)){
+ if(tryScavenge(s.activeLoc,false,false)){
   s.scavCd=scavCdMax();
   currentDigLabel=DIG_LABELS[Math.floor(Math.random()*DIG_LABELS.length)];
   saveGame();
@@ -758,10 +766,7 @@ function openPriceGame(){
  pgZoneCenter=25+Math.random()*50;
  pgZoneHalf=8;
  var zone=document.getElementById('pgZone');
- if(zone){
-  zone.style.left=(pgZoneCenter-pgZoneHalf)+'%';
-  zone.style.width=(pgZoneHalf*2)+'%';
- }
+ if(zone){zone.style.left=(pgZoneCenter-pgZoneHalf)+'%';zone.style.width=(pgZoneHalf*2)+'%';}
  var runner=document.getElementById('pgRunner');
  if(runner)runner.style.left='0%';
  var res=document.getElementById('pgResult');
@@ -825,6 +830,7 @@ function pgFinishSell(price,hit,msg){
  s.cash+=e;s.stats.earnedTotal+=e;s.stats.ingotsTotal+=grams;s.ingots=0;
  sndCoins();bumpCash();flashSellBtn();saveGame();
  var ov=document.getElementById('pgOverlay');
+ if(ov)ov.classList.remove('ov.show');
  if(ov)ov.classList.remove('show');
  var total=Math.floor(e);
  flashToast(msg+' +'+fmt(total)+' ₽', hit?'lg':null);
@@ -836,7 +842,6 @@ function buy(k){
  if(k==='acid'){if(s.cash<s.cost.acid){sndDeny();vibe(30);return;}s.cash-=s.cost.acid;s.lv.acid++;s.cost.acid=Math.round(s.cost.acid*1.65);changed=true;}
  else if(k==='fire'){if(s.cash<s.cost.fire){sndDeny();vibe(30);return;}s.cash-=s.cost.fire;s.lv.fire++;s.cost.fire=Math.round(s.cost.fire*1.65);changed=true;}
  else if(k==='cap'){if(s.cash<s.cost.cap){sndDeny();vibe(30);return;}s.cash-=s.cost.cap;s.lv.cap++;s.cap+=8;s.cost.cap=Math.round(s.cost.cap*1.55);changed=true;}
- else if(k==='dump'){if(s.cash<s.cost.dump){sndDeny();vibe(30);return;}s.cash-=s.cost.dump;s.lv.dump++;s.cost.dump=Math.round(s.cost.dump*1.9);changed=true;}
  else if(k==='hold'){if(s.lv.hold)return;if(s.cash<s.cost.hold){sndDeny();vibe(30);return;}s.cash-=s.cost.hold;s.lv.hold=1;changed=true;}
  else if(k==='scavspd'){if(s.cash<s.cost.scavspd){sndDeny();vibe(30);return;}s.cash-=s.cost.scavspd;s.lv.scavspd++;s.cost.scavspd=Math.round(s.cost.scavspd*1.7);changed=true;}
  else if(k==='acidspd'){if(s.cash<s.cost.acidspd){sndDeny();vibe(30);return;}s.cash-=s.cost.acidspd;s.lv.acidspd++;s.cost.acidspd=Math.round(s.cost.acidspd*1.7);changed=true;}
@@ -849,6 +854,8 @@ function buy(k){
  else if(k==='reputation'){if(s.lv.reputation>=REPUTATION_MAX)return;if(s.cash<s.cost.reputation){sndDeny();vibe(30);return;}s.cash-=s.cost.reputation;s.lv.reputation++;if(s.lv.reputation<REPUTATION_MAX){s.cost.reputation=reputationCostFor(s.lv.reputation);}else{s.cost.reputation=0;}changed=true;}
  else if(k==='offlineRate'){if(s.lv.offlineRate>=OFFLINE_RATE_MAX)return;if(s.cash<s.cost.offlineRate){sndDeny();vibe(30);return;}s.cash-=s.cost.offlineRate;s.lv.offlineRate++;if(s.lv.offlineRate<OFFLINE_RATE_MAX){s.cost.offlineRate=offlineRateCostFor(s.lv.offlineRate);}else{s.cost.offlineRate=0;}changed=true;}
  else if(k==='offlineCap'){if(s.lv.offlineCap>=OFFLINE_CAP_MAX)return;if(s.cash<s.cost.offlineCap){sndDeny();vibe(30);return;}s.cash-=s.cost.offlineCap;s.lv.offlineCap++;if(s.lv.offlineCap<OFFLINE_CAP_MAX){s.cost.offlineCap=offlineCapCostFor(s.lv.offlineCap);}else{s.cost.offlineCap=0;}changed=true;}
+ else if(k==='autoSpeed'){if(s.cash<s.cost.autoSpeed){sndDeny();vibe(30);return;}s.cash-=s.cost.autoSpeed;s.lv.autoSpeed++;s.cost.autoSpeed=autoSpeedCostFor(s.lv.autoSpeed);changed=true;}
+ else if(k==='autoPenalty'){if(s.lv.autoPenalty>=AUTO_PENALTY_MAX)return;if(s.cash<s.cost.autoPenalty){sndDeny();vibe(30);return;}s.cash-=s.cost.autoPenalty;s.lv.autoPenalty++;if(s.lv.autoPenalty<AUTO_PENALTY_MAX){s.cost.autoPenalty=autoPenaltyCostFor(s.lv.autoPenalty);}else{s.cost.autoPenalty=0;}changed=true;}
  else if(k.indexOf('regen:')===0){var lkey=k.substring(6),ldef=locDef(lkey),lls=locState(lkey);if(!ldef||!lls||!lls.unlocked)return;var rcost=regenCostFor(ldef,lls);if(s.cash<rcost){sndDeny();vibe(30);return;}s.cash-=rcost;lls.regenLv++;changed=true;}
  if(changed){sndBuy();vibe(25);bumpCash();if(btnEl)flashBoughtBtn(btnEl);saveGame();}
 }
@@ -860,19 +867,27 @@ function buyPrest(key){
  else if(key==='acidII'){var c4=2+p.lv.acidII*2;if(p.points<c4){sndDeny();vibe(30);return;}p.points-=c4;p.lv.acidII++;changed=true;}
  else if(key==='fireII'){var c5=2+p.lv.fireII*2;if(p.points<c5){sndDeny();vibe(30);return;}p.points-=c5;p.lv.fireII++;changed=true;}
  else if(key==='capII'){var c6=2+p.lv.capII*2;if(p.points<c6){sndDeny();vibe(30);return;}p.points-=c6;p.lv.capII++;changed=true;}
- else if(key==='autoPenalty'){var c7=3+p.lv.autoPenalty*3;if(p.points<c7){sndDeny();vibe(30);return;}p.points-=c7;p.lv.autoPenalty++;changed=true;}
  if(changed){sndBuy();vibe(25);if(btnEl)flashBoughtBtn(btnEl);saveGame();}
 }
-function autoDigCost(def,lv){return Math.round(def.autoCost*Math.pow(1.5,lv));}
-function buyAutoDig(locKey){var def=locDef(locKey);if(!def)return;var lv=p.autoDig[locKey]||0,cost=autoDigCost(def,lv);if(p.points<cost){sndDeny();vibe(30);return;}p.points-=cost;p.autoDig[locKey]=lv+1;sndBuy();vibe(25);var el=document.getElementById('b-auto:'+locKey);if(el)flashBoughtBtn(el);saveGame();}
+function buyAutoDig(locKey){
+ var def=locDef(locKey);if(!def)return;
+ if(p.autoDig[locKey])return;
+ var cost=AUTO_DIG_COST[locKey]||0;
+ if(s.cash<cost){sndDeny();vibe(30);return;}
+ s.cash-=cost;p.autoDig[locKey]=true;
+ sndBuy();vibe(25);bumpCash();
+ var el=document.getElementById('b-auto:'+locKey);
+ if(el)flashBoughtBtn(el);
+ saveGame();
+}
 function toggleLock(k){if(!CATALOG[k])return;s.locked[k]=!s.locked[k];sndSelectLoc();vibe(10);saveGame();}
 
 function resetAll(){
  p=makePrest();
- for(var li=0;li<LOCATIONS.length;li++){p.autoDig[LOCATIONS[li].key]=0;p.autoTimers[LOCATIONS[li].key]=0;}
+ for(var li=0;li<LOCATIONS.length;li++){p.autoDig[LOCATIONS[li].key]=false;p.autoTimers[LOCATIONS[li].key]=0;}
  var keepSettings=s&&s.settings?s.settings:{sound:true,vibe:true,music:false};
  s=makeState();s.settings=keepSettings;
- try{localStorage.removeItem(SAVE_KEY_A);localStorage.removeItem(SAVE_KEY_B);localStorage.removeItem(SAVE_KEY_OLD);localStorage.removeItem(SAVE_KEY_OLD_BACKUP);}catch(e){}
+ try{localStorage.removeItem(SAVE_KEY_A);localStorage.removeItem(SAVE_KEY_B);for(var oi=0;oi<OLD_KEYS.length;oi++)localStorage.removeItem(OLD_KEYS[oi]);}catch(e){}
  lastSaveTs=0;
  stopAcidLoop();stopFireLoop();cancelAllPress();
  currentDigLabel=DIG_LABELS[0];
@@ -882,8 +897,11 @@ function doPrestige(){
  if(s.cash<PRESTIGE_THRESHOLD){sndDeny();vibe(40);return;}
  var newLvl=p.level+1,reward=prestigeReward(newLvl);
  p.points+=reward;p.level=newLvl;
+ var keepAutoDig={};for(var kk in p.autoDig)keepAutoDig[kk]=p.autoDig[kk];
+ var keepAutoTimers={};for(var tk in p.autoTimers)keepAutoTimers[tk]=p.autoTimers[tk];
  var keepSettings=s.settings;
  s=makeState();s.settings=keepSettings;
+ p.autoDig=keepAutoDig;p.autoTimers=keepAutoTimers;
  for(var li=0;li<LOCATIONS.length;li++)p.autoTimers[LOCATIONS[li].key]=0;
  s.cash=startCashAfterPrestige();
  flashToast('Престиж '+newLvl+'! Получено '+reward+' очков');
@@ -892,16 +910,16 @@ function doPrestige(){
 }
 function tickAutoDig(dt){
  for(var i=0;i<LOCATIONS.length;i++){
-  var def=LOCATIONS[i],lv=p.autoDig[def.key]||0;
-  if(lv<=0)continue;
+  var def=LOCATIONS[i];
+  if(!p.autoDig[def.key])continue;
   var ls=locState(def.key);
   if(!ls||!ls.unlocked)continue;
   p.autoTimers[def.key]=(p.autoTimers[def.key]||0)+dt;
   var cd=scavCdMax();
   if(def.key!==s.activeLoc){cd=cd*(1+autoPenaltyPct()/100);}
-  cd=cd/(1+lv*0.1);
+  cd=cd/(1+autoSpeedBonus());
   if(p.autoTimers[def.key]>=cd){
-   if(tryScavenge(def.key,true)) p.autoTimers[def.key]=0;
+   if(tryScavenge(def.key,true,true)) p.autoTimers[def.key]=0;
    else p.autoTimers[def.key]=cd*0.9;
   }
  }
@@ -917,8 +935,6 @@ function tick(dt){
  if(!fireRunning&&activeLoops.fire)stopFireLoop();
  for(var i=0;i<LOCATIONS.length;i++){var def=LOCATIONS[i],ls=locState(def.key);if(!ls.unlocked)continue;
   if(ls.stock<def.maxStock){ls.regenTimer+=dt;var iv=locRegenIv(def,ls);if(ls.regenTimer>=iv){ls.regenTimer-=iv;ls.stock++;}}}
- if(s.lv.dump>0){s.dumpTimer+=dt;if(s.dumpTimer>=4500){s.dumpTimer-=4500;
-  if(totalJunk()<capMax()){var keys=['chips','phones','ram'];var k=keys[Math.floor(Math.random()*3)];var amount=1;if(totalJunk()+2<=capMax()&&Math.random()<luckChance())amount=2;s.junk[k]+=amount;s.stats.junkTotal+=amount;}}}
  tickAutoDig(dt);
  var kk=dt/1000;
  s.priceDir+=((Math.random()-0.5)*1.6-s.priceDir*0.5)*kk;
@@ -929,8 +945,8 @@ function tick(dt){
 function calcOfflinePerHour(){
  var totalGold=0;
  for(var i=0;i<LOCATIONS.length;i++){
-  var def=LOCATIONS[i],lv=p.autoDig[def.key]||0;
-  if(lv<=0)continue;
+  var def=LOCATIONS[i];
+  if(!p.autoDig[def.key])continue;
   var ls=locState(def.key);
   if(!ls||!ls.unlocked)continue;
   var tw=0,avgGold=0;
@@ -939,7 +955,7 @@ function calcOfflinePerHour(){
   avgGold=avgGold/tw;
   var cdBase=scavCdMax();
   cdBase=cdBase*(1+autoPenaltyPct()/100);
-  cdBase=cdBase/(1+lv*0.1);
+  cdBase=cdBase/(1+autoSpeedBonus());
   var digsPerHour=3600000/Math.max(cdBase,100);
   totalGold+=digsPerHour*avgGold*acidEff()*fireEff();
  }
@@ -949,15 +965,16 @@ function applyOfflineIncome(){
  if(!s.lastSeenTs){s.lastSeenTs=Date.now();return 0;}
  var elapsed=Date.now()-s.lastSeenTs;
  var elapsedSec=elapsed/1000;
- if(elapsedSec<60)return 0;
+ if(elapsedSec<OFFLINE_MIN_SEC){return 0;}
  var capHours=offlineCapHours();
  var elapsedHours=elapsedSec/3600;
  var countedHours=Math.min(elapsedHours,capHours);
  var perHour=calcOfflinePerHour();
  var ratePct=offlineRatePct()/100;
  var earned=Math.floor(perHour*countedHours*ratePct);
+ s.lastSeenTs=Date.now();
  if(earned<=0)return 0;
- s.cash+=earned;s.stats.earnedTotal+=earned;s.stats.offlineTotal+=earned;s.lastSeenTs=Date.now();
+ s.cash+=earned;s.stats.earnedTotal+=earned;s.stats.offlineTotal+=earned;
  return {earned:earned,elapsed:elapsedSec,hours:countedHours,cap:capHours,rate:offlineRatePct(),perHour:perHour};
 }
 function showOfflineOverlay(info){
@@ -979,22 +996,22 @@ function buildSaveData(){
  var jk={},lk={};for(var k in s.junk)jk[k]=s.junk[k];for(var k2 in s.locked)lk[k2]=s.locked[k2];
  return {
   p:{level:p.level,points:p.points,
-   lv:{bonusBoost:p.lv.bonusBoost,startCash:p.lv.startCash,locDiscount:p.lv.locDiscount,acidII:p.lv.acidII,fireII:p.lv.fireII,capII:p.lv.capII,autoPenalty:p.lv.autoPenalty},
+   lv:{bonusBoost:p.lv.bonusBoost,startCash:p.lv.startCash,locDiscount:p.lv.locDiscount,acidII:p.lv.acidII,fireII:p.lv.fireII,capII:p.lv.capII},
    autoDig:p.autoDig,autoTimers:p.autoTimers},
   s:{
    cash:s.cash,ingots:s.ingots,junk:jk,locked:lk,cap:s.cap,scavCd:s.scavCd,solution:s.solution,
    acid:s.acid.map(function(x){return{active:x.active,progress:x.progress,duration:x.duration,yieldAmt:x.yieldAmt};}),
    fire:s.fire.map(function(x){return{active:x.active,progress:x.progress,duration:x.duration,yieldAmt:x.yieldAmt};}),
-   price:s.price,priceDir:s.priceDir,dumpTimer:s.dumpTimer,activeLoc:s.activeLoc,invExpanded:s.invExpanded,
+   price:s.price,priceDir:s.priceDir,activeLoc:s.activeLoc,invExpanded:s.invExpanded,
    accState:s.accState,
    locs:s.locs.map(function(x){return{key:x.key,stock:x.stock,regenTimer:x.regenTimer,regenLv:x.regenLv,unlocked:x.unlocked};}),
-   lv:{acid:s.lv.acid,fire:s.lv.fire,cap:s.lv.cap,dump:s.lv.dump,hold:s.lv.hold,scavspd:s.lv.scavspd,acidspd:s.lv.acidspd,firespd:s.lv.firespd,secondacid:s.lv.secondacid,secondfire:s.lv.secondfire,goodeye:s.lv.goodeye,luck:s.lv.luck,reputation:s.lv.reputation,priceControl:s.lv.priceControl,offlineRate:s.lv.offlineRate,offlineCap:s.lv.offlineCap},
-   cost:{acid:s.cost.acid,fire:s.cost.fire,cap:s.cost.cap,dump:s.cost.dump,hold:s.cost.hold,scavspd:s.cost.scavspd,acidspd:s.cost.acidspd,firespd:s.cost.firespd,secondacid:s.cost.secondacid,secondfire:s.cost.secondfire,goodeye:s.cost.goodeye,luck:s.cost.luck,reputation:s.cost.reputation,priceControl:s.cost.priceControl,offlineRate:s.cost.offlineRate,offlineCap:s.cost.offlineCap},
+   lv:{acid:s.lv.acid,fire:s.lv.fire,cap:s.lv.cap,hold:s.lv.hold,scavspd:s.lv.scavspd,acidspd:s.lv.acidspd,firespd:s.lv.firespd,secondacid:s.lv.secondacid,secondfire:s.lv.secondfire,goodeye:s.lv.goodeye,luck:s.lv.luck,reputation:s.lv.reputation,priceControl:s.lv.priceControl,offlineRate:s.lv.offlineRate,offlineCap:s.lv.offlineCap,autoSpeed:s.lv.autoSpeed,autoPenalty:s.lv.autoPenalty},
+   cost:{acid:s.cost.acid,fire:s.cost.fire,cap:s.cost.cap,hold:s.cost.hold,scavspd:s.cost.scavspd,acidspd:s.cost.acidspd,firespd:s.cost.firespd,secondacid:s.cost.secondacid,secondfire:s.cost.secondfire,goodeye:s.cost.goodeye,luck:s.cost.luck,reputation:s.cost.reputation,priceControl:s.cost.priceControl,offlineRate:s.cost.offlineRate,offlineCap:s.cost.offlineCap,autoSpeed:s.cost.autoSpeed,autoPenalty:s.cost.autoPenalty},
    stats:{junkTotal:s.stats.junkTotal,ingotsTotal:s.stats.ingotsTotal,earnedTotal:s.stats.earnedTotal,offlineTotal:s.stats.offlineTotal},
    settings:{sound:s.settings.sound,vibe:s.settings.vibe,music:s.settings.music},
    lastSeenTs:s.lastSeenTs
   },
-  ts:Date.now(),ver:10
+  ts:Date.now(),ver:11
  };
 }
 
@@ -1024,7 +1041,6 @@ function saveGame(){
 function hasSave(){
  try{
   if(localStorage.getItem(SAVE_KEY_A)||localStorage.getItem(SAVE_KEY_B))return true;
-  if(localStorage.getItem(SAVE_KEY_OLD)||localStorage.getItem(SAVE_KEY_OLD_BACKUP))return true;
   return false;
  }catch(e){return false;}
 }
@@ -1033,10 +1049,10 @@ function applyLoad(data){
  var newP=makePrest();
  newP.level=data.p.level||0;newP.points=data.p.points||0;
  if(data.p.lv)for(var kk in newP.lv)if(typeof data.p.lv[kk]!=='undefined')newP.lv[kk]=data.p.lv[kk];
- if(data.p.autoDig)for(var lk in data.p.autoDig)newP.autoDig[lk]=data.p.autoDig[lk];
+ if(data.p.autoDig)for(var lk in data.p.autoDig)newP.autoDig[lk]=!!data.p.autoDig[lk];
  if(data.p.autoTimers)for(var lt in data.p.autoTimers)newP.autoTimers[lt]=data.p.autoTimers[lt];
  for(var li=0;li<LOCATIONS.length;li++){
-  if(typeof newP.autoDig[LOCATIONS[li].key]==='undefined')newP.autoDig[LOCATIONS[li].key]=0;
+  if(typeof newP.autoDig[LOCATIONS[li].key]==='undefined')newP.autoDig[LOCATIONS[li].key]=false;
   if(typeof newP.autoTimers[LOCATIONS[li].key]==='undefined')newP.autoTimers[LOCATIONS[li].key]=0;
  }
  var newS=makeState();
@@ -1046,7 +1062,7 @@ function applyLoad(data){
  newS.cap=data.s.cap||16;newS.scavCd=0;newS.solution=data.s.solution||0;
  if(data.s.acid&&data.s.acid.length)newS.acid=data.s.acid;
  if(data.s.fire&&data.s.fire.length)newS.fire=data.s.fire;
- newS.price=data.s.price||3200;newS.priceDir=0;newS.dumpTimer=data.s.dumpTimer||0;
+ newS.price=data.s.price||3200;newS.priceDir=0;
  newS.activeLoc=data.s.activeLoc||'yard';newS.invExpanded=!!data.s.invExpanded;
  if(data.s.accState)for(var ak in newS.accState)if(typeof data.s.accState[ak]!=='undefined')newS.accState[ak]=!!data.s.accState[ak];
  if(data.s.locs&&data.s.locs.length){
@@ -1074,23 +1090,14 @@ function applyLoad(data){
  if(newS.lv.reputation>=REPUTATION_MAX){newS.cost.reputation=0;}else{newS.cost.reputation=reputationCostFor(newS.lv.reputation);}
  if(newS.lv.offlineRate>=OFFLINE_RATE_MAX){newS.cost.offlineRate=0;}else{newS.cost.offlineRate=offlineRateCostFor(newS.lv.offlineRate);}
  if(newS.lv.offlineCap>=OFFLINE_CAP_MAX){newS.cost.offlineCap=0;}else{newS.cost.offlineCap=offlineCapCostFor(newS.lv.offlineCap);}
- if(typeof newS.lv.priceControl==='undefined')newS.lv.priceControl=0;
- if(typeof newS.cost.priceControl==='undefined')newS.cost.priceControl=PRICE_CONTROL_COST;
+ if(newS.lv.autoPenalty>=AUTO_PENALTY_MAX){newS.cost.autoPenalty=0;}
  p=newP;s=newS;lastSaveTs=data.ts||0;
 }
 
 function loadGame(){
  try{
   var a=readSlot(SAVE_KEY_A),b=readSlot(SAVE_KEY_B);
-  if(!a&&!b){
-   var oldD=readSlot(SAVE_KEY_OLD)||readSlot(SAVE_KEY_OLD_BACKUP);
-   if(oldD){
-    applyLoad(oldD);
-    try{localStorage.removeItem(SAVE_KEY_OLD);localStorage.removeItem(SAVE_KEY_OLD_BACKUP);}catch(e){}
-    return true;
-   }
-   return false;
-  }
+  if(!a&&!b)return false;
   var best;
   if(a&&b)best=(a.ts>=b.ts)?a:b;
   else best=a||b;
@@ -1181,12 +1188,12 @@ function renderLocations(){
   (function(def){
    var ls=locState(def.key);
    var card=document.createElement('div');
-   var hasAuto=(p.autoDig[def.key]||0)>0;
+   var hasAuto=p.autoDig[def.key]===true;
    card.className='loc-card'+(s.activeLoc===def.key?' active':'')+(!ls.unlocked?' locked':'')+(hasAuto?' autodig':'');
    if(ls.unlocked){
     var pct=ls.stock/def.maxStock*100;
     card.setAttribute('data-act','loc');card.setAttribute('data-key',def.key);
-    var autoLine=hasAuto?'<div class="loc-auto-txt">★ авто · ур. '+p.autoDig[def.key]+'</div>':'';
+    var autoLine=hasAuto?'<div class="loc-auto-txt">★ авто</div>':'';
     card.innerHTML='<div class="loc-ic">'+def.icon+'</div><div class="loc-name">'+def.name+'</div><div class="loc-stock-bar"><div class="loc-stock-fill" style="width:'+pct+'%"></div></div><div class="loc-stock-txt'+(ls.stock===0?' loc-empty':'')+'">'+ls.stock+' / '+def.maxStock+(ls.stock===0?' пусто':'')+'</div>'+autoLine;
    } else {
     card.setAttribute('data-act','unlock');card.setAttribute('data-key',def.key);
@@ -1279,12 +1286,18 @@ function renderAutoDigList(){
  var c=document.getElementById('autoDigList');if(!c)return;
  var html='';
  for(var i=0;i<LOCATIONS.length;i++){
-  var def=LOCATIONS[i],lv=p.autoDig[def.key]||0,cost=autoDigCost(def,lv);
-  var dis=p.points<cost?'disabled':'';
-  var name;
-  if(lv===0)name=def.icon+' '+def.name+' — не куплено';
-  else name=def.icon+' '+def.name+' — ур. '+lv+' (+'+(lv*10)+'% скорости)';
-  html+='<div class="upg"><div><div class="upg-name">'+name+'</div><div class="upg-desc">работает всегда, вне активной точки штраф −'+autoPenaltyPct()+'%</div></div><button class="upg-btn prest" id="b-auto:'+def.key+'" type="button" '+dis+'>'+cost+' очк.</button></div>';
+  var def=LOCATIONS[i],owned=p.autoDig[def.key]===true;
+  var cost=AUTO_DIG_COST[def.key]||0;
+  var locked=!locState(def.key).unlocked;
+  var name=def.icon+' '+def.name;
+  var desc;
+  if(!locked&&locState(def.key).unlocked===false)desc='точка не открыта';
+  if(owned)desc='куплен — копает в фоне';
+  else desc='покупка разовая, за кэш';
+  var dis=(owned||locked||s.cash<cost)?'disabled':'';
+  var btnTxt=owned?'✓ куплен':(fmt(cost)+' ₽');
+  var btnCls='upg-btn'+(owned?' owned':'');
+  html+='<div class="upg"><div><div class="upg-name">'+name+'</div><div class="upg-desc">'+desc+'</div></div><button class="'+btnCls+'" id="b-auto:'+def.key+'" type="button" '+dis+'>'+btnTxt+'</button></div>';
  }
  c.innerHTML=html;
 }
@@ -1339,7 +1352,7 @@ function render(){
  setText('d-cap','вместимость: '+capMax()+' → '+(capMax()+8)+' мест (ур. '+s.lv.cap+')');
  var bh=document.getElementById('b-hold');
  if(bh){if(s.lv.hold){bh.textContent='✓ куплено';bh.disabled=true;bh.className='upg-btn owned';}else{bh.textContent=s.cost.hold+' ₽';bh.disabled=s.cash<s.cost.hold;bh.className='upg-btn';}}
- setText('d-hold',s.lv.hold?'покупка на один раз — зажми кнопку, действие повторяется':'покупка на один раз — зажми кнопку, действие повторяется');
+ setText('d-hold','покупка на один раз — зажми кнопку, действие повторяется');
  setText('b-scavspd',s.cost.scavspd+' ₽');setDis('b-scavspd',s.cash<s.cost.scavspd);
  setText('d-scavspd','кулдаун копания: '+(scavCdMax()/1000).toFixed(2)+'с → '+(Math.max(300,1600*Math.pow(0.9,s.lv.scavspd+1))/1000).toFixed(2)+'с (ур. '+s.lv.scavspd+')');
  setText('b-acidspd',s.cost.acidspd+' ₽');setDis('b-acidspd',s.cash<s.cost.acidspd);
@@ -1348,17 +1361,14 @@ function render(){
  setText('d-firespd','время выпаривания: '+(fireDuration()/1000).toFixed(1)+'с → '+(Math.max(400,3400*Math.pow(0.9,s.lv.firespd+1))/1000).toFixed(1)+'с (ур. '+s.lv.firespd+')');
  var bsa=document.getElementById('b-secondacid');
  if(bsa){if(s.lv.secondacid){bsa.textContent='✓ куплено';bsa.disabled=true;bsa.className='upg-btn owned';}else{bsa.textContent=s.cost.secondacid+' ₽';bsa.disabled=s.cash<s.cost.secondacid;bsa.className='upg-btn';}}
- setText('d-secondacid',s.lv.secondacid?'покупка на один раз — два бака работают параллельно':'покупка на один раз — два бака работают параллельно');
+ setText('d-secondacid','покупка на один раз — два бака работают параллельно');
  var bsf=document.getElementById('b-secondfire');
  if(bsf){if(s.lv.secondfire){bsf.textContent='✓ куплено';bsf.disabled=true;bsf.className='upg-btn owned';}else{bsf.textContent=s.cost.secondfire+' ₽';bsf.disabled=s.cash<s.cost.secondfire;bsf.className='upg-btn';}}
- setText('d-secondfire',s.lv.secondfire?'покупка на один раз — две печи работают параллельно':'покупка на один раз — две печи работают параллельно');
+ setText('d-secondfire','покупка на один раз — две печи работают параллельно');
  setText('b-goodeye',s.cost.goodeye+' ₽');setDis('b-goodeye',s.cash<s.cost.goodeye);
  setText('d-goodeye','шанс редкого дропа: '+Math.round(goodEyeChance()*100)+'% → '+Math.round(Math.min((s.lv.goodeye+1)*0.04,0.5)*100)+'% (ур. '+s.lv.goodeye+')');
  setText('b-luck',s.cost.luck+' ₽');setDis('b-luck',s.cash<s.cost.luck);
  setText('d-luck','шанс двойного дропа: '+Math.round(luckChance()*100)+'% → '+Math.round(Math.min((s.lv.luck+1)*0.05,0.7)*100)+'% (ур. '+s.lv.luck+')');
- setText('b-dump',s.cost.dump+' ₽');setDis('b-dump',s.cash<s.cost.dump);
- if(s.lv.dump===0)setText('d-dump','лом в склад: 1 шт → 2 шт каждые 4.5с (ур. 0)');
- else setText('d-dump','лом в склад: '+s.lv.dump+' шт → '+(s.lv.dump+1)+' шт каждые 4.5с (ур. '+s.lv.dump+')');
  var br=document.getElementById('b-reputation');
  if(br){if(s.lv.reputation>=REPUTATION_MAX){br.textContent='✓ макс';br.disabled=true;br.className='upg-btn owned';}else{br.textContent=s.cost.reputation+' ₽';br.disabled=s.cash<s.cost.reputation;br.className='upg-btn';}}
  var dr=document.getElementById('d-reputation');
@@ -1374,6 +1384,12 @@ function render(){
  if(boc){if(s.lv.offlineCap>=OFFLINE_CAP_MAX){boc.textContent='✓ макс';boc.disabled=true;boc.className='upg-btn owned';}else{boc.textContent=s.cost.offlineCap+' ₽';boc.disabled=s.cash<s.cost.offlineCap;boc.className='upg-btn offline';}}
  var doc=document.getElementById('d-offlineCap');
  if(doc)doc.textContent='лимит оффлайна: '+offlineCapHours()+' ч → '+offlineCapNextHours()+' ч (ур. '+s.lv.offlineCap+'/'+OFFLINE_CAP_MAX+')';
+ var bas=document.getElementById('b-autoSpeed');
+ if(bas){bas.textContent=s.cost.autoSpeed+' ₽';bas.disabled=s.cash<s.cost.autoSpeed;bas.className='upg-btn';}
+ setText('d-autoSpeed','скорость всех работяг: +'+Math.round(autoSpeedBonus()*100)+'% → +'+Math.round((autoSpeedBonus()+0.10)*100)+'% (ур. '+s.lv.autoSpeed+')');
+ var bap=document.getElementById('b-autoPenalty');
+ if(bap){if(s.lv.autoPenalty>=AUTO_PENALTY_MAX){bap.textContent='✓ макс';bap.disabled=true;bap.className='upg-btn owned';}else{bap.textContent=s.cost.autoPenalty+' ₽';bap.disabled=s.cash<s.cost.autoPenalty;bap.className='upg-btn';}}
+ setText('d-autoPenalty','штраф работяг вне активной точки: −'+autoPenaltyPct()+'% → −'+Math.max(0,50-(s.lv.autoPenalty+1)*5)+'% (ур. '+s.lv.autoPenalty+'/'+AUTO_PENALTY_MAX+')');
  setText('psLvl',p.level);setText('psPts',p.points);
  setText('psBonus','+'+prestigeBonusPct()+'%');
  setText('psReward',prestigeReward(p.level+1));
@@ -1391,8 +1407,6 @@ function render(){
  setText('d-fireII','доп. эффективность печи: +'+(p.lv.fireII*3)+'% → +'+((p.lv.fireII+1)*3)+'% (ур. '+p.lv.fireII+')');
  var c6=2+p.lv.capII*2;setText('b-capII',c6+' очк.');setDis('b-capII',p.points<c6);
  setText('d-capII','доп. места на складе: +'+(p.lv.capII*4)+' → +'+((p.lv.capII+1)*4)+' (ур. '+p.lv.capII+')');
- var c7=3+p.lv.autoPenalty*3;setText('b-autoPenalty',c7+' очк.');setDis('b-autoPenalty',p.points<c7);
- setText('d-autoPenalty','штраф автокопания вне активной точки: −'+autoPenaltyPct()+'% → −'+Math.max(0,50-(p.lv.autoPenalty+1)*5)+'% (ур. '+p.lv.autoPenalty+')');
  setText('st-junk',fmt(s.stats.junkTotal));
  setText('st-ingots',fmt(s.stats.ingotsTotal+s.ingots,3)+' г');
  setText('st-earned',fmt(Math.floor(s.stats.earnedTotal))+' ₽');
@@ -1528,7 +1542,7 @@ function processTap(target){
    var ok=false;
    try{ok=loadGame();}catch(err){ok=false;}
    if(ok){var off=applyOfflineIncome();showScreen('game');switchTab('dig');if(off&&off.earned>0)showOfflineOverlay(off);}
-   else{resetAll();showScreen('game');switchTab('dig');showBigToast('Сохранение не прочиталось — начал новую игру');}
+   else{resetAll();showScreen('game');switchTab('dig');}
    return;
   }
   if(t.id==='btnNewGame'){if(hasSave()){if(!confirm('Стереть сохранение и начать заново?'))return;}resetAll();showScreen('game');switchTab('dig');return;}
@@ -1613,11 +1627,13 @@ document.addEventListener('visibilitychange',function(){cancelAllPress();if(curr
 function boot(){
  lastSaveTs=0;
  try{
+  for(var oi=0;oi<OLD_KEYS.length;oi++)localStorage.removeItem(OLD_KEYS[oi]);
+ }catch(e){}
+ try{
   var a=readSlot(SAVE_KEY_A),b=readSlot(SAVE_KEY_B);
   var best;
   if(a&&b)best=(a.ts>=b.ts)?a:b;
   else best=a||b;
-  if(!best)best=readSlot(SAVE_KEY_OLD)||readSlot(SAVE_KEY_OLD_BACKUP);
   if(best&&best.ts)lastSaveTs=best.ts;
  }catch(e){}
  ensureSettings();

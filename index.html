@@ -431,7 +431,7 @@ var TAP_DELAY=30;
 var HOLD_DELAY=350;
 var HOLD_INTERVAL=220;
 
-var VOL_MUL=3;
+var VOL_MUL=6;
 
 var LOCATIONS=[
  {key:'yard',name:'Баки во дворе',icon:'🗑️',unlockCost:0,maxStock:8,regenBase:5200,regenCost:350,autoCost:5,
@@ -514,29 +514,29 @@ function offlineCapCostFor(lv){return Math.round(OFFLINE_CAP_BASE_COST*Math.pow(
 var audioCtx=null,audioBroken=false,activeLoops={};
 function initAudio(){if(audioCtx||audioBroken)return;try{var Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx){audioBroken=true;return;}audioCtx=new Ctx();}catch(e){audioBroken=true;audioCtx=null;}}
 function canPlay(){return audioCtx&&s&&s.settings&&s.settings.sound;}
-function tone(freq,dur,type,vol,delay){try{if(!canPlay())return;var v=Math.min((vol||0.1)*VOL_MUL,0.95);var t0=audioCtx.currentTime+(delay||0);var o=audioCtx.createOscillator();var g=audioCtx.createGain();o.type=type||'sine';o.frequency.setValueAtTime(freq,t0);g.gain.setValueAtTime(v,t0);g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);o.connect(g);g.connect(audioCtx.destination);o.start(t0);o.stop(t0+dur+0.02);}catch(e){}}
-function slide(f1,f2,dur,type,vol,delay){try{if(!canPlay())return;var v=Math.min((vol||0.1)*VOL_MUL,0.95);var t0=audioCtx.currentTime+(delay||0);var o=audioCtx.createOscillator();var g=audioCtx.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f1,t0);o.frequency.exponentialRampToValueAtTime(Math.max(f2,20),t0+dur);g.gain.setValueAtTime(v,t0);g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);o.connect(g);g.connect(audioCtx.destination);o.start(t0);o.stop(t0+dur+0.02);}catch(e){}}
-function rnd(f){return f*(0.92+Math.random()*0.16);}
-function sndTab(){tone(rnd(180),0.08,'sine',0.09);tone(rnd(90),0.1,'triangle',0.05,0.01);}
-function sndAccOpen(){tone(rnd(400),0.06,'sine',0.06);tone(rnd(600),0.07,'sine',0.04,0.03);}
-function sndAccClose(){tone(rnd(600),0.06,'sine',0.05);tone(rnd(400),0.08,'sine',0.04,0.03);}
-function sndToggle(){tone(rnd(500),0.05,'square',0.05);tone(rnd(750),0.06,'square',0.04,0.03);}
-function sndSelectLoc(){tone(rnd(600),0.05,'sine',0.06);tone(rnd(900),0.06,'sine',0.04,0.03);}
-function sndStartProcess(kind){if(kind==='acid'){tone(rnd(280),0.1,'triangle',0.08);tone(rnd(180),0.14,'triangle',0.06,0.05);}else{tone(rnd(220),0.12,'sawtooth',0.06);tone(rnd(140),0.16,'sawtooth',0.05,0.06);}}
-function sndBuy(){tone(rnd(400),0.08,'sine',0.08);tone(rnd(600),0.09,'sine',0.07,0.05);tone(rnd(800),0.1,'sine',0.06,0.1);}
-function sndDeny(){slide(rnd(180),80,0.15,'sawtooth',0.08);}
-function sndCoins(){[900,1350,1800,2200].forEach(function(f,i){tone(rnd(f),0.22,'square',0.06,i*0.05);});}
-function sndPrestige(){[523,659,784,1047].forEach(function(f,i){tone(f,0.5,'sine',0.12,i*0.12);});}
-function sndOfflineClaim(){[660,880,1320].forEach(function(f,i){tone(f,0.3,'triangle',0.1,i*0.08);});}
-function sndDigJunk(){tone(rnd(140),0.06,'triangle',0.08);tone(rnd(90),0.08,'sine',0.05,0.02);}
-function sndDigMid(){tone(rnd(220),0.07,'triangle',0.09);tone(rnd(150),0.09,'sine',0.05,0.02);}
-function sndDigNice(){tone(rnd(340),0.07,'sine',0.09);tone(rnd(500),0.09,'sine',0.06,0.03);}
-function sndDigRare(){tone(rnd(800),0.12,'sine',0.10);tone(rnd(1200),0.14,'sine',0.08,0.04);tone(rnd(1600),0.16,'sine',0.06,0.08);}
-function sndDigPricey(){[1000,1500,2000].forEach(function(f,i){tone(rnd(f),0.18,'sine',0.09,i*0.04);});}
-function sndDing(){[1200,1500,1800,2400].forEach(function(f,i){tone(rnd(f),0.35,'sine',0.12,i*0.05);});}
-function startAcidLoop(){try{if(!canPlay()||activeLoops.acid)return;activeLoops.acid={tick:0};var bubble=function(){if(!activeLoops.acid)return;var f1=200+Math.random()*150;var f2=f1+80+Math.random()*120;slide(f1,f2,0.12,'sine',0.035);activeLoops.acid.tick=setTimeout(bubble,180+Math.random()*220);};bubble();}catch(e){}}
+function tone(freq,dur,type,vol,delay){try{if(!canPlay())return;var v=Math.min((vol||0.1)*VOL_MUL,0.98);var t0=audioCtx.currentTime+(delay||0);var o=audioCtx.createOscillator();var g=audioCtx.createGain();o.type=type||'sine';o.frequency.setValueAtTime(freq,t0);g.gain.setValueAtTime(0.0001,t0);g.gain.exponentialRampToValueAtTime(v,t0+0.005);g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);o.connect(g);g.connect(audioCtx.destination);o.start(t0);o.stop(t0+dur+0.02);}catch(e){}}
+function slide(f1,f2,dur,type,vol,delay){try{if(!canPlay())return;var v=Math.min((vol||0.1)*VOL_MUL,0.98);var t0=audioCtx.currentTime+(delay||0);var o=audioCtx.createOscillator();var g=audioCtx.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f1,t0);o.frequency.exponentialRampToValueAtTime(Math.max(f2,20),t0+dur);g.gain.setValueAtTime(0.0001,t0);g.gain.exponentialRampToValueAtTime(v,t0+0.005);g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);o.connect(g);g.connect(audioCtx.destination);o.start(t0);o.stop(t0+dur+0.02);}catch(e){}}
+function rnd(f){return f*(0.94+Math.random()*0.12);}
+function sndTab(){tone(rnd(1400),0.05,'square',0.09);tone(rnd(1000),0.07,'triangle',0.06,0.01);}
+function sndAccOpen(){tone(rnd(1100),0.06,'triangle',0.07);tone(rnd(1600),0.07,'triangle',0.05,0.03);}
+function sndAccClose(){tone(rnd(1600),0.06,'triangle',0.06);tone(rnd(1100),0.08,'triangle',0.05,0.03);}
+function sndToggle(){tone(rnd(1200),0.05,'square',0.08);tone(rnd(1800),0.06,'square',0.06,0.03);}
+function sndSelectLoc(){tone(rnd(1500),0.05,'square',0.08);tone(rnd(2000),0.06,'square',0.06,0.03);}
+function sndStartProcess(kind){if(kind==='acid'){slide(rnd(600),rnd(1400),0.15,'triangle',0.09);slide(rnd(500),rnd(1100),0.18,'triangle',0.07,0.06);}else{slide(rnd(900),rnd(500),0.18,'sawtooth',0.09);slide(rnd(700),rnd(400),0.22,'sawtooth',0.07,0.08);}}
+function sndBuy(){tone(rnd(1200),0.07,'square',0.10);tone(rnd(1700),0.08,'square',0.09,0.05);tone(rnd(2300),0.1,'square',0.08,0.1);}
+function sndDeny(){slide(rnd(700),rnd(300),0.18,'sawtooth',0.11);}
+function sndCoins(){[1400,1800,2200,2800].forEach(function(f,i){tone(rnd(f),0.22,'square',0.08,i*0.05);});}
+function sndPrestige(){[880,1100,1400,1800].forEach(function(f,i){tone(f,0.5,'triangle',0.14,i*0.12);});}
+function sndOfflineClaim(){[1100,1500,2000].forEach(function(f,i){tone(f,0.3,'triangle',0.12,i*0.08);});}
+function sndDigJunk(){tone(rnd(600),0.05,'triangle',0.09);tone(rnd(400),0.07,'triangle',0.06,0.02);}
+function sndDigMid(){tone(rnd(900),0.06,'triangle',0.10);tone(rnd(650),0.08,'triangle',0.07,0.02);}
+function sndDigNice(){tone(rnd(1200),0.06,'square',0.10);tone(rnd(1700),0.08,'square',0.08,0.03);}
+function sndDigRare(){tone(rnd(1500),0.1,'square',0.11);tone(rnd(2000),0.12,'square',0.09,0.05);tone(rnd(2600),0.14,'square',0.07,0.1);}
+function sndDigPricey(){[1800,2300,2900].forEach(function(f,i){tone(rnd(f),0.16,'square',0.10,i*0.04);});}
+function sndDing(){[1800,2200,2700,3300].forEach(function(f,i){tone(rnd(f),0.35,'triangle',0.13,i*0.05);});}
+function startAcidLoop(){try{if(!canPlay()||activeLoops.acid)return;activeLoops.acid={tick:0};var bubble=function(){if(!activeLoops.acid)return;var f1=800+Math.random()*500;var f2=f1+200+Math.random()*400;slide(f1,f2,0.1,'triangle',0.06);activeLoops.acid.tick=setTimeout(bubble,140+Math.random()*180);};bubble();}catch(e){}}
 function stopAcidLoop(){try{if(activeLoops.acid){clearTimeout(activeLoops.acid.tick);activeLoops.acid=null;}}catch(e){activeLoops.acid=null;}}
-function startFireLoop(){try{if(!canPlay()||activeLoops.fire)return;var o=audioCtx.createOscillator();o.type='sawtooth';o.frequency.value=55;var f=audioCtx.createBiquadFilter();f.type='lowpass';f.frequency.value=200;var g=audioCtx.createGain();g.gain.value=Math.min(0.045*VOL_MUL,0.95);o.connect(f);f.connect(g);g.connect(audioCtx.destination);o.start();activeLoops.fire={osc:o};}catch(e){}}
+function startFireLoop(){try{if(!canPlay()||activeLoops.fire)return;var o=audioCtx.createOscillator();o.type='sawtooth';o.frequency.value=140;var f=audioCtx.createBiquadFilter();f.type='bandpass';f.frequency.value=500;f.Q.value=1.2;var g=audioCtx.createGain();g.gain.value=Math.min(0.08*VOL_MUL,0.98);o.connect(f);f.connect(g);g.connect(audioCtx.destination);o.start();activeLoops.fire={osc:o};}catch(e){}}
 function stopFireLoop(){try{if(activeLoops.fire){activeLoops.fire.osc.stop();activeLoops.fire=null;}}catch(e){activeLoops.fire=null;}}
 
 function vibe(ms){try{if(!s||!s.settings||!s.settings.vibe)return;if(navigator.vibrate)navigator.vibrate(ms||15);}catch(e){}}

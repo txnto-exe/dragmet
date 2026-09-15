@@ -79,7 +79,7 @@ h1.game-title{font-size:22px;font-weight:800;margin:0;flex-shrink:0;cursor:point
 .inv-item.flash{border-color:var(--gold);transform:scale(1.05);}
 .inv-item .ic{font-size:18px;}
 .inv-item .n{font-family:ui-monospace,monospace;font-size:14px;font-weight:600;}
-.inv-item .l{font-size:9px;color:var(--text-dim);line-height:1.15;margin-top:2px;word-break:break-word;}
+.inv-item .l{font-size:9px;color:var(--text-dim);line-height:1.15;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .inv-item .g{font-size:9.5px;color:var(--gold-dim);font-family:ui-monospace,monospace;margin-top:2px;}
 .cap-bar{height:6px;background:var(--panel-2);border-radius:3px;margin-top:10px;overflow:hidden;border:1px solid var(--edge);}
 .cap-fill{height:100%;background:var(--text-dim);width:0%;}
@@ -137,7 +137,7 @@ h1.game-title{font-size:22px;font-weight:800;margin:0;flex-shrink:0;cursor:point
 .inv-line .il-lock{position:absolute;top:50%;left:8px;transform:translateY(-50%);font-size:14px;opacity:0;pointer-events:none;z-index:2;}
 .inv-line .il-ic{font-size:16px;width:20px;text-align:center;position:relative;z-index:1;}
 .inv-line.locked .il-ic{opacity:0.4;}
-.inv-line .il-name{flex:1;color:var(--text-dim);font-size:11.5px;line-height:1.2;}
+.inv-line .il-name{flex:1;color:var(--text-dim);font-size:11.5px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .inv-line .il-cnt{font-family:ui-monospace,monospace;font-weight:600;color:var(--text);min-width:24px;text-align:right;}
 .inv-line .il-au{font-family:ui-monospace,monospace;color:var(--gold);min-width:60px;text-align:right;font-size:11.5px;}
 .inv-line.locked .il-name,.inv-line.locked .il-cnt,.inv-line.locked .il-au{color:#8a9170;}
@@ -172,7 +172,8 @@ h1.game-title{font-size:22px;font-weight:800;margin:0;flex-shrink:0;cursor:point
 .acc-head{display:flex;justify-content:space-between;align-items:center;padding:12px 0;cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none;border-bottom:1px solid var(--edge);}
 .acc-head .acc-title{font-size:12px;color:var(--rust);font-weight:700;letter-spacing:0.5px;text-transform:uppercase;}
 .acc-head.prest .acc-title{color:var(--prest);}
-.acc-head .acc-arrow{font-size:12px;color:var(--text-dim);transition:transform 0.15s;transform:rotate(-90deg);}
+.acc-head .acc-arrow{font-size:14px;color:var(--rust);font-weight:700;transition:transform 0.15s;transform:rotate(-90deg);}
+.acc-head.prest .acc-arrow{color:var(--prest);}
 .acc-head.open .acc-arrow{transform:rotate(0deg);}
 .acc-head.no-border{border-bottom:none;}
 .acc-body{display:none;padding-top:4px;}
@@ -182,14 +183,11 @@ h1.game-title{font-size:22px;font-weight:800;margin:0;flex-shrink:0;cursor:point
 .toast-msg.show{opacity:1;}
 .offline-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:9998;padding:20px;}
 .offline-overlay.show{display:flex;}
-.offline-card{background:linear-gradient(135deg, #0e2836 0%, #1a3a4a 100%);border:1px solid var(--offline);border-radius:10px;padding:24px;max-width:400px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,0.8);}
-.offline-card h2{margin:0 0 6px;font-size:22px;color:var(--offline);font-weight:800;}
-.offline-card .oc-sub{font-size:12px;color:var(--text-dim);margin-bottom:18px;}
-.offline-card .oc-line{display:flex;justify-content:space-between;padding:6px 0;font-size:14px;border-bottom:1px solid var(--offline-dim);}
-.offline-card .oc-line:last-of-type{border-bottom:none;}
-.offline-card .oc-line span:last-child{font-family:ui-monospace,monospace;color:var(--offline);font-weight:600;}
-.offline-card .oc-total{font-size:26px;font-weight:900;color:var(--offline);font-family:ui-monospace,monospace;text-align:center;margin:18px 0 8px;}
-.offline-card .oc-note{font-size:11px;color:var(--text-dim);text-align:center;margin-bottom:18px;line-height:1.4;}
+.offline-card{background:linear-gradient(135deg, #0e2836 0%, #1a3a4a 100%);border:1px solid var(--offline);border-radius:10px;padding:24px;max-width:400px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,0.8);text-align:center;}
+.offline-card h2{margin:0 0 10px;font-size:22px;color:var(--offline);font-weight:800;}
+.offline-card .oc-sub{font-size:13px;color:var(--text-dim);margin-bottom:16px;}
+.offline-card .oc-total{font-size:32px;font-weight:900;color:var(--offline);font-family:ui-monospace,monospace;margin:8px 0 14px;}
+.offline-card .oc-note{font-size:12px;color:var(--text-dim);margin-bottom:20px;line-height:1.5;font-style:italic;}
 .offline-claim{width:100%;padding:14px;background:var(--offline);color:#0a1c26;border:none;border-radius:6px;font-size:16px;font-weight:800;cursor:pointer;touch-action:manipulation;}
 .pg-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.9);display:none;align-items:center;justify-content:center;z-index:9997;padding:20px;}
 .pg-overlay.show{display:flex;}
@@ -256,16 +254,16 @@ h1.game-title{font-size:22px;font-weight:800;margin:0;flex-shrink:0;cursor:point
 .locked-amulets .locked-overlay{position:absolute;inset:0;background:rgba(10,14,8,0.6);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;z-index:5;}
 .locked-amulets .locked-overlay .big-lock{font-size:64px;filter:drop-shadow(0 4px 14px rgba(0,0,0,0.9));}
 .locked-amulets .locked-overlay .lock-label{font-size:11px;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;font-weight:700;}
-.amulet-row{display:flex;align-items:flex-start;gap:10px;padding:10px;background:var(--panel-2);border:1px solid var(--edge);border-radius:6px;position:relative;overflow:hidden;transition:transform 0.25s ease-out;touch-action:pan-y;}
+.amulet-row{display:flex;align-items:flex-start;gap:10px;padding:10px;background:var(--panel-2);border:1px solid var(--edge);border-radius:6px;position:relative;overflow:hidden;transition:transform 0.25s ease-out;touch-action:pan-y;will-change:transform;}
 .amulet-row.swiping{transition:none;}
 .amulet-row .am-icon{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(255,255,255,0.06);}
 .amulet-row .am-body{flex:1;min-width:0;}
 .amulet-row .am-name{font-size:13px;font-weight:700;margin:0;}
 .amulet-row .am-effect{font-size:10.5px;color:var(--text-dim);margin-top:2px;line-height:1.35;}
 .amulet-row .am-time{font-size:10px;color:var(--gold);margin-top:3px;font-family:ui-monospace,monospace;}
-.amulet-row .am-recipe{font-size:9.5px;color:var(--text-dim);margin-top:4px;font-family:ui-monospace,monospace;line-height:1.4;white-space:nowrap;overflow:hidden;}
-.amulet-row .am-recipe .miss{color:var(--rust);}
-.amulet-row .am-recipe .sep{color:#3a4230;margin:0 1px;}
+.amulet-row .am-recipe{font-size:9.5px;color:var(--text-dim);margin-top:5px;display:flex;flex-wrap:wrap;gap:3px;white-space:normal;}
+.amulet-row .am-recipe .rec-chip{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);padding:1px 5px;border-radius:3px;white-space:nowrap;font-family:ui-monospace,monospace;line-height:1.3;}
+.amulet-row .am-recipe .rec-chip.miss{color:var(--rust);background:rgba(143,179,57,0.08);border-color:rgba(143,179,57,0.2);}
 .amulet-row .am-action{flex-shrink:0;display:flex;flex-direction:column;gap:4px;align-items:flex-end;}
 .amulet-row .am-btn{padding:6px 10px;font-size:11px;font-weight:700;border-radius:4px;border:1px solid var(--edge);background:var(--panel);color:var(--text);cursor:pointer;touch-action:manipulation;font-family:inherit;}
 .amulet-row .am-btn.craft{color:var(--acid);border-color:var(--acid-dim);}
@@ -364,11 +362,8 @@ h1.game-title{font-size:22px;font-weight:800;margin:0;flex-shrink:0;cursor:point
   <div class="offline-card">
     <h2>Пока тебя не было</h2>
     <div class="oc-sub" id="ocTime">—</div>
-    <div class="oc-line"><span>Скорость работы</span><span id="ocRate">—</span></div>
-    <div class="oc-line"><span>Лимит часов</span><span id="ocCap">—</span></div>
-    <div class="oc-line"><span>Засчитано часов</span><span id="ocHours">—</span></div>
     <div class="oc-total" id="ocTotal">+0 ₽</div>
-    <div class="oc-note">Работяги топили печь, пока ты не заходил</div>
+    <div class="oc-note" id="ocNote">Работяги топили печь, пока ты не заходил</div>
     <button class="offline-claim" id="ocClaim" type="button">Забрать</button>
   </div>
 </div>
@@ -586,6 +581,18 @@ var AUTO_SLOW_FACTOR=3;
 var FORGE_SPEED_BASE=8000,FORGE_SPEED_MULT=1.7,FORGE_SPEED_MAX=7;
 var FORGE_DISCOUNT_BASE=12000,FORGE_DISCOUNT_MULT=1.8,FORGE_DISCOUNT_MAX=10;
 var FORGE_DURATION_BASE=15000,FORGE_DURATION_MULT=1.9,FORGE_DURATION_MAX=5;
+var SWIPE_WIDTH=78;
+
+var OFFLINE_PHRASES=[
+ 'Работяги топили печь, пока тебя не было.',
+ 'Работяги не спали — копали всю смену.',
+ 'Кузнец не выпускал молот из рук.',
+ 'Мусор сам себя не разберёт — пришлось работягам.',
+ 'Работяги честно пахали за еду.',
+ 'Работяги волокли хлам на склад без перекура.',
+ 'Пока ты отдыхал, кто-то работал.',
+ 'Работяги нашли кое-что интересное, пока тебя не было.'
+];
 
 var AMULETS=[
  {key:'nightShift',name:'Ночная смена',icon:'🌙',color:'#6dc4e8',effect:'Работяги копают без штрафа даже у других точек',recipe:{resist:20,caps:10,cpus:5},durType:'prestige',durVal:3,craftMin:5},
@@ -638,6 +645,8 @@ var p=makePrest();
 for(var li=0;li<LOCATIONS.length;li++){p.autoDig[LOCATIONS[li].key]=false;p.autoTimers[LOCATIONS[li].key]=0;}
 var s=makeState();
 var lastSaveTs=0;
+window._revealedAmulet=null;
+window._amuletDragging=false;
 
 function ensureSettings(){if(!s)return;if(!s.settings)s.settings={sound:true,vibe:true,music:false};if(typeof s.settings.sound==='undefined')s.settings.sound=true;if(typeof s.settings.vibe==='undefined')s.settings.vibe=true;if(typeof s.settings.music==='undefined')s.settings.music=false;}
 function locDef(k){for(var i=0;i<LOCATIONS.length;i++)if(LOCATIONS[i].key===k)return LOCATIONS[i];}
@@ -694,7 +703,7 @@ function forgeCraftTimeMs(id){var a=getAmulet(id);if(!a)return 0;var base=a.craf
 function forgeDurationMult(id){var a=getAmulet(id);if(!a)return 1;if(a.durType==='hours'){return 1+s.lv.forgeDuration*0.25;}return 1;}
 function grantAmulet(id){var a=getAmulet(id);if(!a)return;if(a.durType==='prestige'){s.amulets[id]={prestigeLeft:a.durVal};}else{var ms=a.durVal*3600000*forgeDurationMult(id);s.amulets[id]={expiresAt:Date.now()+ms};}}
 function consumeRecipe(id){var rec=getRecipeAmulet(id);for(var k in rec){s.junk[k]=Math.max(0,(s.junk[k]||0)-rec[k]);}}
-function dissolveAmulet(id){var a=getAmulet(id);if(!a)return;var rec=a.recipe;var returned=[];for(var k in rec){var amount=Math.floor(rec[k]*0.4);if(amount>0){s.junk[k]=(s.junk[k]||0)+amount;returned.push(CATALOG[k].name+' ×'+amount);}}delete s.amulets[id];if(s.equippedAmulet===id)s.equippedAmulet=null;updateBloom();var msg='Растворено. Вернулось: '+(returned.length?returned.join(', '):'ничего');flashToast(msg,'rp');saveGame();}
+function dissolveAmulet(id){var a=getAmulet(id);if(!a)return;var rec=a.recipe;var returned=[];for(var k in rec){var amount=Math.floor(rec[k]*0.4);if(amount>0){s.junk[k]=(s.junk[k]||0)+amount;returned.push(CATALOG[k].icon+' '+CATALOG[k].name+' ×'+amount);}}delete s.amulets[id];if(s.equippedAmulet===id)s.equippedAmulet=null;window._revealedAmulet=null;updateBloom();var msg='Растворено. Вернулось: '+(returned.length?returned.join(', '):'ничего');flashToast(msg,'rp');saveGame();}
 
 var audioCtx=null,audioBroken=false,activeLoops={};
 function initAudio(){if(audioCtx||audioBroken)return;try{var Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx){audioBroken=true;return;}audioCtx=new Ctx();}catch(e){audioBroken=true;audioCtx=null;}}
@@ -826,7 +835,7 @@ function craftAmulet(id){var a=getAmulet(id);if(!a)return;if(s.forgeCraft){sndDe
 function equipAmulet(id){if(!s.amulets[id])return;s.equippedAmulet=id;updateBloom();sndBuy();vibe(25);saveGame();render();}
 function unequipAmulet(){s.equippedAmulet=null;updateBloom();sndToggle();vibe(15);saveGame();render();}
 
-function resetAll(){p=makePrest();for(var li=0;li<LOCATIONS.length;li++){p.autoDig[LOCATIONS[li].key]=false;p.autoTimers[LOCATIONS[li].key]=0;}var keepSettings=s&&s.settings?s.settings:{sound:true,vibe:true,music:false};s=makeState();s.settings=keepSettings;try{localStorage.removeItem(SAVE_KEY_A);localStorage.removeItem(SAVE_KEY_B);for(var oi=0;oi<OLD_KEYS.length;oi++)localStorage.removeItem(OLD_KEYS[oi]);}catch(e){}lastSaveTs=0;stopAcidLoop();stopFireLoop();cancelAllPress();currentDigLabel=DIG_LABELS[0];updateBloom();switchTab('dig');}
+function resetAll(){p=makePrest();for(var li=0;li<LOCATIONS.length;li++){p.autoDig[LOCATIONS[li].key]=false;p.autoTimers[LOCATIONS[li].key]=0;}var keepSettings=s&&s.settings?s.settings:{sound:true,vibe:true,music:false};s=makeState();s.settings=keepSettings;try{localStorage.removeItem(SAVE_KEY_A);localStorage.removeItem(SAVE_KEY_B);for(var oi=0;oi<OLD_KEYS.length;oi++)localStorage.removeItem(OLD_KEYS[oi]);}catch(e){}lastSaveTs=0;stopAcidLoop();stopFireLoop();cancelAllPress();currentDigLabel=DIG_LABELS[0];window._revealedAmulet=null;updateBloom();switchTab('dig');}
 function doPrestige(){
  if(s.cash<PRESTIGE_THRESHOLD){sndDeny();vibe(40);return;}
  var newLvl=p.level+1,reward=prestigeReward(newLvl);
@@ -872,7 +881,7 @@ function tick(dt){
 }
 function calcOfflinePerHour(){var totalGold=0;for(var i=0;i<LOCATIONS.length;i++){var def=LOCATIONS[i];if(!p.autoDig[def.key])continue;var ls=locState(def.key);if(!ls||!ls.unlocked)continue;var tw=0,avgGold=0;for(var j=0;j<def.loot.length;j++){var w=def.loot[j].w;if(hasAmulet('scavenger')&&(def.loot[j].k==='resist'||def.loot[j].k==='caps'||def.loot[j].k==='trans'))w*=3;tw+=w;avgGold+=w*CATALOG[def.loot[j].k].gold;}if(tw<=0)continue;avgGold=avgGold/tw;var cdBase=autoCdBase();var digsPerHour=3600000/Math.max(cdBase,100);totalGold+=digsPerHour*avgGold*acidEffEffective()*fireEffEffective();}return totalGold*effectivePrice();}
 function applyOfflineIncome(){if(!s.lastSeenTs){s.lastSeenTs=Date.now();return 0;}var elapsed=Date.now()-s.lastSeenTs;var elapsedSec=elapsed/1000;if(elapsedSec<OFFLINE_MIN_SEC){return 0;}var capHours=offlineCapHours();var elapsedHours=elapsedSec/3600;var countedHours=Math.min(elapsedHours,capHours);var perHour=calcOfflinePerHour();var ratePct=offlineRatePct()/100;var earned=Math.floor(perHour*countedHours*ratePct);s.lastSeenTs=Date.now();if(earned<=0)return 0;s.cash+=earned;s.stats.earnedTotal+=earned;s.stats.offlineTotal+=earned;return {earned:earned,elapsed:elapsedSec,hours:countedHours,cap:capHours,rate:offlineRatePct(),perHour:perHour};}
-function showOfflineOverlay(info){var el=document.getElementById('offlineOverlay');if(!el)return;var sec=Math.floor(info.elapsed);var h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60);var timeStr=h>0?(h+' ч '+m+' мин'):(m+' мин');var hoursStr=info.hours.toFixed(2)+' ч'+(info.hours>=info.cap?' (макс)':'');document.getElementById('ocTime').textContent='Тебя не было: '+timeStr;document.getElementById('ocRate').textContent='+'+info.rate+'% от обычного';document.getElementById('ocCap').textContent=info.cap+' ч';document.getElementById('ocHours').textContent=hoursStr;document.getElementById('ocTotal').textContent='+'+fmt(info.earned)+' ₽';el.classList.add('show');}
+function showOfflineOverlay(info){var el=document.getElementById('offlineOverlay');if(!el)return;var sec=Math.floor(info.elapsed);var h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60);var timeStr=h>0?(h+' ч '+m+' мин'):(m+' мин');document.getElementById('ocTime').textContent='Тебя не было: '+timeStr;document.getElementById('ocTotal').textContent='+'+fmt(info.earned)+' ₽';var note=document.getElementById('ocNote');if(note)note.textContent=OFFLINE_PHRASES[Math.floor(Math.random()*OFFLINE_PHRASES.length)];el.classList.add('show');}
 function hideOfflineOverlay(){var el=document.getElementById('offlineOverlay');if(!el)return;el.classList.remove('show');}
 
 function buildSaveData(){
@@ -936,6 +945,7 @@ function openSettings(){updateSettingsModal();document.getElementById('settingsM
 function closeSettings(){document.getElementById('settingsModal').classList.remove('show');}
 
 function switchTab(name){
+ window._revealedAmulet=null;
  var secs=document.querySelectorAll('.tab-section');
  for(var i=0;i<secs.length;i++){if(secs[i].getAttribute('data-tab')===name)secs[i].classList.add('active');else secs[i].classList.remove('active');}
  var tbs=document.querySelectorAll('.tab-btn');
@@ -947,8 +957,8 @@ function toggleAcc(key){s.accState[key]=!s.accState[key];if(s.accState[key])sndA
 function applyAccState(){var heads=document.querySelectorAll('.acc-head');for(var i=0;i<heads.length;i++){var k=heads[i].getAttribute('data-acc');if(s.accState[k])heads[i].classList.add('open');else heads[i].classList.remove('open');}var bodies=document.querySelectorAll('.acc-body');for(var j=0;j<bodies.length;j++){var k2=bodies[j].getAttribute('data-accbody');if(s.accState[k2])bodies[j].classList.add('open');else bodies[j].classList.remove('open');}}
 
 function renderLocations(){var row=document.getElementById('locRow');if(!row)return;row.innerHTML='';for(var i=0;i<LOCATIONS.length;i++){(function(def){var ls=locState(def.key);var card=document.createElement('div');var hasAuto=p.autoDig[def.key]===true;card.className='loc-card'+(s.activeLoc===def.key?' active':'')+(!ls.unlocked?' locked':'')+(hasAuto?' autodig':'');if(ls.unlocked){var pct=ls.stock/def.maxStock*100;card.setAttribute('data-act','loc');card.setAttribute('data-key',def.key);var autoLine=hasAuto?'<div class="loc-auto-txt">★ авто</div>':'';card.innerHTML='<div class="loc-ic">'+def.icon+'</div><div class="loc-name">'+def.name+'</div><div class="loc-stock-bar"><div class="loc-stock-fill" style="width:'+pct+'%"></div></div><div class="loc-stock-txt'+(ls.stock===0?' loc-empty':'')+'">'+ls.stock+' / '+def.maxStock+(ls.stock===0?' пусто':'')+'</div>'+autoLine;}else{card.setAttribute('data-act','unlock');card.setAttribute('data-key',def.key);var cost=locUnlockCost(def);var disc=p.lv.locDiscount>0?'<div class="loc-auto-txt">скидка −'+Math.round((1-cost/def.unlockCost)*100)+'%</div>':'';card.innerHTML='<div class="loc-ic">'+def.icon+'</div><div class="loc-name">'+def.name+'</div><div class="loc-unlock">🔒 '+fmt(cost)+' ₽</div>'+disc;}row.appendChild(card);})(LOCATIONS[i]);}}
-function renderInventory(){var row=document.getElementById('invRow');if(!row)return;row.innerHTML='';var order=s.invExpanded?CATALOG_ORDER:CATALOG_ORDER.slice(0,INV_PREVIEW);for(var i=0;i<order.length;i++){var k=order[i],c=CATALOG[k];var div=document.createElement('div');div.className='inv-item';div.innerHTML='<div class="ic">'+c.icon+'</div><div class="n">'+s.junk[k]+'</div><div class="l">'+c.name+'</div><div class="g">'+(c.gold*1000).toFixed(0)+' мг Au</div>';row.appendChild(div);}var tb=document.getElementById('invToggle');if(tb)tb.textContent=s.invExpanded?'Свернуть ▴':'Показать все виды ('+CATALOG_ORDER.length+') ▾';}
-function renderAcidInventory(){var box=document.getElementById('acidInvList');if(!box)return;box.innerHTML='';var any=false;for(var i=0;i<CATALOG_ORDER.length;i++){var k=CATALOG_ORDER[i],c=CATALOG[k],cnt=s.junk[k],au=cnt*c.gold;var locked=!!s.locked[k];var div=document.createElement('div');div.className='inv-line'+(cnt===0?' dim':'')+(locked?' locked':'');div.setAttribute('data-act','lock');div.setAttribute('data-key',k);div.innerHTML='<span class="il-lock">🔒</span><span class="il-ic">'+c.icon+'</span><span class="il-name">'+c.name+'</span><span class="il-cnt">'+cnt+' шт</span><span class="il-au">'+fmt(au,3)+' г</span>';box.appendChild(div);if(cnt>0)any=true;}if(!any)box.innerHTML='<div class="empty-note">Склад пуст — иди покопайся в мусорке</div>';var tot=document.getElementById('acidInvTotal');if(tot)tot.textContent=fmt(junkGoldValue(),3)+' г';var hdr=document.getElementById('acidStockAu');if(hdr)hdr.textContent=fmt(junkGoldValueUnlocked(),3)+' г Au';}
+function renderInventory(){var row=document.getElementById('invRow');if(!row)return;row.innerHTML='';var order=s.invExpanded?CATALOG_ORDER:CATALOG_ORDER.slice(0,INV_PREVIEW);for(var i=0;i<order.length;i++){var k=order[i],c=CATALOG[k];var div=document.createElement('div');div.className='inv-item';div.innerHTML='<div class="ic">'+c.icon+'</div><div class="n">'+s.junk[k]+'</div><div class="l" title="'+c.name+'">'+c.name+'</div><div class="g">'+(c.gold*1000).toFixed(0)+' мг Au</div>';row.appendChild(div);}var tb=document.getElementById('invToggle');if(tb)tb.textContent=s.invExpanded?'Свернуть ▴':'Показать все виды ('+CATALOG_ORDER.length+') ▾';}
+function renderAcidInventory(){var box=document.getElementById('acidInvList');if(!box)return;box.innerHTML='';var any=false;for(var i=0;i<CATALOG_ORDER.length;i++){var k=CATALOG_ORDER[i],c=CATALOG[k],cnt=s.junk[k],au=cnt*c.gold;var locked=!!s.locked[k];var div=document.createElement('div');div.className='inv-line'+(cnt===0?' dim':'')+(locked?' locked':'');div.setAttribute('data-act','lock');div.setAttribute('data-key',k);div.innerHTML='<span class="il-lock">🔒</span><span class="il-ic">'+c.icon+'</span><span class="il-name" title="'+c.name+'">'+c.name+'</span><span class="il-cnt">'+cnt+' шт</span><span class="il-au">'+fmt(au,3)+' г</span>';box.appendChild(div);if(cnt>0)any=true;}if(!any)box.innerHTML='<div class="empty-note">Склад пуст — иди покопайся в мусорке</div>';var tot=document.getElementById('acidInvTotal');if(tot)tot.textContent=fmt(junkGoldValue(),3)+' г';var hdr=document.getElementById('acidStockAu');if(hdr)hdr.textContent=fmt(junkGoldValueUnlocked(),3)+' г Au';}
 function renderAcidStages(){var box=document.getElementById('acidStages');if(!box)return;var html='',freeCount=0,jv=junkGoldValueUnlocked();for(var j=0;j<s.acid.length;j++)if(!s.acid[j].active)freeCount++;for(var i=0;i<s.acid.length;i++){var b=s.acid[i],label=s.acid.length>1?'Ванна #'+(i+1):'Процесс';var status,btnTxt='',btnDis='',btnCls='',prog=0;if(b.active){prog=b.progress/b.duration*100;status=fmt(b.yieldAmt,2)+' г Au';btnTxt='Растворяется...';btnDis='disabled';}else{status=fmt(s.solution,2)+' л раствора';if(jv<=0){btnTxt='Нечего растворять';btnDis='disabled';}else{var frac=freeCount>1?1/freeCount:1;btnTxt='Растворить ~'+fmt(jv*frac*acidEffEffective(),2)+' г Au';btnCls=' ready';}}var activeCls=b.active?' active':'';html+='<div class="stage"><div class="stage-icon ic-acid'+activeCls+'">🧪</div><div class="stage-body"><div class="stage-top"><span>'+label+'</span><b>'+status+'</b></div><div class="bar"><div class="bar-fill acid" style="width:'+prog+'%"></div></div><button class="stage-btn'+btnCls+'" data-act="acid-start" data-idx="'+i+'" '+btnDis+'>'+btnTxt+'</button></div></div>';}box.innerHTML=html;}
 function renderFireStages(){var box=document.getElementById('fireStages');if(!box)return;var html='',freeCount=0;for(var j=0;j<s.fire.length;j++)if(!s.fire[j].active)freeCount++;for(var i=0;i<s.fire.length;i++){var f=s.fire[i],label=s.fire.length>1?'Печь #'+(i+1):'Процесс';var status,btnTxt='',btnDis='',btnCls='',prog=0;if(f.active){prog=f.progress/f.duration*100;status=fmt(f.yieldAmt,3)+' г слитков';btnTxt='Плавится...';btnDis='disabled';}else{status=fmt(s.solution,2)+' л раствора';if(s.solution<=0){btnTxt='Нет раствора';btnDis='disabled';}else{var frac=freeCount>1?1/freeCount:1;btnTxt='Выпарить ~'+fmt(s.solution*frac*fireEffEffective(),3)+' г';btnCls=' ready';}}var activeCls=f.active?' active':'';html+='<div class="stage"><div class="stage-icon ic-fire'+activeCls+'">🔥</div><div class="stage-body"><div class="stage-top"><span>'+label+'</span><b>'+status+'</b></div><div class="bar"><div class="bar-fill fire" style="width:'+prog+'%"></div></div><button class="stage-btn'+btnCls+'" data-act="fire-start" data-idx="'+i+'" '+btnDis+'>'+btnTxt+'</button></div></div>';}box.innerHTML=html;}
 function renderRegenList(){var c=document.getElementById('regenList');if(!c)return;var html='';for(var i=0;i<LOCATIONS.length;i++){var def=LOCATIONS[i],ls=locState(def.key);if(!ls.unlocked)continue;var curIv=locRegenIv(def,ls)/1000,nextIv=(def.regenBase/(1+(ls.regenLv+1)*0.28))/1000;var cost=regenCostFor(def,ls),dis=s.cash<cost?'disabled':'';html+='<div class="upg"><div><div class="upg-name">'+def.icon+' '+def.name+'</div><div class="upg-desc">точка пополняется быстрее: '+curIv.toFixed(1)+'с → '+nextIv.toFixed(1)+'с на одну штуку (уровень '+ls.regenLv+')</div></div><button class="upg-btn" id="b-regen:'+def.key+'" type="button" '+dis+'>'+cost+' ₽</button></div>';}if(!html)html='<div class="upg-desc" style="padding:4px 0;">разблокируй точку, чтобы качать её скорость</div>';c.innerHTML=html;}
@@ -977,81 +987,86 @@ function renderAmuletList(){
   var wrap=document.createElement('div');wrap.className='amulet-row-wrap';
   if(owned){var trash=document.createElement('div');trash.className='amulet-trash';trash.setAttribute('data-act','amulet-dissolve');trash.setAttribute('data-key',a.key);trash.textContent='🗑️';wrap.appendChild(trash);}
   var row=document.createElement('div');row.className='amulet-row';row.setAttribute('data-act','amulet-row');row.setAttribute('data-key',a.key);
-  var recipeHtml='';var first=true;
+  var recipeHtml='';
   for(var k in rec){
-   if(!first)recipeHtml+='<span class="sep">|</span>';
-   first=false;
    var have=s.junk[k]||0,need=rec[k];var cls=have>=need?'':'miss';
-   recipeHtml+='<span class="'+cls+'">'+CATALOG[k].icon+' '+have+'/'+need+'</span>';
+   recipeHtml+='<span class="rec-chip '+cls+'">'+CATALOG[k].icon+' '+CATALOG[k].name+' '+have+'/'+need+'</span>';
   }
   var craftMin=Math.ceil(forgeCraftTimeMs(a.key)/60000);
   var actionHtml='';
   if(owned){if(equipped){actionHtml='<button class="am-btn unequip" data-act="amulet-unequip" data-key="'+a.key+'">Снять</button>';}else{actionHtml='<button class="am-btn equip" data-act="amulet-equip" data-key="'+a.key+'">Одеть</button>';}actionHtml+='<div style="font-size:9px;color:var(--text-dim);margin-top:4px;text-align:right;">свайп ← удалить</div>';}
   else{var dis=canCraft&&!s.forgeCraft?'':'disabled';var btnTxt='Создать';if(s.forgeCraft)btnTxt='Занят';else if(!canCraft)btnTxt='Мало';actionHtml='<button class="am-btn craft" data-act="amulet-craft" data-key="'+a.key+'" '+dis+'>'+btnTxt+'</button>';actionHtml+='<div class="am-time-to-craft">~'+craftMin+' мин</div>';}
   row.innerHTML='<div class="am-icon" style="color:'+a.color+';background:'+a.color+'22;box-shadow:0 0 10px '+a.color+'55;">'+a.icon+'</div>'+'<div class="am-body"><p class="am-name">'+a.name+'</p><div class="am-effect">'+a.effect+'</div>'+(owned?'<div class="am-time">'+amuletRemainingText(a.key)+'</div>':'<div class="am-recipe">'+recipeHtml+'</div>')+'</div><div class="am-action">'+actionHtml+'</div>';
-  if(owned){attachSwipe(row,a.key);}
+  if(owned){
+   attachSwipe(row,a.key);
+   if(window._revealedAmulet===a.key){row.style.transition='none';row.style.transform='translateX(-'+SWIPE_WIDTH+'px)';}
+  }
   wrap.appendChild(row);box.appendChild(wrap);
  }
  if(!box.children.length){box.innerHTML='<div class="empty-note">Амулетов пока нет</div>';}
 }
 function attachSwipe(el,key){
- var startX=0,startY=0,currentX=0,dragging=false,isSwipe=false;
- var width=78;
+ var startX=0,startY=0,currentX=0,dragging=false,isSwipe=false,pid=null;
+ var width=SWIPE_WIDTH;
  function onStart(e){
-  var t=e.touches?e.touches[0]:e;
-  if(!t)return;
-  startX=t.clientX;startY=t.clientY;currentX=0;dragging=true;isSwipe=false;
+  if(window._amuletDragging)return;
+  if(window._revealedAmulet&&window._revealedAmulet!==key){window._revealedAmulet=null;}
+  startX=e.clientX;startY=e.clientY;
+  currentX=(window._revealedAmulet===key)?-width:0;
+  dragging=true;isSwipe=false;pid=e.pointerId;
   window._amuletDragging=true;
+  try{el.setPointerCapture(pid);}catch(er){}
   el.classList.add('swiping');
   el.style.transition='none';
-  el.style.transform='translateX(0)';
+  el.style.transform='translateX('+currentX+'px)';
  }
  function onMove(e){
-  if(!dragging)return;
-  var t=e.touches?e.touches[0]:e;
-  if(!t)return;
-  var dx=t.clientX-startX;
-  var dy=t.clientY-startY;
+  if(!dragging||e.pointerId!==pid)return;
+  var dx=e.clientX-startX,dy=e.clientY-startY;
   if(!isSwipe){
    var adx=Math.abs(dx),ady=Math.abs(dy);
-   if(adx>10 && adx>ady*1.2){
-    isSwipe=true;
-   }else if(ady>10){
-    dragging=false;
-    window._amuletDragging=false;
-    el.classList.remove('swiping');
-    el.style.transition='';
-    return;
-   }else{
-    return;
-   }
+   if(adx>8&&adx>ady*1.1){isSwipe=true;}
+   else if(ady>8){
+    dragging=false;window._amuletDragging=false;
+    el.classList.remove('swiping');el.style.transition='';
+    var base=(window._revealedAmulet===key)?-width:0;
+    el.style.transform='translateX('+base+'px)';
+    try{el.releasePointerCapture(pid);}catch(er){}
+    pid=null;return;
+   }else{return;}
   }
-  if(e.cancelable){try{e.preventDefault();}catch(er){}}
-  currentX=dx;
+  try{e.preventDefault();}catch(er){}
+  var base2=(window._revealedAmulet===key)?-width:0;
+  currentX=base2+dx;
   if(currentX>0)currentX=0;
   if(currentX<-width)currentX=-width;
   el.style.transform='translateX('+currentX+'px)';
  }
  function onEnd(e){
-  if(!dragging){window._amuletDragging=false;return;}
-  dragging=false;
-  window._amuletDragging=false;
-  el.classList.remove('swiping');
-  el.style.transition='';
-  if(isSwipe && currentX<-width/2){
+  if(!dragging)return;
+  dragging=false;window._amuletDragging=false;
+  el.classList.remove('swiping');el.style.transition='';
+  if(isSwipe&&currentX<-width/2){
+   window._revealedAmulet=key;
    el.style.transform='translateX(-'+width+'px)';
   }else{
+   window._revealedAmulet=null;
    el.style.transform='translateX(0)';
   }
+  try{el.releasePointerCapture(pid);}catch(er){}
+  pid=null;
  }
- el.addEventListener('touchstart',onStart,{passive:true});
- el.addEventListener('touchmove',onMove,{passive:false});
- el.addEventListener('touchend',onEnd);
- el.addEventListener('touchcancel',onEnd);
- el.addEventListener('mousedown',onStart);
- el.addEventListener('mousemove',onMove);
- el.addEventListener('mouseup',onEnd);
- el.addEventListener('mouseleave',onEnd);
+ if(window.PointerEvent){
+  el.addEventListener('pointerdown',onStart);
+  el.addEventListener('pointermove',onMove);
+  el.addEventListener('pointerup',onEnd);
+  el.addEventListener('pointercancel',onEnd);
+ }else{
+  el.addEventListener('touchstart',function(e){var t=e.touches[0];onStart({clientX:t.clientX,clientY:t.clientY,pointerId:1});},{passive:true});
+  el.addEventListener('touchmove',function(e){var t=e.touches[0];onMove({clientX:t.clientX,clientY:t.clientY,pointerId:1,preventDefault:function(){if(e.cancelable)e.preventDefault();}});},{passive:false});
+  el.addEventListener('touchend',function(e){onEnd({pointerId:1});});
+  el.addEventListener('touchcancel',function(e){onEnd({pointerId:1});});
+ }
 }
 function renderAmuletHeader(){var h=document.getElementById('amuletHdr');if(!h)return;if(s.equippedAmulet){var a=getAmulet(s.equippedAmulet);if(a){h.style.display='flex';document.getElementById('amuletDot').style.color=a.color;document.getElementById('amuletDot').style.background=a.color;document.getElementById('amuletName').textContent=a.name;document.getElementById('amuletTime').textContent=' · '+amuletRemainingShort(a.key);return;}}h.style.display='none';}
 function setText(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
@@ -1156,6 +1171,14 @@ var ACTION_BTN={digBtn:scavenge,sellBtn:sellIngots};
 
 function handleDown(e){
  try{initAudio();if(audioCtx&&audioCtx.state==='suspended'){try{audioCtx.resume();}catch(er){}}}catch(er){}
+ if(window._revealedAmulet){
+  var tOut=e.target,inside=false;
+  while(tOut&&tOut!==document){
+   if(tOut.classList&&(tOut.classList.contains('amulet-row-wrap')||tOut.classList.contains('amulet-trash'))){inside=true;break;}
+   tOut=tOut.parentNode;
+  }
+  if(!inside)window._revealedAmulet=null;
+ }
  pressActive=true;pressTarget=e.target;pressMoved=false;pressIsAction=false;actionFn=null;
  var pt=e;if(e.touches&&e.touches[0])pt=e.touches[0];pressX=pt.clientX||0;pressY=pt.clientY||0;
  var t=e.target;
@@ -1215,10 +1238,11 @@ function processTap(target){
    if(act==='acid-start'){startAcid(parseInt(t.getAttribute('data-idx'),10)||0);return;}
    if(act==='fire-start'){startFurnace(parseInt(t.getAttribute('data-idx'),10)||0);return;}
    if(act==='lock'){toggleLock(t.getAttribute('data-key'));return;}
+   if(act==='amulet-row'){if(window._revealedAmulet===t.getAttribute('data-key'))window._revealedAmulet=null;return;}
    if(act==='amulet-craft'){craftAmulet(t.getAttribute('data-key'));return;}
    if(act==='amulet-equip'){equipAmulet(t.getAttribute('data-key'));return;}
    if(act==='amulet-unequip'){unequipAmulet();return;}
-   if(act==='amulet-dissolve'){if(confirm('Растворить амулет? Вернётся 40% материалов.'))dissolveAmulet(t.getAttribute('data-key'));return;}
+   if(act==='amulet-dissolve'){dissolveAmulet(t.getAttribute('data-key'));return;}
   }
   t=t.parentNode;
  }

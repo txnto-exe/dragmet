@@ -47,7 +47,7 @@ h1.game-title{font-size:20px;font-weight:800;margin:0;flex-shrink:0;cursor:point
 .hdr-amulet span{font-size:10px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .gear-btn{background:transparent;border:1px solid var(--edge);width:34px;height:34px;border-radius:50%;color:var(--text-dim);font-size:15px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0;}
 .gear-btn:active{background:var(--panel-2);color:var(--text);}
-.panel{background:var(--panel);border:1px solid var(--edge);border-radius:6px;padding:14px;margin-bottom:12px;}
+.panel{background:var(--panel);border:1px solid var(--edge);border-radius:6px;padding:14px;margin-bottom:12px;position:relative;}
 .panel-title{font-size:13px;color:var(--text-dim);margin:0 0 10px;display:flex;justify-content:space-between;align-items:baseline;}
 .panel-title b{color:var(--gold);font-family:ui-monospace,monospace;font-weight:600;font-size:13px;}
 .tab-section{display:none;}
@@ -67,7 +67,7 @@ h1.game-title{font-size:20px;font-weight:800;margin:0;flex-shrink:0;cursor:point
 .loc-auto-txt{font-size:9px;color:var(--prest);margin-top:1px;font-family:ui-monospace,monospace;}
 .loc-unlock{font-size:10px;margin-top:4px;color:var(--gold);font-family:ui-monospace,monospace;}
 .loc-empty{color:var(--rust);}
-.loc-nav{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;}
+.loc-nav{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;position:relative;}
 .loc-nav-btn{background:var(--panel-2);border:1px solid var(--edge);color:var(--text);padding:5px 16px;border-radius:4px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;touch-action:manipulation;line-height:1;}
 .loc-nav-btn:disabled{opacity:0.3;}
 .loc-nav-btn:active:not(:disabled){background:#28321c;color:var(--acid);}
@@ -78,9 +78,8 @@ h1.game-title{font-size:20px;font-weight:800;margin:0;flex-shrink:0;cursor:point
 @keyframes shakeBtn{0%,100%{transform:translateX(0);}20%{transform:translateX(-6px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}
 .dig-fill{position:absolute;left:0;top:0;bottom:0;background:rgba(0,0,0,0.28);width:0%;pointer-events:none;}
 .dig-label{position:relative;z-index:1;pointer-events:none;}
-.toast{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);background:rgba(20,24,16,0.94);border:1px solid var(--edge);padding:7px 14px;border-radius:6px;font-size:13px;color:var(--gold);text-align:center;pointer-events:none;z-index:8;white-space:nowrap;max-width:92%;opacity:0;transition:opacity 0.18s,transform 0.15s;}
+.toast{position:absolute;left:50%;transform:translate(-50%,-50%);background:rgba(20,24,16,0.96);border:1px solid var(--edge);padding:6px 12px;border-radius:6px;font-size:12.5px;color:var(--gold);text-align:center;pointer-events:none;z-index:30;white-space:nowrap;max-width:92%;opacity:0;transition:opacity 0.18s;top:42%;}
 .toast.show{opacity:1;}
-.toast.bump{transform:translate(-50%,-50%) scale(1.08);}
 .toast.t-jk{color:#8a916e;}
 .toast.t-cm{color:#dfe4c8;}
 .toast.t-vl{color:#6dc4e8;font-weight:600;}
@@ -246,11 +245,11 @@ h1.game-title{font-size:20px;font-weight:800;margin:0;flex-shrink:0;cursor:point
 .forge-fireflies{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;opacity:0;transition:opacity 0.6s;}
 .forge-unlocked .forge-fireflies{opacity:1;}
 .forge-firefly{position:absolute;width:5px;height:5px;border-radius:50%;background:radial-gradient(circle, rgba(255,235,160,1) 0%, rgba(255,190,90,0.7) 45%, rgba(255,150,50,0) 100%);box-shadow:0 0 6px rgba(255,210,120,0.95), 0 0 14px rgba(255,170,70,0.55);opacity:0.9;}
-.forge-firefly:nth-child(1){left:88%;top:52%;animation:ffOrbit1 6.5s ease-in-out infinite;}
-.forge-firefly:nth-child(2){left:92%;top:50%;animation:ffOrbit2 8s ease-in-out infinite;animation-delay:-2s;}
-.forge-firefly:nth-child(3){left:86%;top:56%;animation:ffOrbit3 7.2s ease-in-out infinite;animation-delay:-4s;}
-.forge-firefly:nth-child(4){left:91%;top:56%;animation:ffOrbit1 9.2s ease-in-out infinite;animation-delay:-1.5s;}
-.forge-firefly:nth-child(5){left:85%;top:50%;animation:ffOrbit2 7.8s ease-in-out infinite;animation-delay:-3.5s;}
+.forge-firefly:nth-child(1){left:88%;top:48%;animation:ffOrbit1 6.5s ease-in-out infinite;}
+.forge-firefly:nth-child(2){left:92%;top:46%;animation:ffOrbit2 8s ease-in-out infinite;animation-delay:-2s;}
+.forge-firefly:nth-child(3){left:86%;top:52%;animation:ffOrbit3 7.2s ease-in-out infinite;animation-delay:-4s;}
+.forge-firefly:nth-child(4){left:91%;top:52%;animation:ffOrbit1 9.2s ease-in-out infinite;animation-delay:-1.5s;}
+.forge-firefly:nth-child(5){left:85%;top:46%;animation:ffOrbit2 7.8s ease-in-out infinite;animation-delay:-3.5s;}
 @keyframes ffOrbit1{0%{transform:translate(0,0);opacity:0.4;}25%{transform:translate(-7px,-9px);opacity:1;}50%{transform:translate(5px,-13px);opacity:0.7;}75%{transform:translate(9px,-3px);opacity:1;}100%{transform:translate(0,0);opacity:0.4;}}
 @keyframes ffOrbit2{0%{transform:translate(0,0);opacity:0.5;}25%{transform:translate(7px,-7px);opacity:1;}50%{transform:translate(-4px,-14px);opacity:0.6;}75%{transform:translate(-9px,-5px);opacity:0.9;}100%{transform:translate(0,0);opacity:0.5;}}
 @keyframes ffOrbit3{0%{transform:translate(0,0);opacity:0.6;}33%{transform:translate(-9px,-10px);opacity:1;}66%{transform:translate(7px,-7px);opacity:0.5;}100%{transform:translate(0,0);opacity:0.6;}}
@@ -421,8 +420,8 @@ h1.game-title{font-size:20px;font-weight:800;margin:0;flex-shrink:0;cursor:point
     <h1 class="game-title">ДРАГ<span>МЕТ</span></h1>
     <div class="hdr-zones">
       <div class="hdr-zone">
-        <div class="hdr-line hdr-ingot"><span id="ingots">0.000</span><small>г</small></div>
         <div class="hdr-line hdr-cash" id="cashWrap"><span id="cash">0</span> <small>₽</small></div>
+        <div class="hdr-line hdr-ingot"><span id="ingots">0.000</span><small>г</small></div>
       </div>
       <div class="hdr-zone hdr-zone-prest" id="prestHdr" style="display:none;">
         <div class="hdr-line hdr-prest-line"><small>★</small> <span id="prestLvl">0</span></div>
@@ -472,7 +471,7 @@ h1.game-title{font-size:20px;font-weight:800;margin:0;flex-shrink:0;cursor:point
       <div class="loc-viewport">
         <div class="loc-track" id="locTrack"></div>
       </div>
-      <div class="loc-nav">
+      <div class="loc-nav" id="locNav">
         <button class="loc-nav-btn" id="locPrev" type="button">←</button>
         <span class="loc-nav-info" id="locPageInfo">1 / 3</span>
         <button class="loc-nav-btn" id="locNext" type="button">→</button>
@@ -601,8 +600,25 @@ h1.game-title{font-size:20px;font-weight:800;margin:0;flex-shrink:0;cursor:point
 <script>
 (function(){
 "use strict";
-var CATALOG={chips:{name:'Микросхемы',icon:'🔌',gold:0.02},phones:{name:'Телефоны',icon:'📱',gold:0.045},ram:{name:'ОЗУ',icon:'💾',gold:0.07},rare:{name:'Советская плата',icon:'🟩',gold:0.25},legend:{name:'Плата шифратора',icon:'🟨',gold:0.75},caps:{name:'Конденсаторы',icon:'🔋',gold:0.008},resist:{name:'Резисторы',icon:'🔘',gold:0.005},trans:{name:'Транзисторы',icon:'🔻',gold:0.015},hdd:{name:'Жёсткие диски',icon:'💽',gold:0.04},cpus:{name:'Процессоры',icon:'🧠',gold:0.18},connect:{name:'Разъёмы',icon:'🟡',gold:0.09},gContacts:{name:'Золотые контакты',icon:'🟠',gold:0.35}};
-var CATALOG_ORDER=['resist','caps','trans','chips','hdd','phones','ram','connect','cpus','rare','gContacts','legend'];
+var CATALOG={
+ chips:{name:'Микросхемы',icon:'🔌',gold:0.02},
+ phones:{name:'Телефоны',icon:'📱',gold:0.045},
+ ram:{name:'ОЗУ',icon:'💾',gold:0.07},
+ rare:{name:'Советская плата',icon:'🟩',gold:0.25},
+ legend:{name:'Плата шифратора',icon:'🟨',gold:0.75},
+ platinum:{name:'Платиновая пластина',icon:'⬜',gold:1.5},
+ caps:{name:'Конденсаторы',icon:'🔋',gold:0.008},
+ resist:{name:'Резисторы',icon:'🔘',gold:0.005},
+ trans:{name:'Транзисторы',icon:'🔻',gold:0.015},
+ hdd:{name:'Жёсткие диски',icon:'💽',gold:0.04},
+ cpus:{name:'Процессоры',icon:'🧠',gold:0.18},
+ connect:{name:'Разъёмы',icon:'🟡',gold:0.09},
+ gContacts:{name:'Золотые контакты',icon:'🟠',gold:0.35},
+ silverWire:{name:'Серебряная проволока',icon:'⚪',gold:0.12},
+ brass:{name:'Латунные детали',icon:'🔶',gold:0.3},
+ goldPins:{name:'Золотые пины',icon:'🪙',gold:0.5}
+};
+var CATALOG_ORDER=['resist','caps','trans','chips','hdd','phones','ram','connect','silverWire','cpus','rare','brass','gContacts','goldPins','legend','platinum'];
 var PRESTIGE_THRESHOLD=100000;
 var PRICE_MAX=4000;
 var PRICE_MIN=800;
@@ -611,7 +627,7 @@ var AUTO_SPEED_COST_MULT=1.6;
 var AUTO_PENALTY_BASE_COST=3000;
 var AUTO_PENALTY_COST_MULT=1.8;
 var AUTO_PENALTY_MAX=10;
-var AUTO_DIG_COST={yard:800,construction:2500,radiozavod:6000,garages:15000,workshop:35000,ats:80000,scrapyard:180000,institute:400000};
+var AUTO_DIG_COST={yard:800,construction:2500,radiozavod:6000,garages:15000,workshop:35000,ats:80000,scrapyard:180000,datacenter:260000,institute:400000};
 var AUTO_SLOW_FACTOR=3;
 var FORGE_SPEED_BASE=8000,FORGE_SPEED_MULT=1.7,FORGE_SPEED_MAX=7;
 var FORGE_DISCOUNT_BASE=12000,FORGE_DISCOUNT_MULT=1.8,FORGE_DISCOUNT_MAX=10;
@@ -667,17 +683,18 @@ var FAIL_MSGS=['Мимо.','Промах.','Не повезло.','Мимо ка
 
 var LOCATIONS=[
  {key:'yard',name:'Баки во дворе',icon:'🗑️',unlockCost:0,maxStock:8,regenBase:5200,regenCost:350,loot:[{k:'chips',w:35},{k:'caps',w:15},{k:'resist',w:15},{k:'phones',w:20},{k:'ram',w:10},{k:'hdd',w:5}]},
- {key:'construction',name:'Заброшенная стройка',icon:'🏗️',unlockCost:650,maxStock:6,regenBase:7200,regenCost:700,loot:[{k:'phones',w:25},{k:'caps',w:10},{k:'trans',w:20},{k:'hdd',w:15},{k:'ram',w:20},{k:'chips',w:5},{k:'rare',w:5}]},
- {key:'radiozavod',name:'Свалка радиозавода',icon:'🏭',unlockCost:2600,maxStock:5,regenBase:10400,regenCost:1600,loot:[{k:'ram',w:15},{k:'trans',w:10},{k:'hdd',w:15},{k:'cpus',w:10},{k:'connect',w:15},{k:'rare',w:25},{k:'chips',w:5},{k:'legend',w:5}]},
- {key:'garages',name:'Гаражный кооператив',icon:'🚪',unlockCost:6500,maxStock:4,regenBase:14400,regenCost:3200,loot:[{k:'connect',w:10},{k:'cpus',w:10},{k:'legend',w:20},{k:'rare',w:30},{k:'ram',w:15},{k:'hdd',w:10},{k:'chips',w:5}]},
- {key:'workshop',name:'Ремонтная мастерская',icon:'🔧',unlockCost:14000,maxStock:4,regenBase:18000,regenCost:5500,loot:[{k:'trans',w:15},{k:'hdd',w:25},{k:'cpus',w:15},{k:'rare',w:25},{k:'connect',w:15},{k:'ram',w:5}]},
- {key:'ats',name:'Заброшенная АТС',icon:'📡',unlockCost:32000,maxStock:3,regenBase:22000,regenCost:9000,loot:[{k:'cpus',w:18},{k:'connect',w:22},{k:'gContacts',w:10},{k:'legend',w:18},{k:'rare',w:22},{k:'hdd',w:10}]},
- {key:'scrapyard',name:'Приёмка металлолома',icon:'⚙️',unlockCost:75000,maxStock:5,regenBase:28000,regenCost:15000,loot:[{k:'chips',w:14},{k:'phones',w:14},{k:'ram',w:14},{k:'hdd',w:14},{k:'cpus',w:14},{k:'connect',w:9},{k:'rare',w:9},{k:'gContacts',w:7},{k:'legend',w:5}]},
- {key:'institute',name:'Институтский склад',icon:'🎓',unlockCost:180000,maxStock:3,regenBase:34000,regenCost:24000,loot:[{k:'cpus',w:18},{k:'connect',w:18},{k:'rare',w:30},{k:'gContacts',w:12},{k:'legend',w:22}]}
+ {key:'construction',name:'Заброшенная стройка',icon:'🏗️',unlockCost:650,maxStock:6,regenBase:7200,regenCost:700,loot:[{k:'phones',w:22},{k:'caps',w:10},{k:'trans',w:18},{k:'hdd',w:15},{k:'ram',w:18},{k:'silverWire',w:12},{k:'chips',w:5}]},
+ {key:'radiozavod',name:'Свалка радиозавода',icon:'🏭',unlockCost:2600,maxStock:5,regenBase:10400,regenCost:1600,loot:[{k:'ram',w:15},{k:'trans',w:8},{k:'hdd',w:12},{k:'cpus',w:10},{k:'connect',w:14},{k:'silverWire',w:10},{k:'rare',w:22},{k:'chips',w:4},{k:'legend',w:5}]},
+ {key:'garages',name:'Гаражный кооператив',icon:'🚪',unlockCost:6500,maxStock:4,regenBase:14400,regenCost:3200,loot:[{k:'connect',w:10},{k:'cpus',w:10},{k:'silverWire',w:12},{k:'legend',w:18},{k:'rare',w:28},{k:'ram',w:14},{k:'hdd',w:8}]},
+ {key:'workshop',name:'Ремонтная мастерская',icon:'🔧',unlockCost:14000,maxStock:4,regenBase:18000,regenCost:5500,loot:[{k:'trans',w:12},{k:'hdd',w:22},{k:'cpus',w:14},{k:'brass',w:14},{k:'rare',w:22},{k:'connect',w:14},{k:'ram',w:4}]},
+ {key:'ats',name:'Заброшенная АТС',icon:'📡',unlockCost:32000,maxStock:3,regenBase:22000,regenCost:9000,loot:[{k:'cpus',w:18},{k:'connect',w:20},{k:'gContacts',w:12},{k:'goldPins',w:10},{k:'legend',w:18},{k:'rare',w:20},{k:'hdd',w:8}]},
+ {key:'scrapyard',name:'Приёмка металлолома',icon:'⚙️',unlockCost:75000,maxStock:5,regenBase:28000,regenCost:15000,loot:[{k:'chips',w:12},{k:'phones',w:12},{k:'ram',w:12},{k:'hdd',w:12},{k:'cpus',w:12},{k:'brass',w:10},{k:'connect',w:8},{k:'rare',w:8},{k:'gContacts',w:8},{k:'goldPins',w:6},{k:'legend',w:5}]},
+ {key:'datacenter',name:'Заброшенный дата-центр',icon:'🖥️',unlockCost:130000,maxStock:4,regenBase:30000,regenCost:19000,loot:[{k:'cpus',w:20},{k:'connect',w:14},{k:'gContacts',w:14},{k:'goldPins',w:16},{k:'rare',w:12},{k:'legend',w:14},{k:'platinum',w:10}]},
+ {key:'institute',name:'Институтский склад',icon:'🎓',unlockCost:180000,maxStock:3,regenBase:34000,regenCost:24000,loot:[{k:'cpus',w:16},{k:'connect',w:14},{k:'goldPins',w:14},{k:'rare',w:26},{k:'gContacts',w:12},{k:'platinum',w:10},{k:'legend',w:20}]}
 ];
 
 function makePrest(){return{level:0,points:0,lv:{bonusBoost:0,startCash:0,locDiscount:0,acidII:0,fireII:0,capII:0},autoDig:{},autoTimers:{}};}
-function makeState(){return{cash:0,ingots:0,junk:{chips:0,phones:0,ram:0,rare:0,legend:0,caps:0,resist:0,trans:0,hdd:0,cpus:0,connect:0,gContacts:0},locked:{chips:false,phones:false,ram:false,rare:false,legend:false,caps:false,resist:false,trans:false,hdd:false,cpus:false,connect:false,gContacts:false},cap:16,scavCd:0,solution:0,acid:[{active:false,progress:0,duration:4200,yieldAmt:0}],fire:[{active:false,progress:0,duration:3400,yieldAmt:0}],price:3200,priceDir:0,activeLoc:'yard',locPage:0,invExpanded:false,accState:{eq:true,spd:false,luck:false,income:false,regen:false,auto:false,forge:false,pbonus:true,pupg2:false},locs:LOCATIONS.map(function(l){return{key:l.key,stock:l.maxStock,regenTimer:0,regenLv:0,unlocked:l.unlockCost===0};}),lv:{acid:1,fire:1,cap:1,hold:0,scavspd:0,acidspd:0,firespd:0,secondacid:0,secondfire:0,goodeye:0,luck:0,reputation:0,wideZone:0,priceControl:1,offlineRate:0,offlineCap:0,autoSpeed:0,autoPenalty:0,forgeSpeed:0,forgeDiscount:0,forgeDuration:0,twoForges:0},cost:{acid:150,fire:150,cap:120,hold:1200,scavspd:400,acidspd:400,firespd:400,secondacid:3000,secondfire:5000,goodeye:500,luck:700,reputation:REPUTATION_BASE_COST,wideZone:WIDE_ZONE_BASE,priceControl:0,offlineRate:OFFLINE_RATE_BASE_COST,offlineCap:OFFLINE_CAP_BASE_COST,autoSpeed:AUTO_SPEED_BASE_COST,autoPenalty:AUTO_PENALTY_BASE_COST,forgeSpeed:FORGE_SPEED_BASE,forgeDiscount:FORGE_DISCOUNT_BASE,forgeDuration:FORGE_DURATION_BASE,twoForges:TWO_FORGES_COST},stats:{junkTotal:0,ingotsTotal:0,earnedTotal:0,offlineTotal:0},settings:{sound:true,vibe:true,music:false},forgeUnlocked:false,amulets:{},equippedAmulet:null,forgeCrafts:[],lastSeenTs:Date.now()};}
+function makeState(){return{cash:0,ingots:0,junk:{chips:0,phones:0,ram:0,rare:0,legend:0,platinum:0,caps:0,resist:0,trans:0,hdd:0,cpus:0,connect:0,gContacts:0,silverWire:0,brass:0,goldPins:0},locked:{chips:false,phones:false,ram:false,rare:false,legend:false,platinum:false,caps:false,resist:false,trans:false,hdd:false,cpus:false,connect:false,gContacts:false,silverWire:false,brass:false,goldPins:false},cap:16,scavCd:0,solution:0,acid:[{active:false,progress:0,duration:4200,yieldAmt:0}],fire:[{active:false,progress:0,duration:3400,yieldAmt:0}],price:3200,priceDir:0,activeLoc:'yard',locPage:0,invExpanded:false,accState:{eq:true,spd:false,luck:false,income:false,regen:false,auto:false,forge:false,pbonus:true,pupg2:false},locs:LOCATIONS.map(function(l){return{key:l.key,stock:l.maxStock,regenTimer:0,regenLv:0,unlocked:l.unlockCost===0};}),lv:{acid:1,fire:1,cap:1,hold:0,scavspd:0,acidspd:0,firespd:0,secondacid:0,secondfire:0,goodeye:0,luck:0,reputation:0,wideZone:0,priceControl:1,offlineRate:0,offlineCap:0,autoSpeed:0,autoPenalty:0,forgeSpeed:0,forgeDiscount:0,forgeDuration:0,twoForges:0},cost:{acid:150,fire:150,cap:120,hold:1200,scavspd:400,acidspd:400,firespd:400,secondacid:3000,secondfire:5000,goodeye:500,luck:700,reputation:REPUTATION_BASE_COST,wideZone:WIDE_ZONE_BASE,priceControl:0,offlineRate:OFFLINE_RATE_BASE_COST,offlineCap:OFFLINE_CAP_BASE_COST,autoSpeed:AUTO_SPEED_BASE_COST,autoPenalty:AUTO_PENALTY_BASE_COST,forgeSpeed:FORGE_SPEED_BASE,forgeDiscount:FORGE_DISCOUNT_BASE,forgeDuration:FORGE_DURATION_BASE,twoForges:TWO_FORGES_COST},stats:{junkTotal:0,ingotsTotal:0,earnedTotal:0,offlineTotal:0},settings:{sound:true,vibe:true,music:false},forgeUnlocked:false,amulets:{},equippedAmulet:null,forgeCrafts:[],lastSeenTs:Date.now()};}
 
 var p=makePrest();
 for(var li=0;li<LOCATIONS.length;li++){p.autoDig[LOCATIONS[li].key]=false;p.autoTimers[LOCATIONS[li].key]=0;}
@@ -736,7 +753,7 @@ function offlineRateCostFor(lv){return Math.round(OFFLINE_RATE_BASE_COST*Math.po
 function offlineCapHours(){return OFFLINE_CAP_BASE_HOURS+s.lv.offlineCap*OFFLINE_CAP_PER_LV;}
 function offlineCapNextHours(){return OFFLINE_CAP_BASE_HOURS+(s.lv.offlineCap+1)*OFFLINE_CAP_PER_LV;}
 function offlineCapCostFor(lv){return Math.round(OFFLINE_CAP_BASE_COST*Math.pow(OFFLINE_CAP_MULT,lv));}
-function itemTier(k){if(k==='legend')return 'lg';if(k==='rare'||k==='gContacts')return 'rp';if(k==='cpus'||k==='connect')return 'vl';if(k==='chips'||k==='hdd'||k==='phones'||k==='ram')return 'cm';return 'jk';}
+function itemTier(k){if(k==='legend'||k==='platinum')return 'lg';if(k==='rare'||k==='gContacts'||k==='goldPins'||k==='brass'||k==='silverWire')return 'rp';if(k==='cpus'||k==='connect')return 'vl';if(k==='chips'||k==='hdd'||k==='phones'||k==='ram')return 'cm';return 'jk';}
 function getRecipeAmulet(id){var a=getAmulet(id);if(!a)return {};var disc=1-forgeDiscountBonus();var out={};for(var k in a.recipe){out[k]=Math.max(1,Math.ceil(a.recipe[k]*disc));}return out;}
 function canCraftAmulet(id){var rec=getRecipeAmulet(id);for(var k in rec){if((s.junk[k]||0)<rec[k])return false;}return true;}
 function amuletRemainingText(id){var entry=s.amulets[id];if(!entry)return '';var a=getAmulet(id);if(!a)return '';if(a.durType==='prestige'){var left=entry.prestigeLeft||0;return 'Осталось: '+left+' прест.';}else{var ms=(entry.expiresAt||0)-Date.now();if(ms<=0)return 'Истёк';var h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000);return 'Осталось: '+(h>0?h+' ч '+m+' мин':m+' мин');}}
@@ -798,11 +815,28 @@ function flashPrestBtn(){try{var el=document.getElementById('prestBtn');if(!el)r
 function updateBloom(){var ov=document.getElementById('bloomOverlay');if(!ov)return;if(s.equippedAmulet){var a=getAmulet(s.equippedAmulet);if(a){ov.style.background='radial-gradient(ellipse at center, transparent 55%, '+a.color+' 130%)';ov.classList.add('active');return;}}ov.classList.remove('active');ov.style.background='transparent';}
 
 var toastTimer=null;
-function flashToast(msg,tier){var t=document.getElementById('toast');if(!t)return;var cls='toast';if(tier)cls+=' t-'+tier;t.className=cls;t.textContent=msg;if(msg)t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.classList.remove('show');},1600);}
+function flashToast(msg,tier){
+ var t=document.getElementById('toast');if(!t)return;
+ var cls='toast';if(tier)cls+=' t-'+tier;
+ t.className=cls;t.textContent=msg;
+ if(msg){
+  var panel=t.parentNode;
+  var nav=document.getElementById('locNav');
+  if(panel&&nav&&panel.contains(nav)){
+   t.style.top=(nav.offsetTop+nav.offsetHeight/2)+'px';
+  } else {
+   t.style.top='42%';
+  }
+  t.classList.add('show');
+ } else {
+  t.classList.remove('show');
+ }
+ clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.classList.remove('show');},1600);
+}
 
 function pickRandomFromDef(def){var tw=0,i;for(i=0;i<def.loot.length;i++){var w=def.loot[i].w;if(hasAmulet('scavenger')&&(def.loot[i].k==='resist'||def.loot[i].k==='caps'||def.loot[i].k==='trans'))w*=3;tw+=w;}var r=Math.random()*tw,picked=def.loot[0];for(i=0;i<def.loot.length;i++){var w2=def.loot[i].w;if(hasAmulet('scavenger')&&(def.loot[i].k==='resist'||def.loot[i].k==='caps'||def.loot[i].k==='trans'))w2*=3;if(r<w2){picked=def.loot[i];break;}r-=w2;}return picked.k;}
-function maybeUpgradeDrop(k){if(k==='rare'||k==='legend'||k==='cpus'||k==='connect'||k==='gContacts')return k;if(Math.random()<goodEyeChance()){var r=Math.random();if(r<0.1)return 'legend';if(r<0.35)return 'gContacts';if(r<0.55)return 'rare';if(r<0.8)return 'cpus';return 'connect';}if(hasAmulet('legendHunter')&&Math.random()<0.05)return 'legend';if(hasAmulet('goldVein')&&Math.random()<0.15){var r2=Math.random();if(r2<0.1)return 'legend';if(r2<0.35)return 'gContacts';if(r2<0.55)return 'rare';if(r2<0.8)return 'cpus';return 'connect';}return k;}
-function playDigSound(k){if(k==='legend'){sndDing();vibe(40);return;}if(k==='cpus'||k==='connect'||k==='gContacts'){sndDigPricey();vibe(30);return;}if(k==='rare'){sndDigRare();vibe(28);return;}if(k==='phones'||k==='ram'){sndDigNice();vibe(18);return;}if(k==='chips'||k==='hdd'){sndDigMid();vibe(15);return;}sndDigJunk();vibe(12);}
+function maybeUpgradeDrop(k){if(k==='rare'||k==='legend'||k==='platinum'||k==='cpus'||k==='connect'||k==='gContacts'||k==='goldPins'||k==='brass'||k==='silverWire')return k;if(Math.random()<goodEyeChance()){var r=Math.random();if(r<0.06)return 'platinum';if(r<0.16)return 'legend';if(r<0.36)return 'goldPins';if(r<0.5)return 'gContacts';if(r<0.64)return 'brass';if(r<0.78)return 'rare';if(r<0.92)return 'cpus';return 'connect';}if(hasAmulet('legendHunter')&&Math.random()<0.05)return 'legend';if(hasAmulet('goldVein')&&Math.random()<0.15){var r2=Math.random();if(r2<0.06)return 'platinum';if(r2<0.16)return 'legend';if(r2<0.36)return 'goldPins';if(r2<0.5)return 'gContacts';if(r2<0.64)return 'brass';if(r2<0.78)return 'rare';if(r2<0.92)return 'cpus';return 'connect';}return k;}
+function playDigSound(k){if(k==='legend'||k==='platinum'){sndDing();vibe(40);return;}if(k==='cpus'||k==='connect'||k==='gContacts'||k==='goldPins'||k==='brass'||k==='silverWire'){sndDigPricey();vibe(30);return;}if(k==='rare'){sndDigRare();vibe(28);return;}if(k==='phones'||k==='ram'){sndDigNice();vibe(18);return;}if(k==='chips'||k==='hdd'){sndDigMid();vibe(15);return;}sndDigJunk();vibe(12);}
 
 function tryScavenge(locKey,silent,ignoreStock){
  var ls=locState(locKey),def=locDef(locKey);
@@ -819,8 +853,10 @@ function tryScavenge(locKey,silent,ignoreStock){
  if(!silent){
   var msg='Нашёл: '+CATALOG[k].icon+' '+CATALOG[k].name;
   if(k==='legend')msg='Легендарка — '+CATALOG[k].icon+' '+CATALOG[k].name;
+  else if(k==='platinum')msg='Платина! '+CATALOG[k].icon+' '+CATALOG[k].name;
   else if(k==='rare')msg='Редкая — '+CATALOG[k].icon+' '+CATALOG[k].name;
   else if(k==='gContacts')msg='Золотые контакты — '+CATALOG[k].icon+' '+CATALOG[k].name;
+  else if(k==='goldPins')msg='Золотые пины — '+CATALOG[k].icon+' '+CATALOG[k].name;
   else if(k==='cpus')msg='Ценный процессор — '+CATALOG[k].icon+' '+CATALOG[k].name;
   if(doubleDrop)msg='Двойной дроп! '+CATALOG[k].icon+' '+CATALOG[k].name+' ×2';
   flashToast(msg,itemTier(k));bumpToast();flashInvItem(k);
@@ -966,7 +1002,7 @@ function hideOfflineOverlay(){var el=document.getElementById('offlineOverlay');i
 
 function buildSaveData(){
  var jk={},lk={};for(var k in s.junk)jk[k]=s.junk[k];for(var k2 in s.locked)lk[k2]=s.locked[k2];
- return {p:{level:p.level,points:p.points,lv:{bonusBoost:p.lv.bonusBoost,startCash:p.lv.startCash,locDiscount:p.lv.locDiscount,acidII:p.lv.acidII,fireII:p.lv.fireII,capII:p.lv.capII},autoDig:p.autoDig,autoTimers:p.autoTimers},s:{cash:s.cash,ingots:s.ingots,junk:jk,locked:lk,cap:s.cap,scavCd:s.scavCd,solution:s.solution,acid:s.acid.map(function(x){return{active:x.active,progress:x.progress,duration:x.duration,yieldAmt:x.yieldAmt};}),fire:s.fire.map(function(x){return{active:x.active,progress:x.progress,duration:x.duration,yieldAmt:x.yieldAmt};}),price:s.price,priceDir:s.priceDir,activeLoc:s.activeLoc,locPage:s.locPage,invExpanded:s.invExpanded,accState:s.accState,locs:s.locs.map(function(x){return{key:x.key,stock:x.stock,regenTimer:x.regenTimer,regenLv:x.regenLv,unlocked:x.unlocked};}),lv:{acid:s.lv.acid,fire:s.lv.fire,cap:s.lv.cap,hold:s.lv.hold,scavspd:s.lv.scavspd,acidspd:s.lv.acidspd,firespd:s.lv.firespd,secondacid:s.lv.secondacid,secondfire:s.lv.secondfire,goodeye:s.lv.goodeye,luck:s.lv.luck,reputation:s.lv.reputation,wideZone:s.lv.wideZone,priceControl:1,offlineRate:s.lv.offlineRate,offlineCap:s.lv.offlineCap,autoSpeed:s.lv.autoSpeed,autoPenalty:s.lv.autoPenalty,forgeSpeed:s.lv.forgeSpeed,forgeDiscount:s.lv.forgeDiscount,forgeDuration:s.lv.forgeDuration,twoForges:s.lv.twoForges},cost:{acid:s.cost.acid,fire:s.cost.fire,cap:s.cost.cap,hold:s.cost.hold,scavspd:s.cost.scavspd,acidspd:s.cost.acidspd,firespd:s.cost.firespd,secondacid:s.cost.secondacid,secondfire:s.cost.secondfire,goodeye:s.cost.goodeye,luck:s.cost.luck,reputation:s.cost.reputation,wideZone:s.cost.wideZone,priceControl:0,offlineRate:s.cost.offlineRate,offlineCap:s.cost.offlineCap,autoSpeed:s.cost.autoSpeed,autoPenalty:s.cost.autoPenalty,forgeSpeed:s.cost.forgeSpeed,forgeDiscount:s.cost.forgeDiscount,forgeDuration:s.cost.forgeDuration,twoForges:s.cost.twoForges},stats:{junkTotal:s.stats.junkTotal,ingotsTotal:s.stats.ingotsTotal,earnedTotal:s.stats.earnedTotal,offlineTotal:s.stats.offlineTotal},settings:{sound:s.settings.sound,vibe:s.settings.vibe,music:s.settings.music},forgeUnlocked:s.forgeUnlocked,amulets:s.amulets,equippedAmulet:s.equippedAmulet,forgeCrafts:s.forgeCrafts,lastSeenTs:s.lastSeenTs},ts:Date.now(),ver:19};
+ return {p:{level:p.level,points:p.points,lv:{bonusBoost:p.lv.bonusBoost,startCash:p.lv.startCash,locDiscount:p.lv.locDiscount,acidII:p.lv.acidII,fireII:p.lv.fireII,capII:p.lv.capII},autoDig:p.autoDig,autoTimers:p.autoTimers},s:{cash:s.cash,ingots:s.ingots,junk:jk,locked:lk,cap:s.cap,scavCd:s.scavCd,solution:s.solution,acid:s.acid.map(function(x){return{active:x.active,progress:x.progress,duration:x.duration,yieldAmt:x.yieldAmt};}),fire:s.fire.map(function(x){return{active:x.active,progress:x.progress,duration:x.duration,yieldAmt:x.yieldAmt};}),price:s.price,priceDir:s.priceDir,activeLoc:s.activeLoc,locPage:s.locPage,invExpanded:s.invExpanded,accState:s.accState,locs:s.locs.map(function(x){return{key:x.key,stock:x.stock,regenTimer:x.regenTimer,regenLv:x.regenLv,unlocked:x.unlocked};}),lv:{acid:s.lv.acid,fire:s.lv.fire,cap:s.lv.cap,hold:s.lv.hold,scavspd:s.lv.scavspd,acidspd:s.lv.acidspd,firespd:s.lv.firespd,secondacid:s.lv.secondacid,secondfire:s.lv.secondfire,goodeye:s.lv.goodeye,luck:s.lv.luck,reputation:s.lv.reputation,wideZone:s.lv.wideZone,priceControl:1,offlineRate:s.lv.offlineRate,offlineCap:s.lv.offlineCap,autoSpeed:s.lv.autoSpeed,autoPenalty:s.lv.autoPenalty,forgeSpeed:s.lv.forgeSpeed,forgeDiscount:s.lv.forgeDiscount,forgeDuration:s.lv.forgeDuration,twoForges:s.lv.twoForges},cost:{acid:s.cost.acid,fire:s.cost.fire,cap:s.cost.cap,hold:s.cost.hold,scavspd:s.cost.scavspd,acidspd:s.cost.acidspd,firespd:s.cost.firespd,secondacid:s.cost.secondacid,secondfire:s.cost.secondfire,goodeye:s.cost.goodeye,luck:s.cost.luck,reputation:s.cost.reputation,wideZone:s.cost.wideZone,priceControl:0,offlineRate:s.cost.offlineRate,offlineCap:s.cost.offlineCap,autoSpeed:s.cost.autoSpeed,autoPenalty:s.cost.autoPenalty,forgeSpeed:s.cost.forgeSpeed,forgeDiscount:s.cost.forgeDiscount,forgeDuration:s.cost.forgeDuration,twoForges:s.cost.twoForges},stats:{junkTotal:s.stats.junkTotal,ingotsTotal:s.stats.ingotsTotal,earnedTotal:s.stats.earnedTotal,offlineTotal:s.stats.offlineTotal},settings:{sound:s.settings.sound,vibe:s.settings.vibe,music:s.settings.music},forgeUnlocked:s.forgeUnlocked,amulets:s.amulets,equippedAmulet:s.equippedAmulet,forgeCrafts:s.forgeCrafts,lastSeenTs:s.lastSeenTs},ts:Date.now(),ver:20};
 }
 function readSlot(key){try{var raw=localStorage.getItem(key);if(!raw)return null;var d=JSON.parse(raw);if(!d||!d.s||!d.p)return null;return d;}catch(e){return null;}}
 function saveGame(){try{s.lastSeenTs=Date.now();var data=buildSaveData();var a=readSlot(SAVE_KEY_A),b=readSlot(SAVE_KEY_B);var aTs=a?a.ts:0,bTs=b?b.ts:0;var targetKey=(aTs<=bTs)?SAVE_KEY_A:SAVE_KEY_B;localStorage.setItem(targetKey,JSON.stringify(data));lastSaveTs=data.ts;return true;}catch(e){return false;}}

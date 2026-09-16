@@ -566,9 +566,10 @@ h1.game-title{font-size:20px;font-weight:800;margin:0;flex-shrink:0;cursor:point
         <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;">Уровень престижа</span><span class="ps-lvl">★ <span id="psLvl">0</span></span></div>
         <div class="ps-line" style="margin-top:8px;"><span>Очки престижа</span><span id="psPts">0</span></div>
         <div class="ps-line"><span>Бонус к продаже</span><span id="psBonus">+0%</span></div>
-        <div class="ps-line"><span>Награда за следующий</span><span id="psReward">10</span></div>
+        <div class="ps-line"><span>Порог следующего</span><span id="psThreshold">150 000 ₽</span></div>
+        <div class="ps-line"><span>Награда за следующий</span><span id="psReward">25</span></div>
         <button class="prest-btn" id="prestBtn" type="button">Престиж</button>
-        <div style="font-size:11px;color:var(--text-dim);margin-top:8px;text-align:center;">Порог: 100 000 ₽ · сбросит всё кроме прокачек Престижа и амулетов</div>
+        <div style="font-size:11px;color:var(--text-dim);margin-top:8px;text-align:center;" id="prestThresholdInfo">Порог: 150 000 ₽ · сбросит всё кроме прокачек Престижа и амулетов</div>
       </div>
       <div class="panel">
         <div class="acc-head open prest" data-acc="pbonus"><span class="acc-title">Бонусы престижа</span><span class="acc-arrow">▼</span></div>
@@ -619,7 +620,9 @@ var CATALOG={
  goldPins:{name:'Золотые пины',icon:'🪙',gold:0.5}
 };
 var CATALOG_ORDER=['resist','caps','trans','chips','hdd','phones','ram','connect','silverWire','cpus','rare','brass','gContacts','goldPins','legend','platinum'];
-var PRESTIGE_THRESHOLD=100000;
+var PRESTIGE_BASE_THRESHOLD=100000;
+var PRESTIGE_THRESHOLD_MULT=1.5;
+var MAX_PRESTIGE_LEVEL=50;
 var PRICE_MAX=4000;
 var PRICE_MIN=800;
 var AUTO_SPEED_BASE_COST=5000;
@@ -740,6 +743,8 @@ function wideZoneCostFor(lv){return Math.round(WIDE_ZONE_BASE*Math.pow(WIDE_ZONE
 function maxForges(){return s.lv.twoForges?2:1;}
 function forgeSlotsBusy(){return s.forgeCrafts.length>=maxForges();}
 function prestigeReward(newLevel){return Math.round(10*Math.pow(2.5,newLevel-1));}
+function prestigeThreshold(level){level=(typeof level==='number')?level:p.level;return Math.round(PRESTIGE_BASE_THRESHOLD*Math.pow(PRESTIGE_THRESHOLD_MULT,level));}
+function isMaxPrestige(){return p.level>=MAX_PRESTIGE_LEVEL;}
 function prestigeBonusPct(){return (5+p.lv.bonusBoost)*p.level;}
 function reputationPct(){return s.lv.reputation*REPUTATION_PER_LV;}
 function reputationCostFor(lv){return Math.round(REPUTATION_BASE_COST*Math.pow(REPUTATION_COST_MULT,lv));}
@@ -937,7 +942,9 @@ function unequipAmulet(){s.equippedAmulet=null;updateBloom();sndToggle();vibe(15
 
 function resetAll(){p=makePrest();for(var li=0;li<LOCATIONS.length;li++){p.autoDig[LOCATIONS[li].key]=false;p.autoTimers[LOCATIONS[li].key]=0;}var keepSettings=s&&s.settings?s.settings:{sound:true,vibe:true,music:false};s=makeState();s.settings=keepSettings;try{localStorage.removeItem(SAVE_KEY_A);localStorage.removeItem(SAVE_KEY_B);for(var oi=0;oi<OLD_KEYS.length;oi++)localStorage.removeItem(OLD_KEYS[oi]);}catch(e){}lastSaveTs=0;stopAcidLoop();stopFireLoop();cancelAllPress();currentDigLabel=DIG_LABELS[0];window._revealedAmulet=null;updateBloom();switchTab('dig');}
 function doPrestige(){
- if(s.cash<PRESTIGE_THRESHOLD){sndDeny();vibe(40);return;}
+ if(isMaxPrestige()){sndDeny();vibe(40);flashToast('Престиж 50 — максимум');return;}
+ var thr=prestigeThreshold();
+ if(s.cash<thr){sndDeny();vibe(40);return;}
  var newLvl=p.level+1,reward=prestigeReward(newLvl);
  p.points+=reward;p.level=newLvl;
  var keepAutoDig={};for(var kk in p.autoDig)keepAutoDig[kk]=p.autoDig[kk];
@@ -1002,7 +1009,7 @@ function hideOfflineOverlay(){var el=document.getElementById('offlineOverlay');i
 
 function buildSaveData(){
  var jk={},lk={};for(var k in s.junk)jk[k]=s.junk[k];for(var k2 in s.locked)lk[k2]=s.locked[k2];
- return {p:{level:p.level,points:p.points,lv:{bonusBoost:p.lv.bonusBoost,startCash:p.lv.startCash,locDiscount:p.lv.locDiscount,acidII:p.lv.acidII,fireII:p.lv.fireII,capII:p.lv.capII},autoDig:p.autoDig,autoTimers:p.autoTimers},s:{cash:s.cash,ingots:s.ingots,junk:jk,locked:lk,cap:s.cap,scavCd:s.scavCd,solution:s.solution,acid:s.acid.map(function(x){return{active:x.active,progress:x.progress,duration:x.duration,yieldAmt:x.yieldAmt};}),fire:s.fire.map(function(x){return{active:x.active,progress:x.progress,duration:x.duration,yieldAmt:x.yieldAmt};}),price:s.price,priceDir:s.priceDir,activeLoc:s.activeLoc,locPage:s.locPage,invExpanded:s.invExpanded,accState:s.accState,locs:s.locs.map(function(x){return{key:x.key,stock:x.stock,regenTimer:x.regenTimer,regenLv:x.regenLv,unlocked:x.unlocked};}),lv:{acid:s.lv.acid,fire:s.lv.fire,cap:s.lv.cap,hold:s.lv.hold,scavspd:s.lv.scavspd,acidspd:s.lv.acidspd,firespd:s.lv.firespd,secondacid:s.lv.secondacid,secondfire:s.lv.secondfire,goodeye:s.lv.goodeye,luck:s.lv.luck,reputation:s.lv.reputation,wideZone:s.lv.wideZone,priceControl:1,offlineRate:s.lv.offlineRate,offlineCap:s.lv.offlineCap,autoSpeed:s.lv.autoSpeed,autoPenalty:s.lv.autoPenalty,forgeSpeed:s.lv.forgeSpeed,forgeDiscount:s.lv.forgeDiscount,forgeDuration:s.lv.forgeDuration,twoForges:s.lv.twoForges},cost:{acid:s.cost.acid,fire:s.cost.fire,cap:s.cost.cap,hold:s.cost.hold,scavspd:s.cost.scavspd,acidspd:s.cost.acidspd,firespd:s.cost.firespd,secondacid:s.cost.secondacid,secondfire:s.cost.secondfire,goodeye:s.cost.goodeye,luck:s.cost.luck,reputation:s.cost.reputation,wideZone:s.cost.wideZone,priceControl:0,offlineRate:s.cost.offlineRate,offlineCap:s.cost.offlineCap,autoSpeed:s.cost.autoSpeed,autoPenalty:s.cost.autoPenalty,forgeSpeed:s.cost.forgeSpeed,forgeDiscount:s.cost.forgeDiscount,forgeDuration:s.cost.forgeDuration,twoForges:s.cost.twoForges},stats:{junkTotal:s.stats.junkTotal,ingotsTotal:s.stats.ingotsTotal,earnedTotal:s.stats.earnedTotal,offlineTotal:s.stats.offlineTotal},settings:{sound:s.settings.sound,vibe:s.settings.vibe,music:s.settings.music},forgeUnlocked:s.forgeUnlocked,amulets:s.amulets,equippedAmulet:s.equippedAmulet,forgeCrafts:s.forgeCrafts,lastSeenTs:s.lastSeenTs},ts:Date.now(),ver:20};
+ return {p:{level:p.level,points:p.points,lv:{bonusBoost:p.lv.bonusBoost,startCash:p.lv.startCash,locDiscount:p.lv.locDiscount,acidII:p.lv.acidII,fireII:p.lv.fireII,capII:p.lv.capII},autoDig:p.autoDig,autoTimers:p.autoTimers},s:{cash:s.cash,ingots:s.ingots,junk:jk,locked:lk,cap:s.cap,scavCd:s.scavCd,solution:s.solution,acid:s.acid.map(function(x){return{active:x.active,progress:x.progress,duration:x.duration,yieldAmt:x.yieldAmt};}),fire:s.fire.map(function(x){return{active:x.active,progress:x.progress,duration:x.duration,yieldAmt:x.yieldAmt};}),price:s.price,priceDir:s.priceDir,activeLoc:s.activeLoc,locPage:s.locPage,invExpanded:s.invExpanded,accState:s.accState,locs:s.locs.map(function(x){return{key:x.key,stock:x.stock,regenTimer:x.regenTimer,regenLv:x.regenLv,unlocked:x.unlocked};}),lv:{acid:s.lv.acid,fire:s.lv.fire,cap:s.lv.cap,hold:s.lv.hold,scavspd:s.lv.scavspd,acidspd:s.lv.acidspd,firespd:s.lv.firespd,secondacid:s.lv.secondacid,secondfire:s.lv.secondfire,goodeye:s.lv.goodeye,luck:s.lv.luck,reputation:s.lv.reputation,wideZone:s.lv.wideZone,priceControl:1,offlineRate:s.lv.offlineRate,offlineCap:s.lv.offlineCap,autoSpeed:s.lv.autoSpeed,autoPenalty:s.lv.autoPenalty,forgeSpeed:s.lv.forgeSpeed,forgeDiscount:s.lv.forgeDiscount,forgeDuration:s.lv.forgeDuration,twoForges:s.lv.twoForges},cost:{acid:s.cost.acid,fire:s.cost.fire,cap:s.cost.cap,hold:s.cost.hold,scavspd:s.cost.scavspd,acidspd:s.cost.acidspd,firespd:s.cost.firespd,secondacid:s.cost.secondacid,secondfire:s.cost.secondfire,goodeye:s.cost.goodeye,luck:s.cost.luck,reputation:s.cost.reputation,wideZone:s.cost.wideZone,priceControl:0,offlineRate:s.cost.offlineRate,offlineCap:s.cost.offlineCap,autoSpeed:s.cost.autoSpeed,autoPenalty:s.cost.autoPenalty,forgeSpeed:s.cost.forgeSpeed,forgeDiscount:s.cost.forgeDiscount,forgeDuration:s.cost.forgeDuration,twoForges:s.cost.twoForges},stats:{junkTotal:s.stats.junkTotal,ingotsTotal:s.stats.ingotsTotal,earnedTotal:s.stats.earnedTotal,offlineTotal:s.stats.offlineTotal},settings:{sound:s.settings.sound,vibe:s.settings.vibe,music:s.settings.music},forgeUnlocked:s.forgeUnlocked,amulets:s.amulets,equippedAmulet:s.equippedAmulet,forgeCrafts:s.forgeCrafts,lastSeenTs:s.lastSeenTs},ts:Date.now(),ver:21};
 }
 function readSlot(key){try{var raw=localStorage.getItem(key);if(!raw)return null;var d=JSON.parse(raw);if(!d||!d.s||!d.p)return null;return d;}catch(e){return null;}}
 function saveGame(){try{s.lastSeenTs=Date.now();var data=buildSaveData();var a=readSlot(SAVE_KEY_A),b=readSlot(SAVE_KEY_B);var aTs=a?a.ts:0,bTs=b?b.ts:0;var targetKey=(aTs<=bTs)?SAVE_KEY_A:SAVE_KEY_B;localStorage.setItem(targetKey,JSON.stringify(data));lastSaveTs=data.ts;return true;}catch(e){return false;}}
@@ -1037,6 +1044,7 @@ function applyLoad(data){
  else if(data.s.forgeCraft)newS.forgeCrafts=[data.s.forgeCraft];
  newS.lastSeenTs=data.s.lastSeenTs||Date.now();
  newS.lv.priceControl=1;
+ if(newP.level>MAX_PRESTIGE_LEVEL)newP.level=MAX_PRESTIGE_LEVEL;
  if(newS.lv.reputation>=REPUTATION_MAX){newS.cost.reputation=0;}else{newS.cost.reputation=reputationCostFor(newS.lv.reputation);}
  if(newS.lv.wideZone>=WIDE_ZONE_MAX){newS.cost.wideZone=0;}else{newS.cost.wideZone=wideZoneCostFor(newS.lv.wideZone);}
  if(newS.lv.offlineRate>=OFFLINE_RATE_MAX){newS.cost.offlineRate=0;}else{newS.cost.offlineRate=offlineRateCostFor(newS.lv.offlineRate);}
@@ -1322,8 +1330,30 @@ function render(){
  setText('d-forgeDuration','амулеты живут дольше: +'+s.lv.forgeDuration+' прест. / +'+(s.lv.forgeDuration*25)+'% времени → +'+(s.lv.forgeDuration+1)+' прест. / +'+((s.lv.forgeDuration+1)*25)+'% времени (уровень '+s.lv.forgeDuration+'/'+FORGE_DURATION_MAX+')');
  var btf=document.getElementById('b-twoForges');if(btf){if(s.lv.twoForges){btf.textContent='✓ куплено';btf.disabled=true;btf.className='upg-btn owned';}else{btf.textContent=s.cost.twoForges+' ₽';btf.disabled=s.cash<s.cost.twoForges;btf.className='upg-btn';}}
  setText('d-twoForges',s.lv.twoForges?'куплено — кузнец куёт два амулета одновременно':'покупка один раз — кузнец сможет ковать два амулета одновременно');
- setText('psLvl',p.level);setText('psPts',p.points);setText('psBonus','+'+prestigeBonusPct()+'%');setText('psReward',prestigeReward(p.level+1));
- var pb=document.getElementById('prestBtn');if(pb){pb.disabled=s.cash<PRESTIGE_THRESHOLD;pb.textContent=s.cash<PRESTIGE_THRESHOLD?('Нужно '+fmt(PRESTIGE_THRESHOLD)+' ₽ (сейчас '+fmt(Math.floor(s.cash))+')'):('Сделать престиж → получить '+prestigeReward(p.level+1)+' очков');}
+ setText('psLvl',p.level);setText('psPts',p.points);setText('psBonus','+'+prestigeBonusPct()+'%');
+
+ var maxed=isMaxPrestige();
+ var psThreshold=document.getElementById('psThreshold');
+ if(psThreshold)psThreshold.textContent=maxed?'—':(fmt(prestigeThreshold())+' ₽');
+ var psReward=document.getElementById('psReward');
+ if(psReward)psReward.textContent=maxed?'—':prestigeReward(p.level+1);
+ var pti=document.getElementById('prestThresholdInfo');
+ if(pti){
+  if(maxed)pti.textContent='Максимум достигнут · сбросить нельзя';
+  else pti.textContent='Порог: '+fmt(prestigeThreshold())+' ₽ · сбросит всё кроме прокачек Престижа и амулетов';
+ }
+ var pb=document.getElementById('prestBtn');
+ if(pb){
+  if(maxed){
+   pb.disabled=true;
+   pb.textContent='★ ФИНАЛ — престиж 50';
+  } else {
+   var thr=prestigeThreshold();
+   pb.disabled=s.cash<thr;
+   pb.textContent=s.cash<thr?('Нужно '+fmt(thr)+' ₽ (сейчас '+fmt(Math.floor(s.cash))+')'):('Сделать престиж → получить '+prestigeReward(p.level+1)+' очков');
+  }
+ }
+
  var c1=1+p.lv.bonusBoost;setText('b-bonusBoost',c1+' очк.');setDis('b-bonusBoost',p.points<c1);
  setText('d-bonusBoost','бонус за уровень престижа: +'+(5+p.lv.bonusBoost)+'% → +'+(5+p.lv.bonusBoost+1)+'% (уровень '+p.lv.bonusBoost+')');
  var c2=2+p.lv.startCash*2;setText('b-startCash',c2+' очк.');setDis('b-startCash',p.points<c2);

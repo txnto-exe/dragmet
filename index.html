@@ -731,6 +731,9 @@ var lastSaveTs=0;
 window._revealedAmulet=null;
 window._amuletDragging=false;
 
+var currentTab='dig';
+var _sigs={inv:null,acidinv:null,loc:null,regen:null,auto:null,amulet:null,craft:null};
+
 function ensureSettings(){if(!s)return;if(!s.settings)s.settings={sound:true,vibe:true,music:false};if(typeof s.settings.sound==='undefined')s.settings.sound=true;if(typeof s.settings.vibe==='undefined')s.settings.vibe=true;if(typeof s.settings.music==='undefined')s.settings.music=false;}
 function locDef(k){for(var i=0;i<LOCATIONS.length;i++)if(LOCATIONS[i].key===k)return LOCATIONS[i];}
 function locState(k){for(var i=0;i<s.locs.length;i++)if(s.locs[i].key===k)return s.locs[i];}
@@ -742,7 +745,6 @@ function totalJunk(){var t=0;for(var k in s.junk)t+=s.junk[k];return t;}
 function junkGoldValue(){var sum=0;for(var k in s.junk)if(CATALOG[k])sum+=s.junk[k]*CATALOG[k].gold;return sum;}
 function junkGoldValueUnlocked(){var sum=0;for(var k in s.junk)if(CATALOG[k]&&!s.locked[k])sum+=s.junk[k]*CATALOG[k].gold;return sum;}
 
-// Кислота: база 17%, +2.2% за уровень (макс 15 → 50%). + Кислота II: +5% за уровень (макс 10 → +50%).
 function acidEff(){return Math.min(0.17+s.lv.acid*0.022+p.lv.acidII*0.05,1.0);}
 function acidEffNext(){return Math.min(0.17+Math.min(s.lv.acid+1,MAX_ACID)*0.022+p.lv.acidII*0.05,1.0);}
 function acidEffEffective(){var e=acidEff();if(hasAmulet('cleaner'))e=(1+e)/2;return Math.min(e,0.99);}
@@ -752,7 +754,6 @@ function fireEffEffective(){var e=fireEff();if(hasAmulet('furnaceDemon'))e=(1+e)
 
 function regenCostFor(def,ls){return Math.round(def.regenCost*Math.pow(1.8,ls.regenLv));}
 
-// Копать: 1820 → 650 мс за 10 уровней (-117 мс за уровень)
 function scavCdMax(){return Math.max(650,1820-117*s.lv.scavspd);}
 function acidDuration(){return Math.max(1000,4200-160*s.lv.acidspd);}
 function fireDuration(){return Math.max(1000,3400-120*s.lv.firespd);}
@@ -800,6 +801,17 @@ function forgeDurationMult(id){var a=getAmulet(id);if(!a)return 1;if(a.durType==
 function grantAmulet(id){var a=getAmulet(id);if(!a)return;if(a.durType==='prestige'){s.amulets[id]={prestigeLeft:a.durVal};}else{var ms=a.durVal*3600000*forgeDurationMult(id);s.amulets[id]={expiresAt:Date.now()+ms};}}
 function consumeRecipe(id){var rec=getRecipeAmulet(id);for(var k in rec){s.junk[k]=Math.max(0,(s.junk[k]||0)-rec[k]);}}
 function dissolveAmulet(id){var a=getAmulet(id);if(!a)return;var rec=a.recipe;var returned=[];for(var k in rec){var amount=Math.floor(rec[k]*0.4);if(amount>0){s.junk[k]=(s.junk[k]||0)+amount;returned.push(CATALOG[k].icon+' '+CATALOG[k].name+' ×'+amount);}}delete s.amulets[id];if(s.equippedAmulet===id)s.equippedAmulet=null;window._revealedAmulet=null;updateBloom();var msg='Растворено. Вернулось: '+(returned.length?returned.join(', '):'ничего');flashToast(msg,'rp');saveGame();}
+
+// === Signature helpers для оптимизации рендера ===
+function sigJunk(){var r='';for(var i=0;i<CATALOG_ORDER.length;i++)r+=s.junk[CATALOG_ORDER[i]]+'|';return r;}
+function sigJunkLocked(){var r='';for(var i=0;i<CATALOG_ORDER.length;i++)r+=s.junk[CATALOG_ORDER[i]]+(s.locked[CATALOG_ORDER[i]]?'L':'u')+'|';return r;}
+function sigLocs(){var r=s.activeLoc+'|'+s.locPage+'|'+p.lv.locDiscount+'|';for(var i=0;i<s.locs.length;i++){var l=s.locs[i];r+=l.stock+(l.unlocked?'1':'0')+(p.autoDig[l.key]?'A':'')+'|';}return r;}
+function sigAcid(){var r='';for(var i=0;i<s.acid.length;i++)r+=s.acid[i].active?'1':'0';r+='|'+Math.round(s.solution*100)+'|'+Math.round(junkGoldValueUnlocked()*100);return r;}
+function sigFire(){var r='';for(var i=0;i<s.fire.length;i++)r+=s.fire[i].active?'1':'0';r+='|'+Math.round(s.solution*100);return r;}
+function sigRegen(){var r='';for(var i=0;i<s.locs.length;i++){var l=s.locs[i];if(!l.unlocked)continue;r+=l.regenLv+'|';}return r;}
+function sigAuto(){var r='';for(var i=0;i<LOCATIONS.length;i++)r+=p.autoDig[LOCATIONS[i].key]?'1':'0';r+='|';for(var i=0;i<s.locs.length;i++)r+=s.locs[i].unlocked?'1':'0';return r;}
+function sigAmulet(){var r=(s.forgeUnlocked?'1':'0')+'|'+(s.equippedAmulet||'')+'|';for(var k in s.amulets)r+=k+'|';r+=s.forgeCrafts.length+'|';r+=sigJunk();r+='|'+(Date.now()>>16);return r;}
+function sigCraft(){var r='';for(var i=0;i<s.forgeCrafts.length;i++){var c=s.forgeCrafts[i];r+=c.id+':'+c.startedAt+':'+c.duration+'|';}return r;}
 
 var audioCtx=null,audioBroken=false,activeLoops={};
 function initAudio(){if(audioCtx||audioBroken)return;try{var Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx){audioBroken=true;return;}audioCtx=new Ctx();}catch(e){audioBroken=true;audioCtx=null;}}
@@ -1021,12 +1033,12 @@ function craftAmulet(id){
  if(!canCraftAmulet(id)){sndDeny();vibe(30);flashToast('Не хватает материалов');return;}
  consumeRecipe(id);
  s.forgeCrafts.push({id:id,startedAt:Date.now(),duration:forgeCraftTimeMs(id)});
- sndCraftStart();vibe(30);saveGame();render();
+ sndCraftStart();vibe(30);saveGame();
 }
-function equipAmulet(id){if(!s.amulets[id])return;s.equippedAmulet=id;updateBloom();sndBuy();vibe(25);saveGame();render();}
-function unequipAmulet(){s.equippedAmulet=null;updateBloom();sndToggle();vibe(15);saveGame();render();}
+function equipAmulet(id){if(!s.amulets[id])return;s.equippedAmulet=id;updateBloom();sndBuy();vibe(25);saveGame();}
+function unequipAmulet(){s.equippedAmulet=null;updateBloom();sndToggle();vibe(15);saveGame();}
 
-function resetAll(){p=makePrest();for(var li=0;li<LOCATIONS.length;li++){p.autoDig[LOCATIONS[li].key]=false;p.autoTimers[LOCATIONS[li].key]=0;}var keepSettings=s&&s.settings?s.settings:{sound:true,vibe:true,music:false};s=makeState();s.settings=keepSettings;try{localStorage.removeItem(SAVE_KEY_A);localStorage.removeItem(SAVE_KEY_B);for(var oi=0;oi<OLD_KEYS.length;oi++)localStorage.removeItem(OLD_KEYS[oi]);}catch(e){}lastSaveTs=0;stopAcidLoop();stopFireLoop();cancelAllPress();currentDigLabel=DIG_LABELS[0];window._revealedAmulet=null;updateBloom();switchTab('dig');}
+function resetAll(){p=makePrest();for(var li=0;li<LOCATIONS.length;li++){p.autoDig[LOCATIONS[li].key]=false;p.autoTimers[LOCATIONS[li].key]=0;}var keepSettings=s&&s.settings?s.settings:{sound:true,vibe:true,music:false};s=makeState();s.settings=keepSettings;try{localStorage.removeItem(SAVE_KEY_A);localStorage.removeItem(SAVE_KEY_B);for(var oi=0;oi<OLD_KEYS.length;oi++)localStorage.removeItem(OLD_KEYS[oi]);}catch(e){}lastSaveTs=0;stopAcidLoop();stopFireLoop();cancelAllPress();currentDigLabel=DIG_LABELS[0];window._revealedAmulet=null;_sigs={inv:null,acidinv:null,loc:null,regen:null,auto:null,amulet:null,craft:null};updateBloom();switchTab('dig');}
 function doPrestige(){
  if(isMaxPrestige()){sndDeny();vibe(40);flashToast('Престиж '+MAX_PRESTIGE_LEVEL+' — максимум');return;}
  var thr=prestigeThreshold();
@@ -1090,7 +1102,7 @@ function hideOfflineOverlay(){var el=document.getElementById('offlineOverlay');i
 
 function buildSaveData(){
  var jk={},lk={};for(var k in s.junk)jk[k]=s.junk[k];for(var k2 in s.locked)lk[k2]=s.locked[k2];
- return {p:{level:p.level,points:p.points,lv:{bonusBoost:p.lv.bonusBoost,startCash:p.lv.startCash,locDiscount:p.lv.locDiscount,acidII:p.lv.acidII,fireII:p.lv.fireII,capII:p.lv.capII},autoDig:p.autoDig,autoTimers:p.autoTimers},s:{cash:s.cash,ingots:s.ingots,junk:jk,locked:lk,cap:s.cap,scavCd:s.scavCd,solution:s.solution,acid:s.acid.map(function(x){return{active:x.active,progress:x.progress,duration:x.duration,yieldAmt:x.yieldAmt};}),fire:s.fire.map(function(x){return{active:x.active,progress:x.progress,duration:x.duration,yieldAmt:x.yieldAmt};}),activeLoc:s.activeLoc,locPage:s.locPage,invExpanded:s.invExpanded,accState:s.accState,locs:s.locs.map(function(x){return{key:x.key,stock:x.stock,regenTimer:x.regenTimer,regenLv:x.regenLv,unlocked:x.unlocked};}),lv:{acid:s.lv.acid,fire:s.lv.fire,cap:s.lv.cap,hold:s.lv.hold,scavspd:s.lv.scavspd,acidspd:s.lv.acidspd,firespd:s.lv.firespd,secondacid:s.lv.secondacid,secondfire:s.lv.secondfire,goodeye:s.lv.goodeye,luck:s.lv.luck,reputation:s.lv.reputation,wideZone:s.lv.wideZone,offlineRate:s.lv.offlineRate,offlineCap:s.lv.offlineCap,autoSpeed:s.lv.autoSpeed,autoPenalty:s.lv.autoPenalty,forgeSpeed:s.lv.forgeSpeed,forgeDiscount:s.lv.forgeDiscount,forgeDuration:s.lv.forgeDuration,twoForges:s.lv.twoForges},cost:{acid:s.cost.acid,fire:s.cost.fire,cap:s.cost.cap,hold:s.cost.hold,scavspd:s.cost.scavspd,acidspd:s.cost.acidspd,firespd:s.cost.firespd,secondacid:s.cost.secondacid,secondfire:s.cost.secondfire,goodeye:s.cost.goodeye,luck:s.cost.luck,reputation:s.cost.reputation,wideZone:s.cost.wideZone,offlineRate:s.cost.offlineRate,offlineCap:s.cost.offlineCap,autoSpeed:s.cost.autoSpeed,autoPenalty:s.cost.autoPenalty,forgeSpeed:s.cost.forgeSpeed,forgeDiscount:s.cost.forgeDiscount,forgeDuration:s.cost.forgeDuration,twoForges:s.cost.twoForges},stats:{junkTotal:s.stats.junkTotal,ingotsTotal:s.stats.ingotsTotal,earnedTotal:s.stats.earnedTotal,offlineTotal:s.stats.offlineTotal},settings:{sound:s.settings.sound,vibe:s.settings.vibe,music:s.settings.music},forgeUnlocked:s.forgeUnlocked,amulets:s.amulets,equippedAmulet:s.equippedAmulet,forgeCrafts:s.forgeCrafts,lastSeenTs:s.lastSeenTs},ts:Date.now(),ver:23};
+ return {p:{level:p.level,points:p.points,lv:{bonusBoost:p.lv.bonusBoost,startCash:p.lv.startCash,locDiscount:p.lv.locDiscount,acidII:p.lv.acidII,fireII:p.lv.fireII,capII:p.lv.capII},autoDig:p.autoDig,autoTimers:p.autoTimers},s:{cash:s.cash,ingots:s.ingots,junk:jk,locked:lk,cap:s.cap,scavCd:s.scavCd,solution:s.solution,acid:s.acid.map(function(x){return{active:x.active,progress:x.progress,duration:x.duration,yieldAmt:x.yieldAmt};}),fire:s.fire.map(function(x){return{active:x.active,progress:x.progress,duration:x.duration,yieldAmt:x.yieldAmt};}),activeLoc:s.activeLoc,locPage:s.locPage,invExpanded:s.invExpanded,accState:s.accState,locs:s.locs.map(function(x){return{key:x.key,stock:x.stock,regenTimer:x.regenTimer,regenLv:x.regenLv,unlocked:x.unlocked};}),lv:{acid:s.lv.acid,fire:s.lv.fire,cap:s.lv.cap,hold:s.lv.hold,scavspd:s.lv.scavspd,acidspd:s.lv.acidspd,firespd:s.lv.firespd,secondacid:s.lv.secondacid,secondfire:s.lv.secondfire,goodeye:s.lv.goodeye,luck:s.lv.luck,reputation:s.lv.reputation,wideZone:s.lv.wideZone,offlineRate:s.lv.offlineRate,offlineCap:s.lv.offlineCap,autoSpeed:s.lv.autoSpeed,autoPenalty:s.lv.autoPenalty,forgeSpeed:s.lv.forgeSpeed,forgeDiscount:s.lv.forgeDiscount,forgeDuration:s.lv.forgeDuration,twoForges:s.lv.twoForges},cost:{acid:s.cost.acid,fire:s.cost.fire,cap:s.cost.cap,hold:s.cost.hold,scavspd:s.cost.scavspd,acidspd:s.cost.acidspd,firespd:s.cost.firespd,secondacid:s.cost.secondacid,secondfire:s.cost.secondfire,goodeye:s.cost.goodeye,luck:s.cost.luck,reputation:s.cost.reputation,wideZone:s.cost.wideZone,offlineRate:s.cost.offlineRate,offlineCap:s.cost.offlineCap,autoSpeed:s.cost.autoSpeed,autoPenalty:s.cost.autoPenalty,forgeSpeed:s.cost.forgeSpeed,forgeDiscount:s.cost.forgeDiscount,forgeDuration:s.cost.forgeDuration,twoForges:s.cost.twoForges},stats:{junkTotal:s.stats.junkTotal,ingotsTotal:s.stats.ingotsTotal,earnedTotal:s.stats.earnedTotal,offlineTotal:s.stats.offlineTotal},settings:{sound:s.settings.sound,vibe:s.settings.vibe,music:s.settings.music},forgeUnlocked:s.forgeUnlocked,amulets:s.amulets,equippedAmulet:s.equippedAmulet,forgeCrafts:s.forgeCrafts,lastSeenTs:s.lastSeenTs},ts:Date.now(),ver:24};
 }
 function readSlot(key){try{var raw=localStorage.getItem(key);if(!raw)return null;var d=JSON.parse(raw);if(!d||!d.s||!d.p)return null;return d;}catch(e){return null;}}
 function saveGame(){try{s.lastSeenTs=Date.now();var data=buildSaveData();var a=readSlot(SAVE_KEY_A),b=readSlot(SAVE_KEY_B);var aTs=a?a.ts:0,bTs=b?b.ts:0;var targetKey=(aTs<=bTs)?SAVE_KEY_A:SAVE_KEY_B;localStorage.setItem(targetKey,JSON.stringify(data));lastSaveTs=data.ts;return true;}catch(e){return false;}}
@@ -1166,7 +1178,7 @@ function devTap(){devTapCount++;if(devTapTimer)clearTimeout(devTapTimer);if(devT
 function openDev(){document.getElementById('devOverlay').classList.add('show');renderDevItems();}
 function closeDev(){document.getElementById('devOverlay').classList.remove('show');}
 function renderDevItems(){var box=document.getElementById('devItems');if(!box)return;box.innerHTML='';for(var i=0;i<CATALOG_ORDER.length;i++){var k=CATALOG_ORDER[i],c=CATALOG[k];var row=document.createElement('div');row.className='dev-item-row';row.innerHTML='<span class="ic">'+c.icon+'</span><span class="nm">'+c.name+'</span>'+'<button class="dev-btn" data-dev="item:'+k+':10" type="button">+10</button>'+'<button class="dev-btn" data-dev="item:'+k+':100" type="button">+100</button>'+'<button class="dev-btn" data-dev="item:'+k+':1000" type="button">+1000</button>';box.appendChild(row);}}
-function applyDev(action){var parts=action.split(':');var type=parts[0];if(type==='cash'){s.cash+=(parseFloat(parts[1])||0);bumpCash();}else if(type==='ingots'){s.ingots+=(parseFloat(parts[1])||0);}else if(type==='points'){p.points+=(parseInt(parts[1],10)||0);}else if(type==='item'){var k=parts[1];var n=parseInt(parts[2],10)||0;if(CATALOG[k])s.junk[k]=(s.junk[k]||0)+n;}saveGame();render();}
+function applyDev(action){var parts=action.split(':');var type=parts[0];if(type==='cash'){s.cash+=(parseFloat(parts[1])||0);bumpCash();}else if(type==='ingots'){s.ingots+=(parseFloat(parts[1])||0);}else if(type==='points'){p.points+=(parseInt(parts[1],10)||0);}else if(type==='item'){var k=parts[1];var n=parseInt(parts[2],10)||0;if(CATALOG[k])s.junk[k]=(s.junk[k]||0)+n;}saveGame();}
 
 var currentScreen='menu';
 function showScreen(name){currentScreen=name;var screens=document.querySelectorAll('.screen');for(var i=0;i<screens.length;i++)screens[i].classList.remove('active');if(name==='menu'){document.getElementById('menuScreen').classList.add('active');}else if(name==='game'){document.getElementById('gameScreen').classList.add('active');var gs=document.getElementById('gameScreen');var activeTab='dig';var ats=document.querySelectorAll('.tab-section.active');if(ats.length)activeTab=ats[0].getAttribute('data-tab');if(activeTab==='dig')gs.classList.add('dig-lock');else gs.classList.remove('dig-lock');}window.scrollTo(0,0);}
@@ -1177,12 +1189,16 @@ function closeSettings(){document.getElementById('settingsModal').classList.remo
 
 function switchTab(name){
  window._revealedAmulet=null;
+ currentTab=name;
  var secs=document.querySelectorAll('.tab-section');
  for(var i=0;i<secs.length;i++){if(secs[i].getAttribute('data-tab')===name)secs[i].classList.add('active');else secs[i].classList.remove('active');}
  var tbs=document.querySelectorAll('.tab-btn');
  for(var j=0;j<tbs.length;j++){if(tbs[j].getAttribute('data-tab')===name)tbs[j].classList.add('active');else tbs[j].classList.remove('active');}
  var gs=document.getElementById('gameScreen');
  if(gs){if(name==='dig')gs.classList.add('dig-lock');else gs.classList.remove('dig-lock');}
+ // сбрасываем подписи, чтобы при переключении всё пересобралось
+ _sigs={inv:null,acidinv:null,loc:null,regen:null,auto:null,amulet:null,craft:null};
+ if(name==='upg'){applyAccState();}
  window.scrollTo(0,0);sndTab();vibe(8);
 }
 function switchSub(name){var n=document.getElementById('subview-normal'),pr=document.getElementById('subview-prest');var bn=document.getElementById('subtab-normal'),bp=document.getElementById('subtab-prest');if(name==='prest'){n.style.display='none';pr.style.display='';bp.classList.add('active');bn.classList.remove('active');}else{n.style.display='';pr.style.display='none';bn.classList.add('active');bp.classList.remove('active');}window.scrollTo(0,0);sndTab();vibe(8);}
@@ -1368,7 +1384,6 @@ function attachSwipe(el,key){
 function renderAmuletHeader(){var h=document.getElementById('amuletHdr');if(!h)return;if(s.equippedAmulet){var a=getAmulet(s.equippedAmulet);if(a){h.style.display='flex';var d=document.getElementById('amuletDot');if(d){d.style.color=a.color;d.style.background=a.color;}var n=document.getElementById('amuletName');if(n)n.textContent=a.name;return;}}h.style.display='none';}
 function setText(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
 function setDis(id,v){var e=document.getElementById(id);if(e)e.disabled=v;}
-
 function setBtnMax(id, maxed, cost, canBuy){
  var el=document.getElementById(id);if(!el)return;
  if(maxed){el.textContent='✓ макс';el.disabled=true;el.className='upg-btn owned';}
@@ -1376,134 +1391,155 @@ function setBtnMax(id, maxed, cost, canBuy){
 }
 
 function render(){
+ // === ВСЕГДА (дёшево, не зависит от вкладки) ===
  setText('cash',fmt(Math.floor(s.cash)));setText('ingots',fmt(s.ingots,3));setText('ingotBig',fmt(s.ingots,3));
  var ph=document.getElementById('prestHdr');if(ph){if(p.level>0||p.points>0)ph.style.display='';else ph.style.display='none';}
  setText('prestLvl',p.level);setText('prestPts',p.points);
- renderAmuletHeader();renderLocations();renderInventory();renderAcidInventory();renderAcidStages();renderFireStages();renderRegenList();renderAutoDigList();renderCraftStatus();renderAmuletList();applyAccState();
-
- var ff=document.getElementById('forgeFrame');
- if(ff){
-  if(s.forgeUnlocked){ff.classList.remove('forge-locked');ff.classList.add('forge-unlocked');}
-  else{ff.classList.add('forge-locked');ff.classList.remove('forge-unlocked');}
- }
- var fimg=document.querySelector('.forge-blacksmith img');
- if(fimg){var want=s.forgeUnlocked?'kuznec.png':'kuznec-locked.png';if(fimg.getAttribute('src')!==want)fimg.setAttribute('src',want);}
- var tf=document.getElementById('tabForge');
- if(tf){
-  var tfi=tf.querySelector('.tab-ic'),tfl=tf.querySelector('.tab-lbl');
-  if(tfi)tfi.textContent=s.forgeUnlocked?'⚒️':'🔒';
-  if(tfl){tfl.textContent=s.forgeUnlocked?'Кузнец':'\u00A0';}
- }
- var ftitle=document.getElementById('forgePanelTitle');
- if(ftitle)ftitle.style.display=s.forgeUnlocked?'':'none';
- var fw=document.getElementById('forgeAccordionWrap');
- if(fw)fw.style.display=s.forgeUnlocked?'':'none';
-
- var ls=locState(s.activeLoc),def=locDef(s.activeLoc);
- var digBtn=document.getElementById('digBtn');
- if(digBtn){var digFill=document.getElementById('digFill'),digLabel=document.getElementById('digLabel');digFill.style.background='rgba(0,0,0,0.28)';if(ls.stock<=0){digBtn.disabled=true;digFill.style.width='0%';var iv=locRegenIv(def,ls);var left=Math.max(0,iv-ls.regenTimer);digLabel.textContent=def.name+': пусто, ~'+Math.ceil(left/1000)+'с';}else if(totalJunk()>=capMax()){digBtn.disabled=true;digFill.style.width='100%';digFill.style.background='rgba(143,179,57,0.5)';digLabel.textContent='Склад забит — переработай лом';}else if(s.scavCd>0){digBtn.disabled=false;digFill.style.width=(100-s.scavCd/scavCdMax()*100)+'%';digLabel.textContent=currentDigLabel;}else{digBtn.disabled=false;digFill.style.width='0%';digLabel.textContent='Порыться: '+def.name;}}
- setText('capTxt',totalJunk()+' / '+capMax()+' на складе');
- var cf=document.getElementById('capFill');if(cf)cf.style.width=Math.min(100,totalJunk()/capMax()*100)+'%';
- var pe=document.getElementById('priceTxt');
- if(pe){var mult=priceMultiplier();pe.innerHTML='<span style="color:var(--gold);">🎯 '+fmt(Math.round(PRICE_MIN*mult))+' – '+fmt(Math.round(PRICE_MAX*mult))+' ₽</span>';}
- var sb=document.getElementById('sellBtn');
- if(sb){sb.disabled=s.ingots<=0.0005;if(s.ingots<=0.0005)sb.textContent='Нет слитков на продажу';else sb.textContent='🎯 Продать '+fmt(s.ingots,3)+' г (стоп-игра)';}
-
- setBtnMax('b-acid',s.lv.acid>=MAX_ACID,s.cost.acid,s.cash>=s.cost.acid);
- setText('d-acid','в кислоте теряется золота: '+Math.round((1-acidEff())*100)+'% → '+Math.round((1-acidEffNext())*100)+'% (уровень '+s.lv.acid+'/'+MAX_ACID+')');
- setBtnMax('b-fire',s.lv.fire>=MAX_FIRE,s.cost.fire,s.cash>=s.cost.fire);
- setText('d-fire','при плавке теряется золота: '+Math.round((1-fireEff())*100)+'% → '+Math.round((1-fireEffNext())*100)+'% (уровень '+s.lv.fire+'/'+MAX_FIRE+')');
- setBtnMax('b-cap',s.lv.cap>=MAX_CAP,s.cost.cap,s.cash>=s.cost.cap);
- setText('d-cap','сколько лома влезает на склад: '+capMax()+' → '+(capMax()+8)+' (уровень '+s.lv.cap+'/'+MAX_CAP+')');
- var bh=document.getElementById('b-hold');if(bh){if(s.lv.hold){bh.textContent='✓ куплено';bh.disabled=true;bh.className='upg-btn owned';}else{bh.textContent=fmt(s.cost.hold)+' ₽';bh.disabled=s.cash<s.cost.hold;bh.className='upg-btn';}}
- setText('d-hold',s.lv.hold?'куплено — зажми кнопку и она будет работать сама':'покупка один раз — зажми кнопку, действие повторится');
- setBtnMax('b-scavspd',s.lv.scavspd>=MAX_SCAVSPD,s.cost.scavspd,s.cash>=s.cost.scavspd);
- setText('d-scavspd','пауза между копками: '+(scavCdMax()/1000).toFixed(2)+'с → '+(Math.max(650,1820-117*(s.lv.scavspd+1))/1000).toFixed(2)+'с (уровень '+s.lv.scavspd+'/'+MAX_SCAVSPD+')');
- setBtnMax('b-acidspd',s.lv.acidspd>=MAX_ACIDSPD,s.cost.acidspd,s.cash>=s.cost.acidspd);
- setText('d-acidspd','время растворения: '+(acidDuration()/1000).toFixed(1)+'с → '+(Math.max(1000,4200-160*(s.lv.acidspd+1))/1000).toFixed(1)+'с (уровень '+s.lv.acidspd+'/'+MAX_ACIDSPD+')');
- setBtnMax('b-firespd',s.lv.firespd>=MAX_FIRESPD,s.cost.firespd,s.cash>=s.cost.firespd);
- setText('d-firespd','время выпаривания: '+(fireDuration()/1000).toFixed(1)+'с → '+(Math.max(1000,3400-120*(s.lv.firespd+1))/1000).toFixed(1)+'с (уровень '+s.lv.firespd+'/'+MAX_FIRESPD+')');
- var bsa=document.getElementById('b-secondacid');if(bsa){if(s.lv.secondacid){bsa.textContent='✓ куплено';bsa.disabled=true;bsa.className='upg-btn owned';}else{bsa.textContent=fmt(s.cost.secondacid)+' ₽';bsa.disabled=s.cash<s.cost.secondacid;bsa.className='upg-btn';}}
- setText('d-secondacid',s.lv.secondacid?'куплено — два бака работают одновременно':'покупка один раз — можно запустить вторую кислоту параллельно');
- var bsf=document.getElementById('b-secondfire');if(bsf){if(s.lv.secondfire){bsf.textContent='✓ куплено';bsf.disabled=true;bsf.className='upg-btn owned';}else{bsf.textContent=fmt(s.cost.secondfire)+' ₽';bsf.disabled=s.cash<s.cost.secondfire;bsf.className='upg-btn';}}
- setText('d-secondfire',s.lv.secondfire?'куплено — две печи работают одновременно':'покупка один раз — можно запустить вторую печь параллельно');
- setBtnMax('b-goodeye',s.lv.goodeye>=MAX_GOODEYE,s.cost.goodeye,s.cash>=s.cost.goodeye);
- setText('d-goodeye','шанс найти редкую вещь: '+Math.round(goodEyeChance()*100)+'% → '+Math.round(Math.min((s.lv.goodeye+1)*4,80))+'% (уровень '+s.lv.goodeye+'/'+MAX_GOODEYE+')');
- setBtnMax('b-luck',s.lv.luck>=MAX_LUCK,s.cost.luck,s.cash>=s.cost.luck);
- setText('d-luck','шанс найти две вещи: '+Math.round(luckChance()*100)+'% → '+Math.round(Math.min((s.lv.luck+1)*4.667,70))+'% (уровень '+s.lv.luck+'/'+MAX_LUCK+')');
- var br=document.getElementById('b-reputation');if(br){if(s.lv.reputation>=MAX_REPUTATION){br.textContent='✓ макс';br.disabled=true;br.className='upg-btn owned';}else{br.textContent=fmt(s.cost.reputation)+' ₽';br.disabled=s.cash<s.cost.reputation;br.className='upg-btn';}}
- var dr=document.getElementById('d-reputation');if(dr){var cur=reputationPct(),nxt=Math.min(cur+REPUTATION_PER_LV,100);dr.textContent='наценка скупщика: +'+cur+'% → +'+nxt+'% (уровень '+s.lv.reputation+'/'+MAX_REPUTATION+')';}
- var bwz=document.getElementById('b-wideZone');if(bwz){if(s.lv.wideZone>=MAX_WIDEZONE){bwz.textContent='✓ макс';bwz.disabled=true;bwz.className='upg-btn owned';}else{bwz.textContent=fmt(s.cost.wideZone)+' ₽';bwz.disabled=s.cash<s.cost.wideZone;bwz.className='upg-btn';}}
- var dwz=document.getElementById('d-wideZone');if(dwz)dwz.textContent='зелёная зона в стоп-игре: '+wideZoneBonus()+'% → '+Math.min(wideZoneBonus()+1,5)+'% (уровень '+s.lv.wideZone+'/'+MAX_WIDEZONE+')';
- var bor=document.getElementById('b-offlineRate');if(bor){if(s.lv.offlineRate>=MAX_OFFLINE_RATE){bor.textContent='✓ макс';bor.disabled=true;bor.className='upg-btn owned';}else{bor.textContent=fmt(s.cost.offlineRate)+' ₽';bor.disabled=s.cash<s.cost.offlineRate;bor.className='upg-btn offline';}}
- var dor=document.getElementById('d-offlineRate');if(dor)dor.textContent='доход в оффлайне: '+offlineRatePct()+'% → '+offlineRateNextPct()+'% (уровень '+s.lv.offlineRate+'/'+MAX_OFFLINE_RATE+')';
- var boc=document.getElementById('b-offlineCap');if(boc){if(s.lv.offlineCap>=MAX_OFFLINE_CAP){boc.textContent='✓ макс';boc.disabled=true;boc.className='upg-btn owned';}else{boc.textContent=fmt(s.cost.offlineCap)+' ₽';boc.disabled=s.cash<s.cost.offlineCap;boc.className='upg-btn offline';}}
- var doc=document.getElementById('d-offlineCap');if(doc)doc.textContent='максимум часов: '+offlineCapHours()+' → '+offlineCapNextHours()+' ч (уровень '+s.lv.offlineCap+'/'+MAX_OFFLINE_CAP+')';
- setBtnMax('b-autoSpeed',s.lv.autoSpeed>=MAX_AUTO_SPEED,s.cost.autoSpeed,s.cash>=s.cost.autoSpeed);
- var curSec=(Math.max(2000,6000-400*s.lv.autoSpeed)/1000).toFixed(2);
- var nextSec=(Math.max(2000,6000-400*(s.lv.autoSpeed+1))/1000).toFixed(2);
- setText('d-autoSpeed','время на один предмет: '+curSec+'с → '+nextSec+'с (уровень '+s.lv.autoSpeed+'/'+MAX_AUTO_SPEED+')');
- var bap=document.getElementById('b-autoPenalty');if(bap){if(s.lv.autoPenalty>=MAX_AUTO_PENALTY||hasAmulet('nightShift')){bap.textContent=hasAmulet('nightShift')?'— амулетом':('✓ макс');bap.disabled=true;bap.className='upg-btn owned';}else{bap.textContent=fmt(s.cost.autoPenalty)+' ₽';bap.disabled=s.cash<s.cost.autoPenalty;bap.className='upg-btn';}}
- setText('d-autoPenalty',hasAmulet('nightShift')?'амулет «Ночная смена» — штрафа нет':'штраф на чужой точке: −'+autoPenaltyPct()+'% → −'+Math.max(0,50-(s.lv.autoPenalty+1)*5)+'% (уровень '+s.lv.autoPenalty+'/'+MAX_AUTO_PENALTY+')');
- var bfs=document.getElementById('b-forgeSpeed');if(bfs){if(s.lv.forgeSpeed>=MAX_FORGE_SPEED){bfs.textContent='✓ макс';bfs.disabled=true;bfs.className='upg-btn owned';}else{bfs.textContent=fmt(s.cost.forgeSpeed)+' ₽';bfs.disabled=s.cash<s.cost.forgeSpeed;bfs.className='upg-btn';}}
- setText('d-forgeSpeed','время ковки: −'+Math.round(forgeSpeedBonus()*100)+'% → −'+Math.round(Math.min((s.lv.forgeSpeed+1)*0.10,0.70)*100)+'% (уровень '+s.lv.forgeSpeed+'/'+MAX_FORGE_SPEED+')');
- var bfd=document.getElementById('b-forgeDiscount');if(bfd){if(s.lv.forgeDiscount>=MAX_FORGE_DISCOUNT){bfd.textContent='✓ макс';bfd.disabled=true;bfd.className='upg-btn owned';}else{bfd.textContent=fmt(s.cost.forgeDiscount)+' ₽';bfd.disabled=s.cash<s.cost.forgeDiscount;bfd.className='upg-btn';}}
- setText('d-forgeDiscount','рецепты дешевле: −'+Math.round(forgeDiscountBonus()*100)+'% → −'+Math.round(Math.min((s.lv.forgeDiscount+1)*0.05,0.50)*100)+'% (уровень '+s.lv.forgeDiscount+'/'+MAX_FORGE_DISCOUNT+')');
- var bfdu=document.getElementById('b-forgeDuration');if(bfdu){if(s.lv.forgeDuration>=MAX_FORGE_DURATION){bfdu.textContent='✓ макс';bfdu.disabled=true;bfdu.className='upg-btn owned';}else{bfdu.textContent=fmt(s.cost.forgeDuration)+' ₽';bfdu.disabled=s.cash<s.cost.forgeDuration;bfdu.className='upg-btn';}}
- setText('d-forgeDuration','амулеты живут дольше: +'+s.lv.forgeDuration+' прест. / +'+(s.lv.forgeDuration*25)+'% → +'+(s.lv.forgeDuration+1)+' прест. / +'+((s.lv.forgeDuration+1)*25)+'% (уровень '+s.lv.forgeDuration+'/'+MAX_FORGE_DURATION+')');
- var btf=document.getElementById('b-twoForges');if(btf){if(s.lv.twoForges){btf.textContent='✓ куплено';btf.disabled=true;btf.className='upg-btn owned';}else{btf.textContent=fmt(s.cost.twoForges)+' ₽';btf.disabled=s.cash<s.cost.twoForges;btf.className='upg-btn';}}
- setText('d-twoForges',s.lv.twoForges?'куплено — кузнец куёт два амулета одновременно':'покупка один раз — кузнец сможет ковать два амулета одновременно');
-
- setText('psLvl',p.level);setText('psPts',p.points);setText('psBonus','+'+prestigeBonusPct()+'%');
- var maxed=isMaxPrestige();
- var psThreshold=document.getElementById('psThreshold');
- if(psThreshold)psThreshold.textContent=maxed?'—':(fmt(prestigeThreshold())+' ₽');
- var psReward=document.getElementById('psReward');
- if(psReward)psReward.textContent=maxed?'—':prestigeReward(p.level+1);
- var pti=document.getElementById('prestThresholdInfo');
- if(pti){
-  if(maxed)pti.textContent='Максимум достигнут · сбросить нельзя';
-  else pti.textContent='Порог: '+fmt(prestigeThreshold())+' ₽ · сбросит всё кроме прокачек Престижа и амулетов';
- }
- var pb=document.getElementById('prestBtn');
- if(pb){
-  if(maxed){pb.disabled=true;pb.textContent='★ ФИНАЛ — престиж '+MAX_PRESTIGE_LEVEL;}
-  else{var thr=prestigeThreshold();pb.disabled=s.cash<thr;pb.textContent=s.cash<thr?('Нужно '+fmt(thr)+' ₽ (сейчас '+fmt(Math.floor(s.cash))+')'):('Сделать престиж → получить '+prestigeReward(p.level+1)+' очков');}
- }
-
- var c1=1+p.lv.bonusBoost;
- var bb=document.getElementById('b-bonusBoost');
- if(bb){if(p.lv.bonusBoost>=MAX_BONUS_BOOST){bb.textContent='✓ макс';bb.disabled=true;bb.className='upg-btn prest owned';}else{bb.textContent=c1+' очк.';bb.disabled=p.points<c1;bb.className='upg-btn prest';}}
- var dbb=document.getElementById('d-bonusBoost');
- if(dbb){var curBase=5+bonusBoostSum(p.lv.bonusBoost);var nextBase=5+bonusBoostSum(p.lv.bonusBoost+1);dbb.textContent='база бонуса за престиж: +'+curBase.toFixed(2)+'% → +'+nextBase.toFixed(2)+'% (уровень '+p.lv.bonusBoost+'/'+MAX_BONUS_BOOST+')';}
- var c2=2+p.lv.startCash*2;
- var bsc=document.getElementById('b-startCash');
- if(bsc){if(p.lv.startCash>=MAX_START_CASH){bsc.textContent='✓ макс';bsc.disabled=true;bsc.className='upg-btn prest owned';}else{bsc.textContent=c2+' очк.';bsc.disabled=p.points<c2;bsc.className='upg-btn prest';}}
- var dsc=document.getElementById('d-startCash');
- if(dsc)dsc.textContent='стартовый капитал: '+fmt(p.lv.startCash*1000000)+' → '+fmt((p.lv.startCash+1)*1000000)+' ₽ (уровень '+p.lv.startCash+'/'+MAX_START_CASH+')';
- var c3=3+p.lv.locDiscount*3;
- var bld=document.getElementById('b-locDiscount');
- if(bld){if(p.lv.locDiscount>=MAX_LOC_DISCOUNT){bld.textContent='✓ макс';bld.disabled=true;bld.className='upg-btn prest owned';}else{bld.textContent=c3+' очк.';bld.disabled=p.points<c3;bld.className='upg-btn prest';}}
- var dld=document.getElementById('d-locDiscount');
- if(dld)dld.textContent='скидка на открытие точек: −'+Math.min(60,p.lv.locDiscount*4)+'% → −'+Math.min(60,(p.lv.locDiscount+1)*4)+'% (уровень '+p.lv.locDiscount+'/'+MAX_LOC_DISCOUNT+')';
- var c4=2+p.lv.acidII*2;
- var bai=document.getElementById('b-acidII');
- if(bai){if(p.lv.acidII>=MAX_ACID_II){bai.textContent='✓ макс';bai.disabled=true;bai.className='upg-btn prest owned';}else{bai.textContent=c4+' очк.';bai.disabled=p.points<c4;bai.className='upg-btn prest';}}
- var dai=document.getElementById('d-acidII');
- if(dai)dai.textContent='доп. чистота кислоты: +'+(p.lv.acidII*5)+'% → +'+((p.lv.acidII+1)*5)+'% (уровень '+p.lv.acidII+'/'+MAX_ACID_II+')';
- var c5=2+p.lv.fireII*2;
- var bfi=document.getElementById('b-fireII');
- if(bfi){if(p.lv.fireII>=MAX_FIRE_II){bfi.textContent='✓ макс';bfi.disabled=true;bfi.className='upg-btn prest owned';}else{bfi.textContent=c5+' очк.';bfi.disabled=p.points<c5;bfi.className='upg-btn prest';}}
- var dfi=document.getElementById('d-fireII');
- if(dfi)dfi.textContent='доп. эффективность печи: +'+(p.lv.fireII*5)+'% → +'+((p.lv.fireII+1)*5)+'% (уровень '+p.lv.fireII+'/'+MAX_FIRE_II+')';
- var c6=2+p.lv.capII*2;
- var bci=document.getElementById('b-capII');
- if(bci){if(p.lv.capII>=MAX_CAP_II){bci.textContent='✓ макс';bci.disabled=true;bci.className='upg-btn prest owned';}else{bci.textContent=c6+' очк.';bci.disabled=p.points<c6;bci.className='upg-btn prest';}}
- var dci=document.getElementById('d-capII');
- if(dci)dci.textContent='доп. места на складе: +'+(p.lv.capII*2)+' → +'+((p.lv.capII+1)*2)+' (уровень '+p.lv.capII+'/'+MAX_CAP_II+')';
-
+ renderAmuletHeader();
+ // Прогресс в таббаре (мини-полоски под иконками) — дешёвые селекторы, оставляем всегда
  var pa=document.getElementById('prog-acid');if(pa){var tp=0,td=0;for(var i=0;i<s.acid.length;i++){var b=s.acid[i];if(b.active){tp+=b.progress;td+=b.duration;}}pa.style.width=td>0?(tp/td*100)+'%':'0%';}
  var pf=document.getElementById('prog-fire');if(pf){var tp2=0,td2=0;for(var i=0;i<s.fire.length;i++){var f2=s.fire[i];if(f2.active){tp2+=f2.progress;td2+=f2.duration;}}pf.style.width=td2>0?(tp2/td2*100)+'%':'0%';}
+
+ // === FORGE TAB ===
+ if(currentTab==='forge'){
+  var ff=document.getElementById('forgeFrame');
+  if(ff){if(s.forgeUnlocked){ff.classList.remove('forge-locked');ff.classList.add('forge-unlocked');}else{ff.classList.add('forge-locked');ff.classList.remove('forge-unlocked');}}
+  var fimg=document.querySelector('.forge-blacksmith img');
+  if(fimg){var want=s.forgeUnlocked?'kuznec.png':'kuznec-locked.png';if(fimg.getAttribute('src')!==want)fimg.setAttribute('src',want);}
+  var tf=document.getElementById('tabForge');
+  if(tf){var tfi=tf.querySelector('.tab-ic'),tfl=tf.querySelector('.tab-lbl');if(tfi)tfi.textContent=s.forgeUnlocked?'⚒️':'🔒';if(tfl){tfl.textContent=s.forgeUnlocked?'Кузнец':'\u00A0';}}
+  var ftitle=document.getElementById('forgePanelTitle');
+  if(ftitle)ftitle.style.display=s.forgeUnlocked?'':'none';
+  var fw=document.getElementById('forgeAccordionWrap');
+  if(fw)fw.style.display=s.forgeUnlocked?'':'none';
+  var sg=sigAmulet();
+  if(sg!==_sigs.amulet){_sigs.amulet=sg;renderAmuletList();}
+  renderCraftStatus();
+ }
+
+ // === DIG TAB ===
+ if(currentTab==='dig'){
+  var sgL=sigLocs();
+  if(sgL!==_sigs.loc){_sigs.loc=sgL;renderLocations();}
+  var sgI=sigJunk();
+  if(sgI!==_sigs.inv){_sigs.inv=sgI;renderInventory();}
+  var ls=locState(s.activeLoc),def=locDef(s.activeLoc);
+  var digBtn=document.getElementById('digBtn');
+  if(digBtn){var digFill=document.getElementById('digFill'),digLabel=document.getElementById('digLabel');digFill.style.background='rgba(0,0,0,0.28)';if(ls.stock<=0){digBtn.disabled=true;digFill.style.width='0%';var iv=locRegenIv(def,ls);var left=Math.max(0,iv-ls.regenTimer);digLabel.textContent=def.name+': пусто, ~'+Math.ceil(left/1000)+'с';}else if(totalJunk()>=capMax()){digBtn.disabled=true;digFill.style.width='100%';digFill.style.background='rgba(143,179,57,0.5)';digLabel.textContent='Склад забит — переработай лом';}else if(s.scavCd>0){digBtn.disabled=false;digFill.style.width=(100-s.scavCd/scavCdMax()*100)+'%';digLabel.textContent=currentDigLabel;}else{digBtn.disabled=false;digFill.style.width='0%';digLabel.textContent='Порыться: '+def.name;}}
+  setText('capTxt',totalJunk()+' / '+capMax()+' на складе');
+  var cf=document.getElementById('capFill');if(cf)cf.style.width=Math.min(100,totalJunk()/capMax()*100)+'%';
+ }
+
+ // === ACID TAB ===
+ if(currentTab==='acid'){
+  var sgA=sigJunkLocked();
+  if(sgA!==_sigs.acidinv){_sigs.acidinv=sgA;renderAcidInventory();}
+  renderAcidStages();
+ }
+
+ // === FIRE TAB ===
+ if(currentTab==='fire'){
+  renderFireStages();
+  var pe=document.getElementById('priceTxt');
+  if(pe){var mult=priceMultiplier();pe.innerHTML='<span style="color:var(--gold);">🎯 '+fmt(Math.round(PRICE_MIN*mult))+' – '+fmt(Math.round(PRICE_MAX*mult))+' ₽</span>';}
+  var sb=document.getElementById('sellBtn');
+  if(sb){sb.disabled=s.ingots<=0.0005;if(s.ingots<=0.0005)sb.textContent='Нет слитков на продажу';else sb.textContent='🎯 Продать '+fmt(s.ingots,3)+' г (стоп-игра)';}
+ }
+
+ // === UPG TAB ===
+ if(currentTab==='upg'){
+  var sgR=sigRegen();
+  if(sgR!==_sigs.regen){_sigs.regen=sgR;renderRegenList();}
+  var sgAu=sigAuto();
+  if(sgAu!==_sigs.auto){_sigs.auto=sgAu;renderAutoDigList();}
+
+  setBtnMax('b-acid',s.lv.acid>=MAX_ACID,s.cost.acid,s.cash>=s.cost.acid);
+  setText('d-acid','в кислоте теряется золота: '+Math.round((1-acidEff())*100)+'% → '+Math.round((1-acidEffNext())*100)+'% (уровень '+s.lv.acid+'/'+MAX_ACID+')');
+  setBtnMax('b-fire',s.lv.fire>=MAX_FIRE,s.cost.fire,s.cash>=s.cost.fire);
+  setText('d-fire','при плавке теряется золота: '+Math.round((1-fireEff())*100)+'% → '+Math.round((1-fireEffNext())*100)+'% (уровень '+s.lv.fire+'/'+MAX_FIRE+')');
+  setBtnMax('b-cap',s.lv.cap>=MAX_CAP,s.cost.cap,s.cash>=s.cost.cap);
+  setText('d-cap','сколько лома влезает на склад: '+capMax()+' → '+(capMax()+8)+' (уровень '+s.lv.cap+'/'+MAX_CAP+')');
+  var bh=document.getElementById('b-hold');if(bh){if(s.lv.hold){bh.textContent='✓ куплено';bh.disabled=true;bh.className='upg-btn owned';}else{bh.textContent=fmt(s.cost.hold)+' ₽';bh.disabled=s.cash<s.cost.hold;bh.className='upg-btn';}}
+  setText('d-hold',s.lv.hold?'куплено — зажми кнопку и она будет работать сама':'покупка один раз — зажми кнопку, действие повторится');
+  setBtnMax('b-scavspd',s.lv.scavspd>=MAX_SCAVSPD,s.cost.scavspd,s.cash>=s.cost.scavspd);
+  setText('d-scavspd','пауза между копками: '+(scavCdMax()/1000).toFixed(2)+'с → '+(Math.max(650,1820-117*(s.lv.scavspd+1))/1000).toFixed(2)+'с (уровень '+s.lv.scavspd+'/'+MAX_SCAVSPD+')');
+  setBtnMax('b-acidspd',s.lv.acidspd>=MAX_ACIDSPD,s.cost.acidspd,s.cash>=s.cost.acidspd);
+  setText('d-acidspd','время растворения: '+(acidDuration()/1000).toFixed(1)+'с → '+(Math.max(1000,4200-160*(s.lv.acidspd+1))/1000).toFixed(1)+'с (уровень '+s.lv.acidspd+'/'+MAX_ACIDSPD+')');
+  setBtnMax('b-firespd',s.lv.firespd>=MAX_FIRESPD,s.cost.firespd,s.cash>=s.cost.firespd);
+  setText('d-firespd','время выпаривания: '+(fireDuration()/1000).toFixed(1)+'с → '+(Math.max(1000,3400-120*(s.lv.firespd+1))/1000).toFixed(1)+'с (уровень '+s.lv.firespd+'/'+MAX_FIRESPD+')');
+  var bsa=document.getElementById('b-secondacid');if(bsa){if(s.lv.secondacid){bsa.textContent='✓ куплено';bsa.disabled=true;bsa.className='upg-btn owned';}else{bsa.textContent=fmt(s.cost.secondacid)+' ₽';bsa.disabled=s.cash<s.cost.secondacid;bsa.className='upg-btn';}}
+  setText('d-secondacid',s.lv.secondacid?'куплено — два бака работают одновременно':'покупка один раз — можно запустить вторую кислоту параллельно');
+  var bsf=document.getElementById('b-secondfire');if(bsf){if(s.lv.secondfire){bsf.textContent='✓ куплено';bsf.disabled=true;bsf.className='upg-btn owned';}else{bsf.textContent=fmt(s.cost.secondfire)+' ₽';bsf.disabled=s.cash<s.cost.secondfire;bsf.className='upg-btn';}}
+  setText('d-secondfire',s.lv.secondfire?'куплено — две печи работают одновременно':'покупка один раз — можно запустить вторую печь параллельно');
+  setBtnMax('b-goodeye',s.lv.goodeye>=MAX_GOODEYE,s.cost.goodeye,s.cash>=s.cost.goodeye);
+  setText('d-goodeye','шанс найти редкую вещь: '+Math.round(goodEyeChance()*100)+'% → '+Math.round(Math.min((s.lv.goodeye+1)*4,80))+'% (уровень '+s.lv.goodeye+'/'+MAX_GOODEYE+')');
+  setBtnMax('b-luck',s.lv.luck>=MAX_LUCK,s.cost.luck,s.cash>=s.cost.luck);
+  setText('d-luck','шанс найти две вещи: '+Math.round(luckChance()*100)+'% → '+Math.round(Math.min((s.lv.luck+1)*4.667,70))+'% (уровень '+s.lv.luck+'/'+MAX_LUCK+')');
+  var br=document.getElementById('b-reputation');if(br){if(s.lv.reputation>=MAX_REPUTATION){br.textContent='✓ макс';br.disabled=true;br.className='upg-btn owned';}else{br.textContent=fmt(s.cost.reputation)+' ₽';br.disabled=s.cash<s.cost.reputation;br.className='upg-btn';}}
+  var dr=document.getElementById('d-reputation');if(dr){var cur=reputationPct(),nxt=Math.min(cur+REPUTATION_PER_LV,100);dr.textContent='наценка скупщика: +'+cur+'% → +'+nxt+'% (уровень '+s.lv.reputation+'/'+MAX_REPUTATION+')';}
+  var bwz=document.getElementById('b-wideZone');if(bwz){if(s.lv.wideZone>=MAX_WIDEZONE){bwz.textContent='✓ макс';bwz.disabled=true;bwz.className='upg-btn owned';}else{bwz.textContent=fmt(s.cost.wideZone)+' ₽';bwz.disabled=s.cash<s.cost.wideZone;bwz.className='upg-btn';}}
+  var dwz=document.getElementById('d-wideZone');if(dwz)dwz.textContent='зелёная зона в стоп-игре: '+wideZoneBonus()+'% → '+Math.min(wideZoneBonus()+1,5)+'% (уровень '+s.lv.wideZone+'/'+MAX_WIDEZONE+')';
+  var bor=document.getElementById('b-offlineRate');if(bor){if(s.lv.offlineRate>=MAX_OFFLINE_RATE){bor.textContent='✓ макс';bor.disabled=true;bor.className='upg-btn owned';}else{bor.textContent=fmt(s.cost.offlineRate)+' ₽';bor.disabled=s.cash<s.cost.offlineRate;bor.className='upg-btn offline';}}
+  var dor=document.getElementById('d-offlineRate');if(dor)dor.textContent='доход в оффлайне: '+offlineRatePct()+'% → '+offlineRateNextPct()+'% (уровень '+s.lv.offlineRate+'/'+MAX_OFFLINE_RATE+')';
+  var boc=document.getElementById('b-offlineCap');if(boc){if(s.lv.offlineCap>=MAX_OFFLINE_CAP){boc.textContent='✓ макс';boc.disabled=true;boc.className='upg-btn owned';}else{boc.textContent=fmt(s.cost.offlineCap)+' ₽';boc.disabled=s.cash<s.cost.offlineCap;boc.className='upg-btn offline';}}
+  var doc=document.getElementById('d-offlineCap');if(doc)doc.textContent='максимум часов: '+offlineCapHours()+' → '+offlineCapNextHours()+' ч (уровень '+s.lv.offlineCap+'/'+MAX_OFFLINE_CAP+')';
+  setBtnMax('b-autoSpeed',s.lv.autoSpeed>=MAX_AUTO_SPEED,s.cost.autoSpeed,s.cash>=s.cost.autoSpeed);
+  var curSec=(Math.max(2000,6000-400*s.lv.autoSpeed)/1000).toFixed(2);
+  var nextSec=(Math.max(2000,6000-400*(s.lv.autoSpeed+1))/1000).toFixed(2);
+  setText('d-autoSpeed','время на один предмет: '+curSec+'с → '+nextSec+'с (уровень '+s.lv.autoSpeed+'/'+MAX_AUTO_SPEED+')');
+  var bap=document.getElementById('b-autoPenalty');if(bap){if(s.lv.autoPenalty>=MAX_AUTO_PENALTY||hasAmulet('nightShift')){bap.textContent=hasAmulet('nightShift')?'— амулетом':('✓ макс');bap.disabled=true;bap.className='upg-btn owned';}else{bap.textContent=fmt(s.cost.autoPenalty)+' ₽';bap.disabled=s.cash<s.cost.autoPenalty;bap.className='upg-btn';}}
+  setText('d-autoPenalty',hasAmulet('nightShift')?'амулет «Ночная смена» — штрафа нет':'штраф на чужой точке: −'+autoPenaltyPct()+'% → −'+Math.max(0,50-(s.lv.autoPenalty+1)*5)+'% (уровень '+s.lv.autoPenalty+'/'+MAX_AUTO_PENALTY+')');
+  var bfs=document.getElementById('b-forgeSpeed');if(bfs){if(s.lv.forgeSpeed>=MAX_FORGE_SPEED){bfs.textContent='✓ макс';bfs.disabled=true;bfs.className='upg-btn owned';}else{bfs.textContent=fmt(s.cost.forgeSpeed)+' ₽';bfs.disabled=s.cash<s.cost.forgeSpeed;bfs.className='upg-btn';}}
+  setText('d-forgeSpeed','время ковки: −'+Math.round(forgeSpeedBonus()*100)+'% → −'+Math.round(Math.min((s.lv.forgeSpeed+1)*0.10,0.70)*100)+'% (уровень '+s.lv.forgeSpeed+'/'+MAX_FORGE_SPEED+')');
+  var bfd=document.getElementById('b-forgeDiscount');if(bfd){if(s.lv.forgeDiscount>=MAX_FORGE_DISCOUNT){bfd.textContent='✓ макс';bfd.disabled=true;bfd.className='upg-btn owned';}else{bfd.textContent=fmt(s.cost.forgeDiscount)+' ₽';bfd.disabled=s.cash<s.cost.forgeDiscount;bfd.className='upg-btn';}}
+  setText('d-forgeDiscount','рецепты дешевле: −'+Math.round(forgeDiscountBonus()*100)+'% → −'+Math.round(Math.min((s.lv.forgeDiscount+1)*0.05,0.50)*100)+'% (уровень '+s.lv.forgeDiscount+'/'+MAX_FORGE_DISCOUNT+')');
+  var bfdu=document.getElementById('b-forgeDuration');if(bfdu){if(s.lv.forgeDuration>=MAX_FORGE_DURATION){bfdu.textContent='✓ макс';bfdu.disabled=true;bfdu.className='upg-btn owned';}else{bfdu.textContent=fmt(s.cost.forgeDuration)+' ₽';bfdu.disabled=s.cash<s.cost.forgeDuration;bfdu.className='upg-btn';}}
+  setText('d-forgeDuration','амулеты живут дольше: +'+s.lv.forgeDuration+' прест. / +'+(s.lv.forgeDuration*25)+'% → +'+(s.lv.forgeDuration+1)+' прест. / +'+((s.lv.forgeDuration+1)*25)+'% (уровень '+s.lv.forgeDuration+'/'+MAX_FORGE_DURATION+')');
+  var btf=document.getElementById('b-twoForges');if(btf){if(s.lv.twoForges){btf.textContent='✓ куплено';btf.disabled=true;btf.className='upg-btn owned';}else{btf.textContent=fmt(s.cost.twoForges)+' ₽';btf.disabled=s.cash<s.cost.twoForges;btf.className='upg-btn';}}
+  setText('d-twoForges',s.lv.twoForges?'куплено — кузнец куёт два амулета одновременно':'покупка один раз — кузнец сможет ковать два амулета одновременно');
+
+  setText('psLvl',p.level);setText('psPts',p.points);setText('psBonus','+'+prestigeBonusPct()+'%');
+  var maxed=isMaxPrestige();
+  var psThreshold=document.getElementById('psThreshold');
+  if(psThreshold)psThreshold.textContent=maxed?'—':(fmt(prestigeThreshold())+' ₽');
+  var psReward=document.getElementById('psReward');
+  if(psReward)psReward.textContent=maxed?'—':prestigeReward(p.level+1);
+  var pti=document.getElementById('prestThresholdInfo');
+  if(pti){if(maxed)pti.textContent='Максимум достигнут · сбросить нельзя';else pti.textContent='Порог: '+fmt(prestigeThreshold())+' ₽ · сбросит всё кроме прокачек Престижа и амулетов';}
+  var pb=document.getElementById('prestBtn');
+  if(pb){if(maxed){pb.disabled=true;pb.textContent='★ ФИНАЛ — престиж '+MAX_PRESTIGE_LEVEL;}else{var thr=prestigeThreshold();pb.disabled=s.cash<thr;pb.textContent=s.cash<thr?('Нужно '+fmt(thr)+' ₽ (сейчас '+fmt(Math.floor(s.cash))+')'):('Сделать престиж → получить '+prestigeReward(p.level+1)+' очков');}}
+
+  var c1=1+p.lv.bonusBoost;
+  var bb=document.getElementById('b-bonusBoost');
+  if(bb){if(p.lv.bonusBoost>=MAX_BONUS_BOOST){bb.textContent='✓ макс';bb.disabled=true;bb.className='upg-btn prest owned';}else{bb.textContent=c1+' очк.';bb.disabled=p.points<c1;bb.className='upg-btn prest';}}
+  var dbb=document.getElementById('d-bonusBoost');
+  if(dbb){var curBase=5+bonusBoostSum(p.lv.bonusBoost);var nextBase=5+bonusBoostSum(p.lv.bonusBoost+1);dbb.textContent='база бонуса за престиж: +'+curBase.toFixed(2)+'% → +'+nextBase.toFixed(2)+'% (уровень '+p.lv.bonusBoost+'/'+MAX_BONUS_BOOST+')';}
+  var c2=2+p.lv.startCash*2;
+  var bsc=document.getElementById('b-startCash');
+  if(bsc){if(p.lv.startCash>=MAX_START_CASH){bsc.textContent='✓ макс';bsc.disabled=true;bsc.className='upg-btn prest owned';}else{bsc.textContent=c2+' очк.';bsc.disabled=p.points<c2;bsc.className='upg-btn prest';}}
+  var dsc=document.getElementById('d-startCash');
+  if(dsc)dsc.textContent='стартовый капитал: '+fmt(p.lv.startCash*1000000)+' → '+fmt((p.lv.startCash+1)*1000000)+' ₽ (уровень '+p.lv.startCash+'/'+MAX_START_CASH+')';
+  var c3=3+p.lv.locDiscount*3;
+  var bld=document.getElementById('b-locDiscount');
+  if(bld){if(p.lv.locDiscount>=MAX_LOC_DISCOUNT){bld.textContent='✓ макс';bld.disabled=true;bld.className='upg-btn prest owned';}else{bld.textContent=c3+' очк.';bld.disabled=p.points<c3;bld.className='upg-btn prest';}}
+  var dld=document.getElementById('d-locDiscount');
+  if(dld)dld.textContent='скидка на открытие точек: −'+Math.min(60,p.lv.locDiscount*4)+'% → −'+Math.min(60,(p.lv.locDiscount+1)*4)+'% (уровень '+p.lv.locDiscount+'/'+MAX_LOC_DISCOUNT+')';
+  var c4=2+p.lv.acidII*2;
+  var bai=document.getElementById('b-acidII');
+  if(bai){if(p.lv.acidII>=MAX_ACID_II){bai.textContent='✓ макс';bai.disabled=true;bai.className='upg-btn prest owned';}else{bai.textContent=c4+' очк.';bai.disabled=p.points<c4;bai.className='upg-btn prest';}}
+  var dai=document.getElementById('d-acidII');
+  if(dai)dai.textContent='доп. чистота кислоты: +'+(p.lv.acidII*5)+'% → +'+((p.lv.acidII+1)*5)+'% (уровень '+p.lv.acidII+'/'+MAX_ACID_II+')';
+  var c5=2+p.lv.fireII*2;
+  var bfi=document.getElementById('b-fireII');
+  if(bfi){if(p.lv.fireII>=MAX_FIRE_II){bfi.textContent='✓ макс';bfi.disabled=true;bfi.className='upg-btn prest owned';}else{bfi.textContent=c5+' очк.';bfi.disabled=p.points<c5;bfi.className='upg-btn prest';}}
+  var dfi=document.getElementById('d-fireII');
+  if(dfi)dfi.textContent='доп. эффективность печи: +'+(p.lv.fireII*5)+'% → +'+((p.lv.fireII+1)*5)+'% (уровень '+p.lv.fireII+'/'+MAX_FIRE_II+')';
+  var c6=2+p.lv.capII*2;
+  var bci=document.getElementById('b-capII');
+  if(bci){if(p.lv.capII>=MAX_CAP_II){bci.textContent='✓ макс';bci.disabled=true;bci.className='upg-btn prest owned';}else{bci.textContent=c6+' очк.';bci.disabled=p.points<c6;bci.className='upg-btn prest';}}
+  var dci=document.getElementById('d-capII');
+  if(dci)dci.textContent='доп. места на складе: +'+(p.lv.capII*2)+' → +'+((p.lv.capII+1)*2)+' (уровень '+p.lv.capII+'/'+MAX_CAP_II+')';
+ }
 }
 
 var pressActive=false,pressTarget=null,pressX=0,pressY=0,pressMoved=false,pressIsAction=false,tapTimer=null,holdStartTimer=null,holdRepeatTimer=null,actionFn=null;
@@ -1557,8 +1593,8 @@ function processTap(target){
   if(t.id==='ocClaim'){hideOfflineOverlay();sndOfflineClaim();vibe(40);bumpCash();return;}
   if(t.id==='settingsClose'){closeSettings();return;}
   if(t.id==='gearBtn'){openSettings();return;}
-  if(t.id==='locPrev'){if(s.locPage>0){s.locPage--;sndTab();vibe(8);saveGame();renderLocations();}return;}
-  if(t.id==='locNext'){var pages=Math.ceil(LOCATIONS.length/LOCS_PER_PAGE);if(s.locPage<pages-1){s.locPage++;sndTab();vibe(8);saveGame();renderLocations();}return;}
+  if(t.id==='locPrev'){if(s.locPage>0){s.locPage--;sndTab();vibe(8);saveGame();_sigs.loc=null;}return;}
+  if(t.id==='locNext'){var pages=Math.ceil(LOCATIONS.length/LOCS_PER_PAGE);if(s.locPage<pages-1){s.locPage++;sndTab();vibe(8);saveGame();_sigs.loc=null;}return;}
   if(t.id==='btnContinue'){var ok=false;try{ok=loadGame();}catch(err){ok=false;}if(ok){var off=applyOfflineIncome();showScreen('game');updateBloom();switchTab('dig');if(off&&off.earned>0)showOfflineOverlay(off);}else{resetAll();showScreen('game');updateBloom();switchTab('dig');}return;}
   if(t.id==='btnNewGame'){if(hasSave()){if(!confirm('Стереть сохранение и начать заново?'))return;}resetAll();showScreen('game');updateBloom();switchTab('dig');return;}
   if(t.id==='btnBackToMenu'){saveGame();updateMenu();showScreen('menu');return;}

@@ -32,19 +32,21 @@ body{background:var(--bg);background-image:radial-gradient(ellipse at top left, 
 #gameScreen{padding:14px 12px calc(90px + env(safe-area-inset-bottom));}
 .wrap{max-width:480px;margin:0 auto;}
 header{position:sticky;top:0;z-index:100;background:var(--bg);display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid var(--edge);margin:0 -12px 14px;box-shadow:0 6px 12px -8px rgba(0,0,0,0.9);gap:10px;}
-.hdr-left{display:flex;align-items:center;gap:12px;min-width:0;flex-shrink:0;}
+.hdr-money{display:flex;flex-direction:row;align-items:center;gap:20px;flex:1;justify-content:center;min-width:0;}
+header.has-prestige .hdr-money{flex-direction:column;align-items:flex-start;gap:2px;flex:0 0 auto;justify-content:center;}
 .hdr-right{display:flex;flex-direction:column;gap:3px;align-items:flex-end;min-width:0;flex:1;justify-content:center;}
-.hdr-zone{background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.07);border-radius:5px;padding:3px 7px;min-width:0;max-width:100%;}
+.hdr-zone{background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.07);border-radius:5px;padding:3px 9px;min-width:0;max-width:100%;}
 .hdr-zone-prest{background:rgba(192,132,252,0.09);border-color:rgba(192,132,252,0.22);}
-.hdr-zone-amulet{display:flex;flex-direction:row;align-items:center;gap:4px;padding:3px 8px;}
+.hdr-zone-amulet{display:flex;flex-direction:row;align-items:center;gap:5px;padding:3px 9px;max-width:100%;min-width:0;}
 .hdr-zone-amulet .dot{font-size:13px;flex-shrink:0;line-height:1;color:#8a916e;}
-#amuletName{font-size:10.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:150px;color:var(--text);}
-.hdr-line{font-family:ui-monospace,monospace;font-size:12.5px;font-weight:600;white-space:nowrap;line-height:1.15;display:flex;align-items:center;gap:3px;}
+#amuletName{font-size:10.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);min-width:0;}
+.hdr-line{font-family:ui-monospace,monospace;font-size:13px;font-weight:600;white-space:nowrap;line-height:1.15;display:flex;align-items:center;gap:3px;}
 .hdr-line small{color:var(--text-dim);font-weight:400;font-size:10px;}
 .hdr-ingot{color:var(--acid);}
 .hdr-cash{color:var(--gold);transition:transform 0.15s,color 0.15s;}
 .hdr-cash.bump{transform:scale(1.12);color:#f0c94a;}
-.hdr-prest-line{color:var(--prest);}
+.hdr-prest-line{font-family:ui-monospace,monospace;font-size:12px;font-weight:600;color:var(--prest);line-height:1.25;display:flex;align-items:center;gap:3px;}
+.hdr-prest-line small{color:var(--text-dim);font-weight:400;font-size:9.5px;}
 .gear-btn{background:transparent;border:1px solid var(--edge);width:34px;height:34px;border-radius:50%;color:var(--text-dim);font-size:15px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0;}
 .gear-btn:active{background:var(--panel-2);color:var(--text);}
 .panel{background:var(--panel);border:1px solid var(--edge);border-radius:6px;padding:14px;margin-bottom:12px;position:relative;}
@@ -413,18 +415,19 @@ header{position:sticky;top:0;z-index:100;background:var(--bg);display:flex;align
 
 <div class="screen" id="gameScreen">
 <div class="wrap">
-  <header>
-    <div class="hdr-left">
+  <header id="gameHeader">
+    <div class="hdr-money">
       <div class="hdr-line hdr-cash" id="cashWrap"><span id="cash">0</span> <small>₽</small></div>
       <div class="hdr-line hdr-ingot"><span id="ingots">0.000</span><small>г</small></div>
     </div>
-    <div class="hdr-right">
-      <div class="hdr-zone hdr-zone-prest" id="prestHdr" style="display:none;">
-        <div class="hdr-line hdr-prest-line"><small>★</small> <span id="prestLvl">0</span> <span id="prestPts">0</span><small>очк</small></div>
+    <div class="hdr-right" id="hdrRight" style="display:none;">
+      <div class="hdr-zone hdr-zone-prest">
+        <div class="hdr-prest-line"><small>★</small> <span id="prestLvl">0</span></div>
+        <div class="hdr-prest-line"><span id="prestPts">0</span> <small>очк</small></div>
       </div>
-      <div class="hdr-zone hdr-zone-amulet" id="amuletHdr" style="display:none;">
-        <span class="dot" id="amuletDot"></span>
-        <span id="amuletName">Нет активного амулета</span>
+      <div class="hdr-zone hdr-zone-amulet">
+        <span class="dot" id="amuletDot">○</span>
+        <span id="amuletName">Нет амулета</span>
       </div>
     </div>
     <button class="gear-btn" id="gearBtn" type="button">⚙️</button>
@@ -1170,8 +1173,6 @@ function applyLoad(data){
 }
 function loadGame(){try{var a=readSlot(SAVE_KEY_A),b=readSlot(SAVE_KEY_B);if(!a&&!b)return false;var best;if(a&&b)best=(a.ts>=b.ts)?a:b;else best=a||b;applyLoad(best);return true;}catch(e){return false;}}
 
-// Открытие дев-консоли: долгое зажатие (3 сек) на кнопке настроек.
-// Короткий тап — настройки.
 function openDev(){document.getElementById('devOverlay').classList.add('show');renderDevItems();}
 function closeDev(){document.getElementById('devOverlay').classList.remove('show');}
 function renderDevItems(){var box=document.getElementById('devItems');if(!box)return;box.innerHTML='';for(var i=0;i<CATALOG_ORDER.length;i++){var k=CATALOG_ORDER[i],c=CATALOG[k];var row=document.createElement('div');row.className='dev-item-row';row.innerHTML='<span class="ic">'+c.icon+'</span><span class="nm">'+c.name+'</span>'+'<button class="dev-btn" data-dev="item:'+k+':10" type="button">+10</button>'+'<button class="dev-btn" data-dev="item:'+k+':100" type="button">+100</button>'+'<button class="dev-btn" data-dev="item:'+k+':1000" type="button">+1000</button>';box.appendChild(row);}}
@@ -1409,9 +1410,6 @@ function attachSwipe(el,key){
  }
 }
 function renderAmuletHeader(){
- var h=document.getElementById('amuletHdr');if(!h)return;
- if(p.level<=0){h.style.display='none';return;}
- h.style.display='flex';
  var d=document.getElementById('amuletDot');
  var n=document.getElementById('amuletName');
  if(s.equippedAmulet){
@@ -1423,7 +1421,7 @@ function renderAmuletHeader(){
   }
  }
  if(d){d.textContent='○';d.style.color='#8a916e';}
- if(n){n.textContent='Нет активного амулета';n.style.color='#8a916e';}
+ if(n){n.textContent='Нет амулета';n.style.color='#8a916e';}
 }
 function setText(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
 function setDis(id,v){var e=document.getElementById(id);if(e)e.disabled=v;}
@@ -1435,7 +1433,11 @@ function setBtnMax(id, maxed, cost, canBuy){
 
 function render(){
  setText('cash',fmt(Math.floor(s.cash)));setText('ingots',fmt(s.ingots,3));setText('ingotBig',fmt(s.ingots,3));
- var ph=document.getElementById('prestHdr');if(ph){if(p.level>0)ph.style.display='';else ph.style.display='none';}
+ var hasPrest=p.level>0;
+ var gh=document.getElementById('gameHeader');
+ if(gh){if(hasPrest)gh.classList.add('has-prestige');else gh.classList.remove('has-prestige');}
+ var hr=document.getElementById('hdrRight');
+ if(hr){if(hasPrest)hr.style.display='';else hr.style.display='none';}
  setText('prestLvl',p.level);setText('prestPts',p.points);
  renderAmuletHeader();
  var pa=document.getElementById('prog-acid');if(pa){var tp=0,td=0;for(var i=0;i<s.acid.length;i++){var b=s.acid[i];if(b.active){tp+=b.progress;td+=b.duration;}}pa.style.width=td>0?(tp/td*100)+'%':'0%';}

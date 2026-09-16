@@ -31,20 +31,20 @@ body{background:var(--bg);background-image:radial-gradient(ellipse at top left, 
 .menu-save-info{text-align:center;font-size:11.5px;color:var(--text-dim);margin-top:4px;margin-bottom:12px;min-height:16px;}
 #gameScreen{padding:14px 12px calc(90px + env(safe-area-inset-bottom));}
 .wrap{max-width:480px;margin:0 auto;}
-header{position:sticky;top:0;z-index:100;background:var(--bg);display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--edge);margin:0 -12px 14px;box-shadow:0 6px 12px -8px rgba(0,0,0,0.9);gap:8px;}
-h1.game-title{font-size:20px;font-weight:800;margin:0;flex-shrink:0;cursor:pointer;} h1.game-title span{color:var(--rust);}
-.hdr-zones{display:flex;gap:6px;flex:1;min-width:0;justify-content:flex-end;align-items:stretch;}
-.hdr-zone{display:flex;flex-direction:column;justify-content:center;gap:1px;background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.07);border-radius:5px;padding:3px 7px;min-width:0;}
+header{position:sticky;top:0;z-index:100;background:var(--bg);display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid var(--edge);margin:0 -12px 14px;box-shadow:0 6px 12px -8px rgba(0,0,0,0.9);gap:10px;}
+.hdr-left{display:flex;align-items:center;gap:12px;min-width:0;flex-shrink:0;}
+.hdr-right{display:flex;flex-direction:column;gap:3px;align-items:flex-end;min-width:0;flex:1;justify-content:center;}
+.hdr-zone{background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.07);border-radius:5px;padding:3px 7px;min-width:0;max-width:100%;}
 .hdr-zone-prest{background:rgba(192,132,252,0.09);border-color:rgba(192,132,252,0.22);}
-.hdr-zone-amulet{background:rgba(255,255,255,0.035);border-color:rgba(255,255,255,0.07);flex-direction:row;align-items:center;gap:4px;padding:3px 8px;}
+.hdr-zone-amulet{display:flex;flex-direction:row;align-items:center;gap:4px;padding:3px 8px;}
+.hdr-zone-amulet .dot{font-size:13px;flex-shrink:0;line-height:1;color:#8a916e;}
+#amuletName{font-size:10.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:150px;color:var(--text);}
 .hdr-line{font-family:ui-monospace,monospace;font-size:12.5px;font-weight:600;white-space:nowrap;line-height:1.15;display:flex;align-items:center;gap:3px;}
 .hdr-line small{color:var(--text-dim);font-weight:400;font-size:10px;}
 .hdr-ingot{color:var(--acid);}
 .hdr-cash{color:var(--gold);transition:transform 0.15s,color 0.15s;}
 .hdr-cash.bump{transform:scale(1.12);color:#f0c94a;}
 .hdr-prest-line{color:var(--prest);}
-.hdr-amulet .dot{width:8px;height:8px;border-radius:50%;box-shadow:0 0 6px currentColor;flex-shrink:0;}
-.hdr-amulet span{font-size:10px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .gear-btn{background:transparent;border:1px solid var(--edge);width:34px;height:34px;border-radius:50%;color:var(--text-dim);font-size:15px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0;}
 .gear-btn:active{background:var(--panel-2);color:var(--text);}
 .panel{background:var(--panel);border:1px solid var(--edge);border-radius:6px;padding:14px;margin-bottom:12px;position:relative;}
@@ -414,19 +414,17 @@ h1.game-title{font-size:20px;font-weight:800;margin:0;flex-shrink:0;cursor:point
 <div class="screen" id="gameScreen">
 <div class="wrap">
   <header>
-    <h1 class="game-title">ДРАГ<span>МЕТ</span></h1>
-    <div class="hdr-zones">
-      <div class="hdr-zone">
-        <div class="hdr-line hdr-cash" id="cashWrap"><span id="cash">0</span> <small>₽</small></div>
-        <div class="hdr-line hdr-ingot"><span id="ingots">0.000</span><small>г</small></div>
-      </div>
+    <div class="hdr-left">
+      <div class="hdr-line hdr-cash" id="cashWrap"><span id="cash">0</span> <small>₽</small></div>
+      <div class="hdr-line hdr-ingot"><span id="ingots">0.000</span><small>г</small></div>
+    </div>
+    <div class="hdr-right">
       <div class="hdr-zone hdr-zone-prest" id="prestHdr" style="display:none;">
-        <div class="hdr-line hdr-prest-line"><small>★</small> <span id="prestLvl">0</span></div>
-        <div class="hdr-line hdr-prest-line"><span id="prestPts">0</span> <small>очк</small></div>
+        <div class="hdr-line hdr-prest-line"><small>★</small> <span id="prestLvl">0</span> <span id="prestPts">0</span><small>очк</small></div>
       </div>
       <div class="hdr-zone hdr-zone-amulet" id="amuletHdr" style="display:none;">
         <span class="dot" id="amuletDot"></span>
-        <span id="amuletName"></span>
+        <span id="amuletName">Нет активного амулета</span>
       </div>
     </div>
     <button class="gear-btn" id="gearBtn" type="button">⚙️</button>
@@ -802,7 +800,6 @@ function grantAmulet(id){var a=getAmulet(id);if(!a)return;if(a.durType==='presti
 function consumeRecipe(id){var rec=getRecipeAmulet(id);for(var k in rec){s.junk[k]=Math.max(0,(s.junk[k]||0)-rec[k]);}}
 function dissolveAmulet(id){var a=getAmulet(id);if(!a)return;var rec=a.recipe;var returned=[];for(var k in rec){var amount=Math.floor(rec[k]*0.4);if(amount>0){s.junk[k]=(s.junk[k]||0)+amount;returned.push(CATALOG[k].icon+' '+CATALOG[k].name+' ×'+amount);}}delete s.amulets[id];if(s.equippedAmulet===id)s.equippedAmulet=null;window._revealedAmulet=null;updateBloom();var msg='Растворено. Вернулось: '+(returned.length?returned.join(', '):'ничего');flashToast(msg,'rp');saveGame();}
 
-// === Signature helpers для оптимизации рендера ===
 function sigJunk(){var r='';for(var i=0;i<CATALOG_ORDER.length;i++)r+=s.junk[CATALOG_ORDER[i]]+'|';return r;}
 function sigJunkLocked(){var r='';for(var i=0;i<CATALOG_ORDER.length;i++)r+=s.junk[CATALOG_ORDER[i]]+(s.locked[CATALOG_ORDER[i]]?'L':'u')+'|';return r;}
 function sigLocs(){var r=s.activeLoc+'|'+s.locPage+'|'+p.lv.locDiscount+'|';for(var i=0;i<s.locs.length;i++){var l=s.locs[i];r+=l.stock+(l.unlocked?'1':'0')+(p.autoDig[l.key]?'A':'')+'|';}return r;}
@@ -1173,12 +1170,43 @@ function applyLoad(data){
 }
 function loadGame(){try{var a=readSlot(SAVE_KEY_A),b=readSlot(SAVE_KEY_B);if(!a&&!b)return false;var best;if(a&&b)best=(a.ts>=b.ts)?a:b;else best=a||b;applyLoad(best);return true;}catch(e){return false;}}
 
-var devTapCount=0,devTapTimer=null;
-function devTap(){devTapCount++;if(devTapTimer)clearTimeout(devTapTimer);if(devTapCount>=5){devTapCount=0;openDev();return;}devTapTimer=setTimeout(function(){devTapCount=0;},1000);}
+// Открытие дев-консоли: долгое зажатие (3 сек) на кнопке настроек.
+// Короткий тап — настройки.
 function openDev(){document.getElementById('devOverlay').classList.add('show');renderDevItems();}
 function closeDev(){document.getElementById('devOverlay').classList.remove('show');}
 function renderDevItems(){var box=document.getElementById('devItems');if(!box)return;box.innerHTML='';for(var i=0;i<CATALOG_ORDER.length;i++){var k=CATALOG_ORDER[i],c=CATALOG[k];var row=document.createElement('div');row.className='dev-item-row';row.innerHTML='<span class="ic">'+c.icon+'</span><span class="nm">'+c.name+'</span>'+'<button class="dev-btn" data-dev="item:'+k+':10" type="button">+10</button>'+'<button class="dev-btn" data-dev="item:'+k+':100" type="button">+100</button>'+'<button class="dev-btn" data-dev="item:'+k+':1000" type="button">+1000</button>';box.appendChild(row);}}
 function applyDev(action){var parts=action.split(':');var type=parts[0];if(type==='cash'){s.cash+=(parseFloat(parts[1])||0);bumpCash();}else if(type==='ingots'){s.ingots+=(parseFloat(parts[1])||0);}else if(type==='points'){p.points+=(parseInt(parts[1],10)||0);}else if(type==='item'){var k=parts[1];var n=parseInt(parts[2],10)||0;if(CATALOG[k])s.junk[k]=(s.junk[k]||0)+n;}saveGame();}
+
+(function(){
+  var btn=document.getElementById('gearBtn');if(!btn)return;
+  var holdTimer=null,holdFired=false,downX=0,downY=0,downId=null;
+  function cancelHold(){if(holdTimer){clearTimeout(holdTimer);holdTimer=null;}}
+  btn.addEventListener('pointerdown',function(e){
+    holdFired=false;downX=e.clientX;downY=e.clientY;downId=e.pointerId;
+    cancelHold();
+    holdTimer=setTimeout(function(){
+      holdTimer=null;holdFired=true;
+      openDev();
+    },3000);
+  });
+  btn.addEventListener('pointermove',function(e){
+    if(e.pointerId!==downId)return;
+    var dx=e.clientX-downX,dy=e.clientY-downY;
+    if(dx*dx+dy*dy>144){cancelHold();holdFired=false;}
+  });
+  btn.addEventListener('pointerup',function(e){
+    if(e.pointerId!==downId)return;
+    cancelHold();
+    var wasHold=holdFired;
+    holdFired=false;downId=null;
+    if(wasHold)return;
+    openSettings();
+  });
+  btn.addEventListener('pointercancel',function(e){
+    if(e.pointerId!==downId)return;
+    cancelHold();holdFired=false;downId=null;
+  });
+})();
 
 var currentScreen='menu';
 function showScreen(name){currentScreen=name;var screens=document.querySelectorAll('.screen');for(var i=0;i<screens.length;i++)screens[i].classList.remove('active');if(name==='menu'){document.getElementById('menuScreen').classList.add('active');}else if(name==='game'){document.getElementById('gameScreen').classList.add('active');var gs=document.getElementById('gameScreen');var activeTab='dig';var ats=document.querySelectorAll('.tab-section.active');if(ats.length)activeTab=ats[0].getAttribute('data-tab');if(activeTab==='dig')gs.classList.add('dig-lock');else gs.classList.remove('dig-lock');}window.scrollTo(0,0);}
@@ -1196,7 +1224,6 @@ function switchTab(name){
  for(var j=0;j<tbs.length;j++){if(tbs[j].getAttribute('data-tab')===name)tbs[j].classList.add('active');else tbs[j].classList.remove('active');}
  var gs=document.getElementById('gameScreen');
  if(gs){if(name==='dig')gs.classList.add('dig-lock');else gs.classList.remove('dig-lock');}
- // сбрасываем подписи, чтобы при переключении всё пересобралось
  _sigs={inv:null,acidinv:null,loc:null,regen:null,auto:null,amulet:null,craft:null};
  if(name==='upg'){applyAccState();}
  window.scrollTo(0,0);sndTab();vibe(8);
@@ -1381,7 +1408,23 @@ function attachSwipe(el,key){
   el.addEventListener('touchcancel',function(e){onEnd({pointerId:1});});
  }
 }
-function renderAmuletHeader(){var h=document.getElementById('amuletHdr');if(!h)return;if(s.equippedAmulet){var a=getAmulet(s.equippedAmulet);if(a){h.style.display='flex';var d=document.getElementById('amuletDot');if(d){d.style.color=a.color;d.style.background=a.color;}var n=document.getElementById('amuletName');if(n)n.textContent=a.name;return;}}h.style.display='none';}
+function renderAmuletHeader(){
+ var h=document.getElementById('amuletHdr');if(!h)return;
+ if(p.level<=0){h.style.display='none';return;}
+ h.style.display='flex';
+ var d=document.getElementById('amuletDot');
+ var n=document.getElementById('amuletName');
+ if(s.equippedAmulet){
+  var a=getAmulet(s.equippedAmulet);
+  if(a){
+   if(d){d.textContent=a.icon;d.style.color=a.color;}
+   if(n){n.textContent=a.name;n.style.color='';}
+   return;
+  }
+ }
+ if(d){d.textContent='○';d.style.color='#8a916e';}
+ if(n){n.textContent='Нет активного амулета';n.style.color='#8a916e';}
+}
 function setText(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
 function setDis(id,v){var e=document.getElementById(id);if(e)e.disabled=v;}
 function setBtnMax(id, maxed, cost, canBuy){
@@ -1391,16 +1434,13 @@ function setBtnMax(id, maxed, cost, canBuy){
 }
 
 function render(){
- // === ВСЕГДА (дёшево, не зависит от вкладки) ===
  setText('cash',fmt(Math.floor(s.cash)));setText('ingots',fmt(s.ingots,3));setText('ingotBig',fmt(s.ingots,3));
- var ph=document.getElementById('prestHdr');if(ph){if(p.level>0||p.points>0)ph.style.display='';else ph.style.display='none';}
+ var ph=document.getElementById('prestHdr');if(ph){if(p.level>0)ph.style.display='';else ph.style.display='none';}
  setText('prestLvl',p.level);setText('prestPts',p.points);
  renderAmuletHeader();
- // Прогресс в таббаре (мини-полоски под иконками) — дешёвые селекторы, оставляем всегда
  var pa=document.getElementById('prog-acid');if(pa){var tp=0,td=0;for(var i=0;i<s.acid.length;i++){var b=s.acid[i];if(b.active){tp+=b.progress;td+=b.duration;}}pa.style.width=td>0?(tp/td*100)+'%':'0%';}
  var pf=document.getElementById('prog-fire');if(pf){var tp2=0,td2=0;for(var i=0;i<s.fire.length;i++){var f2=s.fire[i];if(f2.active){tp2+=f2.progress;td2+=f2.duration;}}pf.style.width=td2>0?(tp2/td2*100)+'%':'0%';}
 
- // === FORGE TAB ===
  if(currentTab==='forge'){
   var ff=document.getElementById('forgeFrame');
   if(ff){if(s.forgeUnlocked){ff.classList.remove('forge-locked');ff.classList.add('forge-unlocked');}else{ff.classList.add('forge-locked');ff.classList.remove('forge-unlocked');}}
@@ -1417,7 +1457,6 @@ function render(){
   renderCraftStatus();
  }
 
- // === DIG TAB ===
  if(currentTab==='dig'){
   var sgL=sigLocs();
   if(sgL!==_sigs.loc){_sigs.loc=sgL;renderLocations();}
@@ -1430,14 +1469,12 @@ function render(){
   var cf=document.getElementById('capFill');if(cf)cf.style.width=Math.min(100,totalJunk()/capMax()*100)+'%';
  }
 
- // === ACID TAB ===
  if(currentTab==='acid'){
   var sgA=sigJunkLocked();
   if(sgA!==_sigs.acidinv){_sigs.acidinv=sgA;renderAcidInventory();}
   renderAcidStages();
  }
 
- // === FIRE TAB ===
  if(currentTab==='fire'){
   renderFireStages();
   var pe=document.getElementById('priceTxt');
@@ -1446,7 +1483,6 @@ function render(){
   if(sb){sb.disabled=s.ingots<=0.0005;if(s.ingots<=0.0005)sb.textContent='Нет слитков на продажу';else sb.textContent='🎯 Продать '+fmt(s.ingots,3)+' г (стоп-игра)';}
  }
 
- // === UPG TAB ===
  if(currentTab==='upg'){
   var sgR=sigRegen();
   if(sgR!==_sigs.regen){_sigs.regen=sgR;renderRegenList();}
@@ -1592,7 +1628,6 @@ function processTap(target){
  while(t&&t!==document){
   if(t.id==='ocClaim'){hideOfflineOverlay();sndOfflineClaim();vibe(40);bumpCash();return;}
   if(t.id==='settingsClose'){closeSettings();return;}
-  if(t.id==='gearBtn'){openSettings();return;}
   if(t.id==='locPrev'){if(s.locPage>0){s.locPage--;sndTab();vibe(8);saveGame();_sigs.loc=null;}return;}
   if(t.id==='locNext'){var pages=Math.ceil(LOCATIONS.length/LOCS_PER_PAGE);if(s.locPage<pages-1){s.locPage++;sndTab();vibe(8);saveGame();_sigs.loc=null;}return;}
   if(t.id==='btnContinue'){var ok=false;try{ok=loadGame();}catch(err){ok=false;}if(ok){var off=applyOfflineIncome();showScreen('game');updateBloom();switchTab('dig');if(off&&off.earned>0)showOfflineOverlay(off);}else{resetAll();showScreen('game');updateBloom();switchTab('dig');}return;}
@@ -1601,7 +1636,6 @@ function processTap(target){
   if(t.id==='btnResetAll'){if(confirm('Сбросить весь прогресс?')){resetAll();updateMenu();closeSettings();showScreen('menu');}return;}
   if(t.id==='tglSound'||t.id==='tglVibe'||t.id==='tglMusic'){var newVal=!t.checked;t.checked=newVal;if(t.id==='tglSound')s.settings.sound=newVal;else if(t.id==='tglVibe')s.settings.vibe=newVal;else if(t.id==='tglMusic')s.settings.music=newVal;saveGame();if(t.id==='tglSound'&&newVal)initAudio();sndToggle();vibe(15);return;}
   if(currentScreen!=='game'){t=t.parentNode;continue;}
-  if(t.classList&&t.classList.contains('game-title')){devTap();return;}
   if(t.classList&&t.classList.contains('acc-head')){toggleAcc(t.getAttribute('data-acc'));return;}
   if(t.classList&&t.classList.contains('tab-btn')){switchTab(t.getAttribute('data-tab'));return;}
   if(t.classList&&t.classList.contains('subtab')){switchSub(t.id==='subtab-prest'?'prest':'normal');return;}

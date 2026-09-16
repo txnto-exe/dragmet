@@ -31,21 +31,22 @@ body{background:var(--bg);background-image:radial-gradient(ellipse at top left, 
 .menu-save-info{text-align:center;font-size:11.5px;color:var(--text-dim);margin-top:4px;margin-bottom:12px;min-height:16px;}
 #gameScreen{padding:14px 12px calc(90px + env(safe-area-inset-bottom));}
 .wrap{max-width:480px;margin:0 auto;}
-header{position:sticky;top:0;z-index:100;background:var(--bg);display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid var(--edge);margin:0 -12px 14px;box-shadow:0 6px 12px -8px rgba(0,0,0,0.9);gap:10px;}
-.hdr-money{display:flex;flex-direction:row;align-items:center;gap:20px;flex:1;justify-content:center;min-width:0;}
-header.has-prestige .hdr-money{flex-direction:column;align-items:flex-start;gap:2px;flex:0 0 auto;justify-content:center;}
-.hdr-right{display:flex;flex-direction:column;gap:3px;align-items:flex-end;min-width:0;flex:1;justify-content:center;}
-.hdr-zone{background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.07);border-radius:5px;padding:3px 9px;min-width:0;max-width:100%;}
-.hdr-zone-prest{background:rgba(192,132,252,0.09);border-color:rgba(192,132,252,0.22);}
-.hdr-zone-amulet{display:flex;flex-direction:row;align-items:center;gap:5px;padding:3px 9px;max-width:100%;min-width:0;}
-.hdr-zone-amulet .dot{font-size:13px;flex-shrink:0;line-height:1;color:#8a916e;}
+header{position:sticky;top:0;z-index:100;background:var(--bg);display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid var(--edge);margin:0 -12px 14px;box-shadow:0 6px 12px -8px rgba(0,0,0,0.9);gap:8px;}
+.hdr-money{display:flex;flex-direction:row;align-items:stretch;gap:6px;flex:1;min-width:0;}
+header.has-prestige .hdr-money{flex-direction:column;gap:4px;flex:0 0 auto;}
+.hdr-right{display:flex;flex-direction:column;gap:4px;align-items:stretch;min-width:0;flex:1;justify-content:center;}
+.hdr-plate{display:flex;align-items:center;justify-content:center;border-radius:6px;padding:7px 12px;min-width:0;white-space:nowrap;font-family:ui-monospace,monospace;font-size:14px;font-weight:600;line-height:1.15;gap:3px;}
+.hdr-plate small{color:var(--text-dim);font-weight:400;font-size:10.5px;}
+.hdr-plate-cash{background:rgba(201,162,39,0.10);border:1px solid rgba(201,162,39,0.30);color:var(--gold);flex:1;}
+header.has-prestige .hdr-plate-cash{flex:0 0 auto;}
+.hdr-plate-ingot{background:rgba(168,214,74,0.09);border:1px solid rgba(168,214,74,0.28);color:var(--acid);flex:1;}
+header.has-prestige .hdr-plate-ingot{flex:0 0 auto;}
+.hdr-plate-prest{background:rgba(192,132,252,0.10);border:1px solid rgba(192,132,252,0.30);color:var(--prest);flex-direction:column;align-items:flex-start;gap:1px;padding:5px 12px;}
+.hdr-plate-amulet{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.10);color:var(--text);flex-direction:row;gap:5px;padding:5px 12px;justify-content:flex-start;max-width:100%;}
+.hdr-plate-amulet .dot{font-size:13px;flex-shrink:0;line-height:1;color:#8a916e;}
 #amuletName{font-size:10.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);min-width:0;}
-.hdr-line{font-family:ui-monospace,monospace;font-size:13px;font-weight:600;white-space:nowrap;line-height:1.15;display:flex;align-items:center;gap:3px;}
-.hdr-line small{color:var(--text-dim);font-weight:400;font-size:10px;}
-.hdr-ingot{color:var(--acid);}
-.hdr-cash{color:var(--gold);transition:transform 0.15s,color 0.15s;}
 .hdr-cash.bump{transform:scale(1.12);color:#f0c94a;}
-.hdr-prest-line{font-family:ui-monospace,monospace;font-size:12px;font-weight:600;color:var(--prest);line-height:1.25;display:flex;align-items:center;gap:3px;}
+.hdr-prest-line{display:flex;align-items:center;gap:3px;font-size:12px;font-weight:600;color:var(--prest);line-height:1.25;}
 .hdr-prest-line small{color:var(--text-dim);font-weight:400;font-size:9.5px;}
 .gear-btn{background:transparent;border:1px solid var(--edge);width:34px;height:34px;border-radius:50%;color:var(--text-dim);font-size:15px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0;}
 .gear-btn:active{background:var(--panel-2);color:var(--text);}
@@ -417,15 +418,15 @@ header.has-prestige .hdr-money{flex-direction:column;align-items:flex-start;gap:
 <div class="wrap">
   <header id="gameHeader">
     <div class="hdr-money">
-      <div class="hdr-line hdr-cash" id="cashWrap"><span id="cash">0</span> <small>₽</small></div>
-      <div class="hdr-line hdr-ingot"><span id="ingots">0.000</span><small>г</small></div>
+      <div class="hdr-plate hdr-plate-cash hdr-cash" id="cashWrap"><span id="cash">0</span> <small>₽</small></div>
+      <div class="hdr-plate hdr-plate-ingot"><span id="ingots">0.000</span><small>г</small></div>
     </div>
     <div class="hdr-right" id="hdrRight" style="display:none;">
-      <div class="hdr-zone hdr-zone-prest">
+      <div class="hdr-plate hdr-plate-prest">
         <div class="hdr-prest-line"><small>★</small> <span id="prestLvl">0</span></div>
         <div class="hdr-prest-line"><span id="prestPts">0</span> <small>очк</small></div>
       </div>
-      <div class="hdr-zone hdr-zone-amulet">
+      <div class="hdr-plate hdr-plate-amulet" id="amuletPlate">
         <span class="dot" id="amuletDot">○</span>
         <span id="amuletName">Нет амулета</span>
       </div>
@@ -588,7 +589,7 @@ header.has-prestige .hdr-money{flex-direction:column;align-items:flex-start;gap:
 </div>
 
 <nav class="tabbar">
-  <button class="tab-btn" data-tab="forge" type="button" id="tabForge"><span class="tab-ic">🔒</span><span class="tab-lbl">\u00A0</span></button>
+  <button class="tab-btn" data-tab="forge" type="button" id="tabForge"><span class="tab-ic">🔒</span><span class="tab-lbl"></span></button>
   <button class="tab-btn" data-tab="fire" type="button"><span class="tab-ic">🔥</span><span class="tab-lbl">Печь</span><span class="tab-prog"><span id="prog-fire"></span></span></button>
   <button class="tab-btn center active" data-tab="dig" type="button"><span class="tab-ic">⛏️</span><span class="tab-lbl">Копать</span></button>
   <button class="tab-btn" data-tab="acid" type="button"><span class="tab-ic">🧪</span><span class="tab-lbl">Кислота</span><span class="tab-prog"><span id="prog-acid"></span></span></button>
@@ -1410,18 +1411,19 @@ function attachSwipe(el,key){
  }
 }
 function renderAmuletHeader(){
+ var plate=document.getElementById('amuletPlate');
  var d=document.getElementById('amuletDot');
  var n=document.getElementById('amuletName');
- if(s.equippedAmulet){
-  var a=getAmulet(s.equippedAmulet);
-  if(a){
-   if(d){d.textContent=a.icon;d.style.color=a.color;}
-   if(n){n.textContent=a.name;n.style.color='';}
-   return;
-  }
+ var a=s.equippedAmulet?getAmulet(s.equippedAmulet):null;
+ if(a){
+  if(d){d.textContent=a.icon;d.style.color=a.color;}
+  if(n){n.textContent=a.name;n.style.color='';}
+  if(plate){plate.style.borderColor=a.color;plate.style.background='rgba(255,255,255,0.04)';}
+  return;
  }
  if(d){d.textContent='○';d.style.color='#8a916e';}
  if(n){n.textContent='Нет амулета';n.style.color='#8a916e';}
+ if(plate){plate.style.borderColor='rgba(255,255,255,0.10)';plate.style.background='rgba(255,255,255,0.04)';}
 }
 function setText(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
 function setDis(id,v){var e=document.getElementById(id);if(e)e.disabled=v;}
@@ -1449,7 +1451,7 @@ function render(){
   var fimg=document.querySelector('.forge-blacksmith img');
   if(fimg){var want=s.forgeUnlocked?'kuznec.png':'kuznec-locked.png';if(fimg.getAttribute('src')!==want)fimg.setAttribute('src',want);}
   var tf=document.getElementById('tabForge');
-  if(tf){var tfi=tf.querySelector('.tab-ic'),tfl=tf.querySelector('.tab-lbl');if(tfi)tfi.textContent=s.forgeUnlocked?'⚒️':'🔒';if(tfl){tfl.textContent=s.forgeUnlocked?'Кузнец':'\u00A0';}}
+  if(tf){var tfi=tf.querySelector('.tab-ic'),tfl=tf.querySelector('.tab-lbl');if(tfi)tfi.textContent=s.forgeUnlocked?'⚒️':'🔒';if(tfl){tfl.textContent=s.forgeUnlocked?'Кузнец':'';}}
   var ftitle=document.getElementById('forgePanelTitle');
   if(ftitle)ftitle.style.display=s.forgeUnlocked?'':'none';
   var fw=document.getElementById('forgeAccordionWrap');

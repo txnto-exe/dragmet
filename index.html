@@ -620,8 +620,8 @@ var CATALOG_ORDER=['resist','caps','trans','chips','hdd','phones','ram','connect
 var PRESTIGE_BASE_THRESHOLD=100000;
 var PRESTIGE_THRESHOLD_MULT=1.5;
 var MAX_PRESTIGE_LEVEL=20;
-var PRICE_MAX=5000;
-var PRICE_MIN=1200;
+var PRICE_MAX=4000;
+var PRICE_MIN=800;
 var FIXED_PRICE_AVG=3400;
 var AUTO_SPEED_BASE_COST=5000;
 var AUTO_SPEED_COST_MULT=1.6;
@@ -711,7 +711,7 @@ var FAIL_MSGS=['Мимо.','Промах.','Не повезло.','Мимо ка
 
 var LOCATIONS=[
  {key:'yard',name:'Баки во дворе',icon:'🗑️',unlockCost:0,maxStock:8,regenBase:5200,regenCost:350,loot:[{k:'chips',w:35},{k:'caps',w:15},{k:'resist',w:15},{k:'phones',w:20},{k:'ram',w:10},{k:'hdd',w:5}]},
- {key:'construction',name:'Заброшенная стройка',icon:'🏗️',unlockCost:450,maxStock:6,regenBase:7200,regenCost:700,loot:[{k:'phones',w:22},{k:'caps',w:10},{k:'trans',w:18},{k:'hdd',w:15},{k:'ram',w:18},{k:'silverWire',w:12},{k:'chips',w:5}]},
+ {key:'construction',name:'Заброшенная стройка',icon:'🏗️',unlockCost:550,maxStock:6,regenBase:7200,regenCost:700,loot:[{k:'phones',w:22},{k:'caps',w:10},{k:'trans',w:18},{k:'hdd',w:15},{k:'ram',w:18},{k:'silverWire',w:12},{k:'chips',w:5}]},
  {key:'radiozavod',name:'Свалка радиозавода',icon:'🏭',unlockCost:2600,maxStock:5,regenBase:10400,regenCost:1600,loot:[{k:'ram',w:15},{k:'trans',w:8},{k:'hdd',w:12},{k:'cpus',w:10},{k:'connect',w:14},{k:'silverWire',w:10},{k:'rare',w:22},{k:'chips',w:4},{k:'legend',w:5}]},
  {key:'garages',name:'Гаражный кооператив',icon:'🚪',unlockCost:6500,maxStock:4,regenBase:14400,regenCost:3200,loot:[{k:'connect',w:10},{k:'cpus',w:10},{k:'silverWire',w:12},{k:'legend',w:18},{k:'rare',w:28},{k:'ram',w:14},{k:'hdd',w:8}]},
  {key:'workshop',name:'Ремонтная мастерская',icon:'🔧',unlockCost:14000,maxStock:4,regenBase:18000,regenCost:5500,loot:[{k:'trans',w:12},{k:'hdd',w:22},{k:'cpus',w:14},{k:'brass',w:14},{k:'rare',w:22},{k:'connect',w:14},{k:'ram',w:4}]},
@@ -722,7 +722,7 @@ var LOCATIONS=[
 ];
 
 function makePrest(){return{level:0,points:0,lv:{bonusBoost:0,startCash:0,locDiscount:0,acidII:0,fireII:0,capII:0},autoDig:{},autoTimers:{}};}
-function makeState(){return{cash:0,ingots:0,junk:{chips:0,phones:0,ram:0,rare:0,legend:0,platinum:0,caps:0,resist:0,trans:0,hdd:0,cpus:0,connect:0,gContacts:0,silverWire:0,brass:0,goldPins:0},locked:{chips:false,phones:false,ram:false,rare:false,legend:false,platinum:false,caps:false,resist:false,trans:false,hdd:false,cpus:false,connect:false,gContacts:false,silverWire:false,brass:false,goldPins:false},cap:24,scavCd:0,solution:0,acid:[{active:false,progress:0,duration:4200,yieldAmt:0}],fire:[{active:false,progress:0,duration:3400,yieldAmt:0}],activeLoc:'yard',locPage:0,invExpanded:false,accState:{eq:true,spd:false,luck:false,income:false,regen:false,auto:false,forge:false,pbonus:true,pupg2:false},locs:LOCATIONS.map(function(l){return{key:l.key,stock:l.maxStock,regenTimer:0,regenLv:0,unlocked:l.unlockCost===0};}),lv:{acid:1,fire:1,cap:1,hold:0,scavspd:0,acidspd:0,firespd:0,secondacid:0,secondfire:0,goodeye:0,luck:0,reputation:0,wideZone:0,offlineRate:0,offlineCap:0,autoSpeed:0,autoPenalty:0,forgeSpeed:0,forgeDiscount:0,forgeDuration:0,twoForges:0},cost:{acid:100,fire:100,cap:120,hold:1200,scavspd:300,acidspd:300,firespd:300,secondacid:3000,secondfire:5000,goodeye:500,luck:700,reputation:REPUTATION_BASE_COST,wideZone:WIDE_ZONE_BASE,offlineRate:OFFLINE_RATE_BASE_COST,offlineCap:OFFLINE_CAP_BASE_COST,autoSpeed:AUTO_SPEED_BASE_COST,autoPenalty:AUTO_PENALTY_BASE_COST,forgeSpeed:FORGE_SPEED_BASE,forgeDiscount:FORGE_DISCOUNT_BASE,forgeDuration:FORGE_DURATION_BASE,twoForges:TWO_FORGES_COST},stats:{junkTotal:0,ingotsTotal:0,earnedTotal:0,offlineTotal:0},settings:{sound:true,vibe:true,music:false},forgeUnlocked:false,amulets:{},equippedAmulet:null,forgeCrafts:[],lastSeenTs:Date.now()};}
+function makeState(){return{cash:0,ingots:0,junk:{chips:0,phones:0,ram:0,rare:0,legend:0,platinum:0,caps:0,resist:0,trans:0,hdd:0,cpus:0,connect:0,gContacts:0,silverWire:0,brass:0,goldPins:0},locked:{chips:false,phones:false,ram:false,rare:false,legend:false,platinum:false,caps:false,resist:false,trans:false,hdd:false,cpus:false,connect:false,gContacts:false,silverWire:false,brass:false,goldPins:false},cap:20,scavCd:0,solution:0,acid:[{active:false,progress:0,duration:4200,yieldAmt:0}],fire:[{active:false,progress:0,duration:3400,yieldAmt:0}],activeLoc:'yard',locPage:0,invExpanded:false,accState:{eq:true,spd:false,luck:false,income:false,regen:false,auto:false,forge:false,pbonus:true,pupg2:false},locs:LOCATIONS.map(function(l){return{key:l.key,stock:l.maxStock,regenTimer:0,regenLv:0,unlocked:l.unlockCost===0};}),lv:{acid:1,fire:1,cap:1,hold:0,scavspd:0,acidspd:0,firespd:0,secondacid:0,secondfire:0,goodeye:0,luck:0,reputation:0,wideZone:0,offlineRate:0,offlineCap:0,autoSpeed:0,autoPenalty:0,forgeSpeed:0,forgeDiscount:0,forgeDuration:0,twoForges:0},cost:{acid:130,fire:130,cap:120,hold:1200,scavspd:380,acidspd:380,firespd:380,secondacid:3000,secondfire:5000,goodeye:500,luck:700,reputation:REPUTATION_BASE_COST,wideZone:WIDE_ZONE_BASE,offlineRate:OFFLINE_RATE_BASE_COST,offlineCap:OFFLINE_CAP_BASE_COST,autoSpeed:AUTO_SPEED_BASE_COST,autoPenalty:AUTO_PENALTY_BASE_COST,forgeSpeed:FORGE_SPEED_BASE,forgeDiscount:FORGE_DISCOUNT_BASE,forgeDuration:FORGE_DURATION_BASE,twoForges:TWO_FORGES_COST},stats:{junkTotal:0,ingotsTotal:0,earnedTotal:0,offlineTotal:0},settings:{sound:true,vibe:true,music:false},forgeUnlocked:false,amulets:{},equippedAmulet:null,forgeCrafts:[],lastSeenTs:Date.now()};}
 
 var p=makePrest();
 for(var li=0;li<LOCATIONS.length;li++){p.autoDig[LOCATIONS[li].key]=false;p.autoTimers[LOCATIONS[li].key]=0;}
@@ -742,17 +742,16 @@ function totalJunk(){var t=0;for(var k in s.junk)t+=s.junk[k];return t;}
 function junkGoldValue(){var sum=0;for(var k in s.junk)if(CATALOG[k])sum+=s.junk[k]*CATALOG[k].gold;return sum;}
 function junkGoldValueUnlocked(){var sum=0;for(var k in s.junk)if(CATALOG[k]&&!s.locked[k])sum+=s.junk[k]*CATALOG[k].gold;return sum;}
 
-// Кислота: база 30%, +1.33% за уровень (макс 15 → 50%). + Кислота II: +5% за уровень (макс 10 → +50%).
-function acidEff(){return Math.min(0.30+s.lv.acid*0.01333+p.lv.acidII*0.05,1.0);}
-function acidEffNext(){return Math.min(0.30+Math.min(s.lv.acid+1,MAX_ACID)*0.01333+p.lv.acidII*0.05,1.0);}
+function acidEff(){return Math.min(0.22+s.lv.acid*0.01867+p.lv.acidII*0.05,1.0);}
+function acidEffNext(){return Math.min(0.22+Math.min(s.lv.acid+1,MAX_ACID)*0.01867+p.lv.acidII*0.05,1.0);}
 function acidEffEffective(){var e=acidEff();if(hasAmulet('cleaner'))e=(1+e)/2;return Math.min(e,0.99);}
-function fireEff(){return Math.min(0.30+s.lv.fire*0.01333+p.lv.fireII*0.05,1.0);}
-function fireEffNext(){return Math.min(0.30+Math.min(s.lv.fire+1,MAX_FIRE)*0.01333+p.lv.fireII*0.05,1.0);}
+function fireEff(){return Math.min(0.22+s.lv.fire*0.01867+p.lv.fireII*0.05,1.0);}
+function fireEffNext(){return Math.min(0.22+Math.min(s.lv.fire+1,MAX_FIRE)*0.01867+p.lv.fireII*0.05,1.0);}
 function fireEffEffective(){var e=fireEff();if(hasAmulet('furnaceDemon'))e=(1+e)/2;return Math.min(e,0.99);}
 
 function regenCostFor(def,ls){return Math.round(def.regenCost*Math.pow(1.8,ls.regenLv));}
 
-function scavCdMax(){return Math.max(500,1200-70*s.lv.scavspd);}
+function scavCdMax(){return Math.max(500,1400-90*s.lv.scavspd);}
 function acidDuration(){return Math.max(1000,4200-160*s.lv.acidspd);}
 function fireDuration(){return Math.max(1000,3400-120*s.lv.firespd);}
 
@@ -1417,7 +1416,7 @@ function render(){
  var bh=document.getElementById('b-hold');if(bh){if(s.lv.hold){bh.textContent='✓ куплено';bh.disabled=true;bh.className='upg-btn owned';}else{bh.textContent=fmt(s.cost.hold)+' ₽';bh.disabled=s.cash<s.cost.hold;bh.className='upg-btn';}}
  setText('d-hold',s.lv.hold?'куплено — зажми кнопку и она будет работать сама':'покупка один раз — зажми кнопку, действие повторится');
  setBtnMax('b-scavspd',s.lv.scavspd>=MAX_SCAVSPD,s.cost.scavspd,s.cash>=s.cost.scavspd);
- setText('d-scavspd','пауза между копками: '+(scavCdMax()/1000).toFixed(2)+'с → '+(Math.max(500,1200-70*(s.lv.scavspd+1))/1000).toFixed(2)+'с (уровень '+s.lv.scavspd+'/'+MAX_SCAVSPD+')');
+ setText('d-scavspd','пауза между копками: '+(scavCdMax()/1000).toFixed(2)+'с → '+(Math.max(500,1400-90*(s.lv.scavspd+1))/1000).toFixed(2)+'с (уровень '+s.lv.scavspd+'/'+MAX_SCAVSPD+')');
  setBtnMax('b-acidspd',s.lv.acidspd>=MAX_ACIDSPD,s.cost.acidspd,s.cash>=s.cost.acidspd);
  setText('d-acidspd','время растворения: '+(acidDuration()/1000).toFixed(1)+'с → '+(Math.max(1000,4200-160*(s.lv.acidspd+1))/1000).toFixed(1)+'с (уровень '+s.lv.acidspd+'/'+MAX_ACIDSPD+')');
  setBtnMax('b-firespd',s.lv.firespd>=MAX_FIRESPD,s.cost.firespd,s.cash>=s.cost.firespd);

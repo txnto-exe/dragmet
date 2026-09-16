@@ -620,8 +620,8 @@ var CATALOG_ORDER=['resist','caps','trans','chips','hdd','phones','ram','connect
 var PRESTIGE_BASE_THRESHOLD=100000;
 var PRESTIGE_THRESHOLD_MULT=1.5;
 var MAX_PRESTIGE_LEVEL=20;
-var PRICE_MAX=4000;
-var PRICE_MIN=800;
+var PRICE_MAX=5000;
+var PRICE_MIN=1200;
 var FIXED_PRICE_AVG=3400;
 var AUTO_SPEED_BASE_COST=5000;
 var AUTO_SPEED_COST_MULT=1.6;
@@ -629,7 +629,6 @@ var AUTO_PENALTY_BASE_COST=3000;
 var AUTO_PENALTY_COST_MULT=1.8;
 var AUTO_DIG_COST={yard:800,construction:2500,radiozavod:6000,garages:15000,workshop:35000,ats:80000,scrapyard:180000,datacenter:260000,institute:400000};
 
-// Максимумы уровней всех прокачек
 var MAX_ACID=15;
 var MAX_FIRE=15;
 var MAX_CAP=25;
@@ -655,8 +654,6 @@ var MAX_FIRE_II=10;
 var MAX_CAP_II=25;
 var MAX_REGEN=10;
 
-// Приросты базы бонуса престижа (нелинейно: сначала быстро, потом медленно)
-// Сумма = 12.5. База на максимуме = 5 + 12.5 = 17.5
 var BOOST_INCREMENTS=[0.91,0.88,0.85,0.82,0.79,0.76,0.73,0.70,0.67,0.64,0.61,0.58,0.55,0.52,0.49,0.46,0.43,0.40,0.37,0.34];
 function bonusBoostSum(lv){var sum=0;for(var i=0;i<lv&&i<BOOST_INCREMENTS.length;i++)sum+=BOOST_INCREMENTS[i];return sum;}
 
@@ -714,7 +711,7 @@ var FAIL_MSGS=['Мимо.','Промах.','Не повезло.','Мимо ка
 
 var LOCATIONS=[
  {key:'yard',name:'Баки во дворе',icon:'🗑️',unlockCost:0,maxStock:8,regenBase:5200,regenCost:350,loot:[{k:'chips',w:35},{k:'caps',w:15},{k:'resist',w:15},{k:'phones',w:20},{k:'ram',w:10},{k:'hdd',w:5}]},
- {key:'construction',name:'Заброшенная стройка',icon:'🏗️',unlockCost:650,maxStock:6,regenBase:7200,regenCost:700,loot:[{k:'phones',w:22},{k:'caps',w:10},{k:'trans',w:18},{k:'hdd',w:15},{k:'ram',w:18},{k:'silverWire',w:12},{k:'chips',w:5}]},
+ {key:'construction',name:'Заброшенная стройка',icon:'🏗️',unlockCost:450,maxStock:6,regenBase:7200,regenCost:700,loot:[{k:'phones',w:22},{k:'caps',w:10},{k:'trans',w:18},{k:'hdd',w:15},{k:'ram',w:18},{k:'silverWire',w:12},{k:'chips',w:5}]},
  {key:'radiozavod',name:'Свалка радиозавода',icon:'🏭',unlockCost:2600,maxStock:5,regenBase:10400,regenCost:1600,loot:[{k:'ram',w:15},{k:'trans',w:8},{k:'hdd',w:12},{k:'cpus',w:10},{k:'connect',w:14},{k:'silverWire',w:10},{k:'rare',w:22},{k:'chips',w:4},{k:'legend',w:5}]},
  {key:'garages',name:'Гаражный кооператив',icon:'🚪',unlockCost:6500,maxStock:4,regenBase:14400,regenCost:3200,loot:[{k:'connect',w:10},{k:'cpus',w:10},{k:'silverWire',w:12},{k:'legend',w:18},{k:'rare',w:28},{k:'ram',w:14},{k:'hdd',w:8}]},
  {key:'workshop',name:'Ремонтная мастерская',icon:'🔧',unlockCost:14000,maxStock:4,regenBase:18000,regenCost:5500,loot:[{k:'trans',w:12},{k:'hdd',w:22},{k:'cpus',w:14},{k:'brass',w:14},{k:'rare',w:22},{k:'connect',w:14},{k:'ram',w:4}]},
@@ -725,7 +722,7 @@ var LOCATIONS=[
 ];
 
 function makePrest(){return{level:0,points:0,lv:{bonusBoost:0,startCash:0,locDiscount:0,acidII:0,fireII:0,capII:0},autoDig:{},autoTimers:{}};}
-function makeState(){return{cash:0,ingots:0,junk:{chips:0,phones:0,ram:0,rare:0,legend:0,platinum:0,caps:0,resist:0,trans:0,hdd:0,cpus:0,connect:0,gContacts:0,silverWire:0,brass:0,goldPins:0},locked:{chips:false,phones:false,ram:false,rare:false,legend:false,platinum:false,caps:false,resist:false,trans:false,hdd:false,cpus:false,connect:false,gContacts:false,silverWire:false,brass:false,goldPins:false},cap:16,scavCd:0,solution:0,acid:[{active:false,progress:0,duration:4200,yieldAmt:0}],fire:[{active:false,progress:0,duration:3400,yieldAmt:0}],activeLoc:'yard',locPage:0,invExpanded:false,accState:{eq:true,spd:false,luck:false,income:false,regen:false,auto:false,forge:false,pbonus:true,pupg2:false},locs:LOCATIONS.map(function(l){return{key:l.key,stock:l.maxStock,regenTimer:0,regenLv:0,unlocked:l.unlockCost===0};}),lv:{acid:1,fire:1,cap:1,hold:0,scavspd:0,acidspd:0,firespd:0,secondacid:0,secondfire:0,goodeye:0,luck:0,reputation:0,wideZone:0,offlineRate:0,offlineCap:0,autoSpeed:0,autoPenalty:0,forgeSpeed:0,forgeDiscount:0,forgeDuration:0,twoForges:0},cost:{acid:150,fire:150,cap:120,hold:1200,scavspd:400,acidspd:400,firespd:400,secondacid:3000,secondfire:5000,goodeye:500,luck:700,reputation:REPUTATION_BASE_COST,wideZone:WIDE_ZONE_BASE,offlineRate:OFFLINE_RATE_BASE_COST,offlineCap:OFFLINE_CAP_BASE_COST,autoSpeed:AUTO_SPEED_BASE_COST,autoPenalty:AUTO_PENALTY_BASE_COST,forgeSpeed:FORGE_SPEED_BASE,forgeDiscount:FORGE_DISCOUNT_BASE,forgeDuration:FORGE_DURATION_BASE,twoForges:TWO_FORGES_COST},stats:{junkTotal:0,ingotsTotal:0,earnedTotal:0,offlineTotal:0},settings:{sound:true,vibe:true,music:false},forgeUnlocked:false,amulets:{},equippedAmulet:null,forgeCrafts:[],lastSeenTs:Date.now()};}
+function makeState(){return{cash:0,ingots:0,junk:{chips:0,phones:0,ram:0,rare:0,legend:0,platinum:0,caps:0,resist:0,trans:0,hdd:0,cpus:0,connect:0,gContacts:0,silverWire:0,brass:0,goldPins:0},locked:{chips:false,phones:false,ram:false,rare:false,legend:false,platinum:false,caps:false,resist:false,trans:false,hdd:false,cpus:false,connect:false,gContacts:false,silverWire:false,brass:false,goldPins:false},cap:24,scavCd:0,solution:0,acid:[{active:false,progress:0,duration:4200,yieldAmt:0}],fire:[{active:false,progress:0,duration:3400,yieldAmt:0}],activeLoc:'yard',locPage:0,invExpanded:false,accState:{eq:true,spd:false,luck:false,income:false,regen:false,auto:false,forge:false,pbonus:true,pupg2:false},locs:LOCATIONS.map(function(l){return{key:l.key,stock:l.maxStock,regenTimer:0,regenLv:0,unlocked:l.unlockCost===0};}),lv:{acid:1,fire:1,cap:1,hold:0,scavspd:0,acidspd:0,firespd:0,secondacid:0,secondfire:0,goodeye:0,luck:0,reputation:0,wideZone:0,offlineRate:0,offlineCap:0,autoSpeed:0,autoPenalty:0,forgeSpeed:0,forgeDiscount:0,forgeDuration:0,twoForges:0},cost:{acid:100,fire:100,cap:120,hold:1200,scavspd:300,acidspd:300,firespd:300,secondacid:3000,secondfire:5000,goodeye:500,luck:700,reputation:REPUTATION_BASE_COST,wideZone:WIDE_ZONE_BASE,offlineRate:OFFLINE_RATE_BASE_COST,offlineCap:OFFLINE_CAP_BASE_COST,autoSpeed:AUTO_SPEED_BASE_COST,autoPenalty:AUTO_PENALTY_BASE_COST,forgeSpeed:FORGE_SPEED_BASE,forgeDiscount:FORGE_DISCOUNT_BASE,forgeDuration:FORGE_DURATION_BASE,twoForges:TWO_FORGES_COST},stats:{junkTotal:0,ingotsTotal:0,earnedTotal:0,offlineTotal:0},settings:{sound:true,vibe:true,music:false},forgeUnlocked:false,amulets:{},equippedAmulet:null,forgeCrafts:[],lastSeenTs:Date.now()};}
 
 var p=makePrest();
 for(var li=0;li<LOCATIONS.length;li++){p.autoDig[LOCATIONS[li].key]=false;p.autoTimers[LOCATIONS[li].key]=0;}
@@ -745,27 +742,23 @@ function totalJunk(){var t=0;for(var k in s.junk)t+=s.junk[k];return t;}
 function junkGoldValue(){var sum=0;for(var k in s.junk)if(CATALOG[k])sum+=s.junk[k]*CATALOG[k].gold;return sum;}
 function junkGoldValueUnlocked(){var sum=0;for(var k in s.junk)if(CATALOG[k]&&!s.locked[k])sum+=s.junk[k]*CATALOG[k].gold;return sum;}
 
-// Кислота: база 20%, +2% за уровень (макс 15 → 50%). Плюс Кислота II: +5% за уровень (макс 10 → +50%).
-function acidEff(){return Math.min(0.20+s.lv.acid*0.02+p.lv.acidII*0.05,1.0);}
-function acidEffNext(){return Math.min(0.20+Math.min(s.lv.acid+1,MAX_ACID)*0.02+p.lv.acidII*0.05,1.0);}
+// Кислота: база 30%, +1.33% за уровень (макс 15 → 50%). + Кислота II: +5% за уровень (макс 10 → +50%).
+function acidEff(){return Math.min(0.30+s.lv.acid*0.01333+p.lv.acidII*0.05,1.0);}
+function acidEffNext(){return Math.min(0.30+Math.min(s.lv.acid+1,MAX_ACID)*0.01333+p.lv.acidII*0.05,1.0);}
 function acidEffEffective(){var e=acidEff();if(hasAmulet('cleaner'))e=(1+e)/2;return Math.min(e,0.99);}
-function fireEff(){return Math.min(0.20+s.lv.fire*0.02+p.lv.fireII*0.05,1.0);}
-function fireEffNext(){return Math.min(0.20+Math.min(s.lv.fire+1,MAX_FIRE)*0.02+p.lv.fireII*0.05,1.0);}
+function fireEff(){return Math.min(0.30+s.lv.fire*0.01333+p.lv.fireII*0.05,1.0);}
+function fireEffNext(){return Math.min(0.30+Math.min(s.lv.fire+1,MAX_FIRE)*0.01333+p.lv.fireII*0.05,1.0);}
 function fireEffEffective(){var e=fireEff();if(hasAmulet('furnaceDemon'))e=(1+e)/2;return Math.min(e,0.99);}
 
 function regenCostFor(def,ls){return Math.round(def.regenCost*Math.pow(1.8,ls.regenLv));}
 
-// Копать: 1600 → 500 мс за 10 уровней (-110 мс за уровень)
-function scavCdMax(){return Math.max(500,1600-110*s.lv.scavspd);}
-// Кислота: 4200 → 1000 мс за 20 уровней (-160 мс за уровень)
+function scavCdMax(){return Math.max(500,1200-70*s.lv.scavspd);}
 function acidDuration(){return Math.max(1000,4200-160*s.lv.acidspd);}
-// Печь: 3400 → 1000 мс за 20 уровней (-120 мс за уровень)
 function fireDuration(){return Math.max(1000,3400-120*s.lv.firespd);}
 
 function goodEyeChance(){return Math.min(s.lv.goodeye*0.04,0.80);}
 function luckChance(){return Math.min(s.lv.luck*0.04667,0.70);}
 
-// Работяги: база 6000 мс, -400 мс за уровень, макс 10 → 2000 мс
 function autoSpeedCostFor(lv){return Math.round(AUTO_SPEED_BASE_COST*Math.pow(AUTO_SPEED_COST_MULT,lv));}
 function autoPenaltyPct(){if(hasAmulet('nightShift'))return 0;return Math.max(0,50-s.lv.autoPenalty*5);}
 function autoPenaltyCostFor(lv){return Math.round(AUTO_PENALTY_BASE_COST*Math.pow(AUTO_PENALTY_COST_MULT,lv));}
@@ -1113,7 +1106,8 @@ function applyLoad(data){
  newS.cash=data.s.cash||0;newS.ingots=data.s.ingots||0;
  if(data.s.junk)for(var jk in newS.junk)if(typeof data.s.junk[jk]!=='undefined')newS.junk[jk]=data.s.junk[jk];
  if(data.s.locked)for(var lkk in newS.locked)if(typeof data.s.locked[lkk]!=='undefined')newS.locked[lkk]=!!data.s.locked[lkk];
- newS.cap=data.s.cap||16;newS.scavCd=0;newS.solution=data.s.solution||0;
+ if(typeof data.s.cap!=='undefined')newS.cap=data.s.cap;
+ newS.scavCd=0;newS.solution=data.s.solution||0;
  if(data.s.acid&&data.s.acid.length)newS.acid=data.s.acid;
  if(data.s.fire&&data.s.fire.length)newS.fire=data.s.fire;
  newS.activeLoc=data.s.activeLoc||'yard';newS.locPage=data.s.locPage||0;newS.invExpanded=!!data.s.invExpanded;
@@ -1130,7 +1124,6 @@ function applyLoad(data){
  else if(data.s.forgeCraft)newS.forgeCrafts=[data.s.forgeCraft];
  newS.lastSeenTs=data.s.lastSeenTs||Date.now();
  if(newP.level>MAX_PRESTIGE_LEVEL)newP.level=MAX_PRESTIGE_LEVEL;
- // Ограничение уровней всех прокачек
  if(newS.lv.acid>MAX_ACID)newS.lv.acid=MAX_ACID;
  if(newS.lv.fire>MAX_FIRE)newS.lv.fire=MAX_FIRE;
  if(newS.lv.cap>MAX_CAP)newS.lv.cap=MAX_CAP;
@@ -1375,7 +1368,6 @@ function renderAmuletHeader(){var h=document.getElementById('amuletHdr');if(!h)r
 function setText(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
 function setDis(id,v){var e=document.getElementById(id);if(e)e.disabled=v;}
 
-// Помощник: обновляет кнопку и описание прокачки с учётом максимума
 function setBtnMax(id, maxed, cost, canBuy){
  var el=document.getElementById(id);if(!el)return;
  if(maxed){el.textContent='✓ макс';el.disabled=true;el.className='upg-btn owned';}
@@ -1416,58 +1408,42 @@ function render(){
  var sb=document.getElementById('sellBtn');
  if(sb){sb.disabled=s.ingots<=0.0005;if(s.ingots<=0.0005)sb.textContent='Нет слитков на продажу';else sb.textContent='🎯 Продать '+fmt(s.ingots,3)+' г (стоп-игра)';}
 
- // Кислота
  setBtnMax('b-acid',s.lv.acid>=MAX_ACID,s.cost.acid,s.cash>=s.cost.acid);
  setText('d-acid','в кислоте теряется золота: '+Math.round((1-acidEff())*100)+'% → '+Math.round((1-acidEffNext())*100)+'% (уровень '+s.lv.acid+'/'+MAX_ACID+')');
- // Печь
  setBtnMax('b-fire',s.lv.fire>=MAX_FIRE,s.cost.fire,s.cash>=s.cost.fire);
  setText('d-fire','при плавке теряется золота: '+Math.round((1-fireEff())*100)+'% → '+Math.round((1-fireEffNext())*100)+'% (уровень '+s.lv.fire+'/'+MAX_FIRE+')');
- // Склад
  setBtnMax('b-cap',s.lv.cap>=MAX_CAP,s.cost.cap,s.cash>=s.cost.cap);
  setText('d-cap','сколько лома влезает на склад: '+capMax()+' → '+(capMax()+8)+' (уровень '+s.lv.cap+'/'+MAX_CAP+')');
- // Турбо
  var bh=document.getElementById('b-hold');if(bh){if(s.lv.hold){bh.textContent='✓ куплено';bh.disabled=true;bh.className='upg-btn owned';}else{bh.textContent=fmt(s.cost.hold)+' ₽';bh.disabled=s.cash<s.cost.hold;bh.className='upg-btn';}}
  setText('d-hold',s.lv.hold?'куплено — зажми кнопку и она будет работать сама':'покупка один раз — зажми кнопку, действие повторится');
- // Копать быстрее
  setBtnMax('b-scavspd',s.lv.scavspd>=MAX_SCAVSPD,s.cost.scavspd,s.cash>=s.cost.scavspd);
- setText('d-scavspd','пауза между копками: '+(scavCdMax()/1000).toFixed(2)+'с → '+(Math.max(500,1600-110*(s.lv.scavspd+1))/1000).toFixed(2)+'с (уровень '+s.lv.scavspd+'/'+MAX_SCAVSPD+')');
- // Кислота быстрее
+ setText('d-scavspd','пауза между копками: '+(scavCdMax()/1000).toFixed(2)+'с → '+(Math.max(500,1200-70*(s.lv.scavspd+1))/1000).toFixed(2)+'с (уровень '+s.lv.scavspd+'/'+MAX_SCAVSPD+')');
  setBtnMax('b-acidspd',s.lv.acidspd>=MAX_ACIDSPD,s.cost.acidspd,s.cash>=s.cost.acidspd);
  setText('d-acidspd','время растворения: '+(acidDuration()/1000).toFixed(1)+'с → '+(Math.max(1000,4200-160*(s.lv.acidspd+1))/1000).toFixed(1)+'с (уровень '+s.lv.acidspd+'/'+MAX_ACIDSPD+')');
- // Печь быстрее
  setBtnMax('b-firespd',s.lv.firespd>=MAX_FIRESPD,s.cost.firespd,s.cash>=s.cost.firespd);
  setText('d-firespd','время выпаривания: '+(fireDuration()/1000).toFixed(1)+'с → '+(Math.max(1000,3400-120*(s.lv.firespd+1))/1000).toFixed(1)+'с (уровень '+s.lv.firespd+'/'+MAX_FIRESPD+')');
- // Вторые баки/печи
  var bsa=document.getElementById('b-secondacid');if(bsa){if(s.lv.secondacid){bsa.textContent='✓ куплено';bsa.disabled=true;bsa.className='upg-btn owned';}else{bsa.textContent=fmt(s.cost.secondacid)+' ₽';bsa.disabled=s.cash<s.cost.secondacid;bsa.className='upg-btn';}}
  setText('d-secondacid',s.lv.secondacid?'куплено — два бака работают одновременно':'покупка один раз — можно запустить вторую кислоту параллельно');
  var bsf=document.getElementById('b-secondfire');if(bsf){if(s.lv.secondfire){bsf.textContent='✓ куплено';bsf.disabled=true;bsf.className='upg-btn owned';}else{bsf.textContent=fmt(s.cost.secondfire)+' ₽';bsf.disabled=s.cash<s.cost.secondfire;bsf.className='upg-btn';}}
  setText('d-secondfire',s.lv.secondfire?'куплено — две печи работают одновременно':'покупка один раз — можно запустить вторую печь параллельно');
- // Хороший глаз
  setBtnMax('b-goodeye',s.lv.goodeye>=MAX_GOODEYE,s.cost.goodeye,s.cash>=s.cost.goodeye);
  setText('d-goodeye','шанс найти редкую вещь: '+Math.round(goodEyeChance()*100)+'% → '+Math.round(Math.min((s.lv.goodeye+1)*4,80))+'% (уровень '+s.lv.goodeye+'/'+MAX_GOODEYE+')');
- // Чуйка
  setBtnMax('b-luck',s.lv.luck>=MAX_LUCK,s.cost.luck,s.cash>=s.cost.luck);
  setText('d-luck','шанс найти две вещи: '+Math.round(luckChance()*100)+'% → '+Math.round(Math.min((s.lv.luck+1)*4.667,70))+'% (уровень '+s.lv.luck+'/'+MAX_LUCK+')');
- // Репутация
  var br=document.getElementById('b-reputation');if(br){if(s.lv.reputation>=MAX_REPUTATION){br.textContent='✓ макс';br.disabled=true;br.className='upg-btn owned';}else{br.textContent=fmt(s.cost.reputation)+' ₽';br.disabled=s.cash<s.cost.reputation;br.className='upg-btn';}}
  var dr=document.getElementById('d-reputation');if(dr){var cur=reputationPct(),nxt=Math.min(cur+REPUTATION_PER_LV,100);dr.textContent='наценка скупщика: +'+cur+'% → +'+nxt+'% (уровень '+s.lv.reputation+'/'+MAX_REPUTATION+')';}
- // Широкая зона
  var bwz=document.getElementById('b-wideZone');if(bwz){if(s.lv.wideZone>=MAX_WIDEZONE){bwz.textContent='✓ макс';bwz.disabled=true;bwz.className='upg-btn owned';}else{bwz.textContent=fmt(s.cost.wideZone)+' ₽';bwz.disabled=s.cash<s.cost.wideZone;bwz.className='upg-btn';}}
  var dwz=document.getElementById('d-wideZone');if(dwz)dwz.textContent='зелёная зона в стоп-игре: '+wideZoneBonus()+'% → '+Math.min(wideZoneBonus()+1,5)+'% (уровень '+s.lv.wideZone+'/'+MAX_WIDEZONE+')';
- // Оффлайн
  var bor=document.getElementById('b-offlineRate');if(bor){if(s.lv.offlineRate>=MAX_OFFLINE_RATE){bor.textContent='✓ макс';bor.disabled=true;bor.className='upg-btn owned';}else{bor.textContent=fmt(s.cost.offlineRate)+' ₽';bor.disabled=s.cash<s.cost.offlineRate;bor.className='upg-btn offline';}}
  var dor=document.getElementById('d-offlineRate');if(dor)dor.textContent='доход в оффлайне: '+offlineRatePct()+'% → '+offlineRateNextPct()+'% (уровень '+s.lv.offlineRate+'/'+MAX_OFFLINE_RATE+')';
  var boc=document.getElementById('b-offlineCap');if(boc){if(s.lv.offlineCap>=MAX_OFFLINE_CAP){boc.textContent='✓ макс';boc.disabled=true;boc.className='upg-btn owned';}else{boc.textContent=fmt(s.cost.offlineCap)+' ₽';boc.disabled=s.cash<s.cost.offlineCap;boc.className='upg-btn offline';}}
  var doc=document.getElementById('d-offlineCap');if(doc)doc.textContent='максимум часов: '+offlineCapHours()+' → '+offlineCapNextHours()+' ч (уровень '+s.lv.offlineCap+'/'+MAX_OFFLINE_CAP+')';
- // Скорость работяг
  setBtnMax('b-autoSpeed',s.lv.autoSpeed>=MAX_AUTO_SPEED,s.cost.autoSpeed,s.cash>=s.cost.autoSpeed);
  var curSec=(Math.max(2000,6000-400*s.lv.autoSpeed)/1000).toFixed(2);
  var nextSec=(Math.max(2000,6000-400*(s.lv.autoSpeed+1))/1000).toFixed(2);
  setText('d-autoSpeed','время на один предмет: '+curSec+'с → '+nextSec+'с (уровень '+s.lv.autoSpeed+'/'+MAX_AUTO_SPEED+')');
- // Снижение штрафа
  var bap=document.getElementById('b-autoPenalty');if(bap){if(s.lv.autoPenalty>=MAX_AUTO_PENALTY||hasAmulet('nightShift')){bap.textContent=hasAmulet('nightShift')?'— амулетом':('✓ макс');bap.disabled=true;bap.className='upg-btn owned';}else{bap.textContent=fmt(s.cost.autoPenalty)+' ₽';bap.disabled=s.cash<s.cost.autoPenalty;bap.className='upg-btn';}}
  setText('d-autoPenalty',hasAmulet('nightShift')?'амулет «Ночная смена» — штрафа нет':'штраф на чужой точке: −'+autoPenaltyPct()+'% → −'+Math.max(0,50-(s.lv.autoPenalty+1)*5)+'% (уровень '+s.lv.autoPenalty+'/'+MAX_AUTO_PENALTY+')');
- // Кузница
  var bfs=document.getElementById('b-forgeSpeed');if(bfs){if(s.lv.forgeSpeed>=MAX_FORGE_SPEED){bfs.textContent='✓ макс';bfs.disabled=true;bfs.className='upg-btn owned';}else{bfs.textContent=fmt(s.cost.forgeSpeed)+' ₽';bfs.disabled=s.cash<s.cost.forgeSpeed;bfs.className='upg-btn';}}
  setText('d-forgeSpeed','время ковки: −'+Math.round(forgeSpeedBonus()*100)+'% → −'+Math.round(Math.min((s.lv.forgeSpeed+1)*0.10,0.70)*100)+'% (уровень '+s.lv.forgeSpeed+'/'+MAX_FORGE_SPEED+')');
  var bfd=document.getElementById('b-forgeDiscount');if(bfd){if(s.lv.forgeDiscount>=MAX_FORGE_DISCOUNT){bfd.textContent='✓ макс';bfd.disabled=true;bfd.className='upg-btn owned';}else{bfd.textContent=fmt(s.cost.forgeDiscount)+' ₽';bfd.disabled=s.cash<s.cost.forgeDiscount;bfd.className='upg-btn';}}
@@ -1477,7 +1453,6 @@ function render(){
  var btf=document.getElementById('b-twoForges');if(btf){if(s.lv.twoForges){btf.textContent='✓ куплено';btf.disabled=true;btf.className='upg-btn owned';}else{btf.textContent=fmt(s.cost.twoForges)+' ₽';btf.disabled=s.cash<s.cost.twoForges;btf.className='upg-btn';}}
  setText('d-twoForges',s.lv.twoForges?'куплено — кузнец куёт два амулета одновременно':'покупка один раз — кузнец сможет ковать два амулета одновременно');
 
- // Престиж
  setText('psLvl',p.level);setText('psPts',p.points);setText('psBonus','+'+prestigeBonusPct()+'%');
  var maxed=isMaxPrestige();
  var psThreshold=document.getElementById('psThreshold');
@@ -1495,7 +1470,6 @@ function render(){
   else{var thr=prestigeThreshold();pb.disabled=s.cash<thr;pb.textContent=s.cash<thr?('Нужно '+fmt(thr)+' ₽ (сейчас '+fmt(Math.floor(s.cash))+')'):('Сделать престиж → получить '+prestigeReward(p.level+1)+' очков');}
  }
 
- // Престиж-прокачки
  var c1=1+p.lv.bonusBoost;
  var bb=document.getElementById('b-bonusBoost');
  if(bb){if(p.lv.bonusBoost>=MAX_BONUS_BOOST){bb.textContent='✓ макс';bb.disabled=true;bb.className='upg-btn prest owned';}else{bb.textContent=c1+' очк.';bb.disabled=p.points<c1;bb.className='upg-btn prest';}}

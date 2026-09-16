@@ -218,8 +218,6 @@ h1.game-title{font-size:20px;font-weight:800;margin:0;flex-shrink:0;cursor:point
 @keyframes forgeBreathe{0%,100%{transform:scale(1);}50%{transform:scale(1.008) translateY(-1px);}}
 .forge-blacksmith img{width:100%;height:100%;object-fit:contain;image-rendering:pixelated;image-rendering:crisp-edges;}
 .forge-locked .forge-blacksmith{animation:none;}
-.forge-locked .forge-blacksmith img{filter:blur(6px) brightness(0.42) contrast(1.2);}
-.forge-locked::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 48%, transparent 15%, rgba(0,0,0,0.75) 55%, rgba(0,0,0,0.99) 95%),linear-gradient(180deg, rgba(0,0,0,0.55) 0%, transparent 22%, transparent 55%, rgba(0,0,0,0.8) 100%);pointer-events:none;z-index:5;}
 .forge-locked .forge-glow,
 .forge-locked .forge-glow-lamp,
 .forge-locked .forge-glow-warm,
@@ -566,10 +564,10 @@ h1.game-title{font-size:20px;font-weight:800;margin:0;flex-shrink:0;cursor:point
         <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;">Уровень престижа</span><span class="ps-lvl">★ <span id="psLvl">0</span></span></div>
         <div class="ps-line" style="margin-top:8px;"><span>Очки престижа</span><span id="psPts">0</span></div>
         <div class="ps-line"><span>Бонус к продаже</span><span id="psBonus">+0%</span></div>
-        <div class="ps-line"><span>Порог следующего</span><span id="psThreshold">150 000 ₽</span></div>
-        <div class="ps-line"><span>Награда за следующий</span><span id="psReward">25</span></div>
+        <div class="ps-line"><span>Порог следующего</span><span id="psThreshold">100 000 ₽</span></div>
+        <div class="ps-line"><span>Награда за следующий</span><span id="psReward">10</span></div>
         <button class="prest-btn" id="prestBtn" type="button">Престиж</button>
-        <div style="font-size:11px;color:var(--text-dim);margin-top:8px;text-align:center;" id="prestThresholdInfo">Порог: 150 000 ₽ · сбросит всё кроме прокачек Престижа и амулетов</div>
+        <div style="font-size:11px;color:var(--text-dim);margin-top:8px;text-align:center;" id="prestThresholdInfo">Порог: 100 000 ₽ · сбросит всё кроме прокачек Престижа и амулетов</div>
       </div>
       <div class="panel">
         <div class="acc-head open prest" data-acc="pbonus"><span class="acc-title">Бонусы престижа</span><span class="acc-arrow">▼</span></div>

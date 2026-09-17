@@ -319,18 +319,49 @@ header.has-prestige .hdr-plate-ingot{flex:0 0 auto;}
 .dev-item-row .nm{flex:1;font-size:10.5px;color:#dfe4c8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .dev-item-row .dev-btn{padding:5px 7px;font-size:10.5px;min-width:36px;flex:0 0 auto;}
 .dev-close{width:100%;padding:12px;margin-top:14px;background:#c73a3a;color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;touch-action:manipulation;}
-#gameScreen.dig-lock{padding:14px 12px calc(78px + env(safe-area-inset-bottom));height:100vh;height:100dvh;overflow:hidden;display:flex;flex-direction:column;}
-#gameScreen.dig-lock .wrap{display:flex;flex-direction:column;flex:1;min-height:0;width:100%;}
-#gameScreen.dig-lock header{flex:0 0 auto;margin-bottom:12px;}
-#gameScreen.dig-lock section[data-tab="dig"].active{display:flex;flex-direction:column;flex:1;min-height:0;}
-#gameScreen.dig-lock section[data-tab="dig"]>.panel{display:flex;flex-direction:column;flex:1;min-height:0;margin-bottom:0;padding:12px 12px 10px;position:relative;overflow:hidden;}
-#gameScreen.dig-lock section[data-tab="dig"] .panel-title{margin-bottom:8px;}
-#gameScreen.dig-lock section[data-tab="dig"] .loc-viewport{flex:0 0 auto;margin-bottom:6px;}
-#gameScreen.dig-lock section[data-tab="dig"] .loc-nav{flex:0 0 auto;margin-bottom:10px;}
-#gameScreen.dig-lock section[data-tab="dig"] .dig-btn{flex:0 0 auto;padding:14px;font-size:15px;}
-#gameScreen.dig-lock section[data-tab="dig"] .cap-bar{flex:0 0 auto;margin-top:8px;}
-#gameScreen.dig-lock section[data-tab="dig"] .cap-txt{flex:0 0 auto;margin-top:3px;}
-#gameScreen.dig-lock section[data-tab="dig"] .inv-row{flex:0 0 auto;margin-top:10px;}
+
+/* ===== МИНИ-ИГРЫ ===== */
+.mg-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.92);display:none;align-items:center;justify-content:center;z-index:9997;padding:20px;}
+.mg-overlay.show{display:flex;}
+.mg-card{background:linear-gradient(135deg,#172213 0%,#1f2e18 100%);border:1px solid var(--acid);border-radius:12px;padding:20px;max-width:420px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,0.85),0 0 40px rgba(168,214,74,0.10);}
+.mg-card.fire{background:linear-gradient(135deg,#251a0d 0%,#382713 100%);border-color:var(--rust);box-shadow:0 10px 40px rgba(0,0,0,0.85),0 0 40px rgba(232,120,74,0.15);}
+.mg-title{font-size:19px;font-weight:800;color:var(--acid);margin:0 0 4px;text-align:center;letter-spacing:0.5px;text-shadow:0 0 12px rgba(168,214,74,0.35);}
+.mg-card.fire .mg-title{color:var(--rust);text-shadow:0 0 12px rgba(232,120,74,0.4);}
+.mg-sub{font-size:11px;color:var(--text-dim);text-align:center;margin-bottom:18px;line-height:1.5;}
+.mg-result{text-align:center;padding:8px 0 0;font-size:14px;font-weight:700;min-height:22px;color:var(--text-dim);transition:color 0.2s;}
+.mg-result.ok{color:var(--acid);text-shadow:0 0 10px rgba(168,214,74,0.5);}
+.mg-result.fail{color:#e87878;text-shadow:0 0 10px rgba(232,120,120,0.5);}
+
+/* Кислота */
+.amg-flasks{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
+.amg-flask-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;}
+.amg-flask{position:relative;width:100%;height:190px;background:#0a1106;border:2px solid var(--edge);border-radius:8px 8px 6px 6px;overflow:hidden;box-shadow:inset 0 0 24px rgba(0,0,0,0.7);}
+.amg-flask::after{content:'';position:absolute;left:0;right:0;top:0;height:6px;background:linear-gradient(180deg,rgba(0,0,0,0.6),transparent);pointer-events:none;}
+.amg-zone{position:absolute;left:3px;right:3px;background:linear-gradient(180deg,rgba(168,214,74,0.42),rgba(168,214,74,0.15));border-top:2px solid var(--acid);border-bottom:2px solid var(--acid);box-shadow:0 0 14px rgba(168,214,74,0.55),inset 0 0 10px rgba(168,214,74,0.25);transition:background 0.2s,border-color 0.2s,box-shadow 0.2s;}
+.amg-fill{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(180deg,rgba(168,214,74,0.32),rgba(168,214,74,0.08));pointer-events:none;}
+.amg-marker{position:absolute;left:-2px;right:-2px;height:5px;background:#fff;box-shadow:0 0 14px #fff,0 0 5px #fff;transform:translateY(50%);border-radius:3px;pointer-events:none;}
+.amg-label{font-size:11px;color:var(--text-dim);font-weight:600;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+.amg-btn{width:100%;padding:9px 4px;background:var(--acid-dim);border:1px solid var(--acid);color:var(--acid);border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;touch-action:none;font-family:inherit;letter-spacing:0.3px;transition:background 0.15s,transform 0.08s,color 0.15s;}
+.amg-btn:active{background:var(--acid);color:#0d1408;transform:scale(0.97);}
+.amg-btn.pouring{background:var(--acid);color:#0d1408;box-shadow:0 0 14px rgba(168,214,74,0.65);}
+.amg-btn.done{background:rgba(168,214,74,0.15);color:var(--acid);border-color:var(--acid);pointer-events:none;box-shadow:0 0 12px rgba(168,214,74,0.4);}
+.amg-flask.ok .amg-zone{background:rgba(168,214,74,0.65);box-shadow:0 0 26px rgba(168,214,74,1),inset 0 0 14px rgba(168,214,74,0.5);}
+.amg-flask.fail .amg-zone{background:rgba(199,58,58,0.55);border-color:#c73a3a;box-shadow:0 0 26px rgba(199,58,58,0.95),inset 0 0 14px rgba(199,58,58,0.4);}
+.amg-flask.fail .amg-marker{background:#ff9a9a;box-shadow:0 0 14px #c73a3a,0 0 5px #c73a3a;}
+
+/* Печь */
+.fmg-bar{position:relative;height:64px;background:#0f0a04;border:2px solid var(--edge);border-radius:8px;overflow:hidden;margin-bottom:14px;box-shadow:inset 0 0 26px rgba(0,0,0,0.75);}
+.fmg-zone{position:absolute;top:0;bottom:0;background:linear-gradient(90deg,rgba(232,120,74,0.32),rgba(232,120,74,0.62),rgba(232,120,74,0.32));border-left:2px solid var(--rust);border-right:2px solid var(--rust);box-shadow:0 0 18px rgba(232,120,74,0.7) inset,0 0 14px rgba(232,120,74,0.4);}
+.fmg-runner{position:absolute;top:-3px;bottom:-3px;width:5px;background:#fff;box-shadow:0 0 14px #fff,0 0 6px #fff;transform:translateX(-50%);border-radius:3px;pointer-events:none;}
+.fmg-progress-label{font-size:10px;color:var(--text-dim);text-align:center;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;}
+.fmg-progress{height:16px;background:#0f0a04;border:1px solid var(--edge);border-radius:8px;overflow:hidden;margin-bottom:16px;box-shadow:inset 0 0 12px rgba(0,0,0,0.7);}
+.fmg-progress-fill{height:100%;width:0%;background:linear-gradient(90deg,#e8784a,#f0a04a,#f5c060);box-shadow:0 0 14px rgba(232,120,74,0.8);transition:width 0.05s linear;}
+.fmg-controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.fmg-btn{padding:22px 10px;background:var(--panel-2);border:2px solid var(--edge);color:var(--text);border-radius:8px;font-size:26px;font-weight:900;cursor:pointer;touch-action:none;font-family:inherit;transition:background 0.15s,transform 0.08s,color 0.15s,border-color 0.15s;}
+.fmg-btn.fmg-minus{background:rgba(109,196,232,0.10);border-color:var(--offline-dim);color:var(--offline);}
+.fmg-btn.fmg-minus:active{background:var(--offline);color:#0a1c26;border-color:var(--offline);transform:scale(0.97);}
+.fmg-btn.fmg-plus{background:rgba(232,120,74,0.15);border-color:var(--rust);color:var(--rust);}
+.fmg-btn.fmg-plus:active{background:var(--rust);color:#fff;border-color:var(--rust);transform:scale(0.97);}
 </style>
 </head>
 <body>
@@ -400,6 +431,63 @@ header.has-prestige .hdr-plate-ingot{flex:0 0 auto;}
     <div class="pg-result hint" id="pgResult"></div>
     <div class="pg-result-sub" id="pgResultSub"></div>
     <button class="pg-stop" id="pgStop" type="button">СТОП</button>
+  </div>
+</div>
+
+<div class="mg-overlay" id="acidMgOverlay">
+  <div class="mg-card">
+    <div class="mg-title">🧪 Растворение</div>
+    <div class="mg-sub">Зажми — уровень пойдёт вверх. Отпусти в зоне. Промах — заново.</div>
+    <div class="amg-flasks">
+      <div class="amg-flask-wrap">
+        <div class="amg-flask" id="amgFlask0">
+          <div class="amg-fill" id="amgFill0"></div>
+          <div class="amg-zone" id="amgZone0"></div>
+          <div class="amg-marker" id="amgMarker0"></div>
+        </div>
+        <div class="amg-label">💧 Вода</div>
+        <button class="amg-btn" id="amgBtn0" type="button">Держи</button>
+      </div>
+      <div class="amg-flask-wrap">
+        <div class="amg-flask" id="amgFlask1">
+          <div class="amg-fill" id="amgFill1"></div>
+          <div class="amg-zone" id="amgZone1"></div>
+          <div class="amg-marker" id="amgMarker1"></div>
+        </div>
+        <div class="amg-label">🧪 Кислота</div>
+        <button class="amg-btn" id="amgBtn1" type="button">Держи</button>
+      </div>
+      <div class="amg-flask-wrap">
+        <div class="amg-flask" id="amgFlask2">
+          <div class="amg-fill" id="amgFill2"></div>
+          <div class="amg-zone" id="amgZone2"></div>
+          <div class="amg-marker" id="amgMarker2"></div>
+        </div>
+        <div class="amg-label">⚗️ Щёлочь</div>
+        <button class="amg-btn" id="amgBtn2" type="button">Держи</button>
+      </div>
+    </div>
+    <div class="mg-result" id="amgResult"></div>
+  </div>
+</div>
+
+<div class="mg-overlay" id="fireMgOverlay">
+  <div class="mg-card fire">
+    <div class="mg-title">🔥 Выплавка</div>
+    <div class="mg-sub">Держи бегунок в оранжевой зоне. Три секунды — победа.</div>
+    <div class="fmg-bar">
+      <div class="fmg-zone" id="fmgZone"></div>
+      <div class="fmg-runner" id="fmgRunner"></div>
+    </div>
+    <div class="fmg-progress-label">Готовность</div>
+    <div class="fmg-progress">
+      <div class="fmg-progress-fill" id="fmgProgress"></div>
+    </div>
+    <div class="fmg-controls">
+      <button class="fmg-btn fmg-minus" id="fmgMinus" type="button">−</button>
+      <button class="fmg-btn fmg-plus" id="fmgPlus" type="button">+</button>
+    </div>
+    <div class="mg-result" id="fmgResult"></div>
   </div>
 </div>
 
@@ -733,6 +821,9 @@ var lastSaveTs=0;
 window._revealedAmulet=null;
 window._amuletDragging=false;
 
+var _acidGraceUntil=0;
+var _fireGraceUntil=0;
+
 var currentTab='dig';
 var _sigs={inv:null,acidinv:null,loc:null,regen:null,auto:null,amulet:null,craft:null};
 
@@ -797,7 +888,6 @@ function itemTier(k){if(k==='legend'||k==='platinum')return 'lg';if(k==='rare'||
 function getRecipeAmulet(id){var a=getAmulet(id);if(!a)return {};var disc=1-forgeDiscountBonus();var out={};for(var k in a.recipe){out[k]=Math.max(1,Math.ceil(a.recipe[k]*disc));}return out;}
 function canCraftAmulet(id){var rec=getRecipeAmulet(id);for(var k in rec){if((s.junk[k]||0)<rec[k])return false;}return true;}
 function amuletRemainingText(id){var entry=s.amulets[id];if(!entry)return '';var a=getAmulet(id);if(!a)return '';if(a.durType==='prestige'){var left=entry.prestigeLeft||0;return 'Осталось: '+left+' прест.';}else{var ms=(entry.expiresAt||0)-Date.now();if(ms<=0)return 'Истёк';var h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000);return 'Осталось: '+(h>0?h+' ч '+m+' мин':m+' мин');}}
-function amuletRemainingShort(id){var entry=s.amulets[id];if(!entry)return '';var a=getAmulet(id);if(!a)return '';if(a.durType==='prestige'){return (entry.prestigeLeft||0)+'★';}var ms=(entry.expiresAt||0)-Date.now();if(ms<=0)return '0';var h=Math.floor(ms/3600000);if(h>0)return h+' ч';var m=Math.floor(ms/60000);return m+' м';}
 function forgeCraftTimeMs(id){var a=getAmulet(id);if(!a)return 0;var base=a.craftMin*60*1000;var mult=1-forgeSpeedBonus();return Math.max(15000,Math.round(base*mult));}
 function forgeDurationMult(id){var a=getAmulet(id);if(!a)return 1;if(a.durType==='hours'){return 1+s.lv.forgeDuration*0.25;}return 1;}
 function grantAmulet(id){var a=getAmulet(id);if(!a)return;if(a.durType==='prestige'){s.amulets[id]={prestigeLeft:a.durVal};}else{var ms=a.durVal*3600000*forgeDurationMult(id);s.amulets[id]={expiresAt:Date.now()+ms};}}
@@ -807,12 +897,9 @@ function dissolveAmulet(id){var a=getAmulet(id);if(!a)return;var rec=a.recipe;va
 function sigJunk(){var r='';for(var i=0;i<CATALOG_ORDER.length;i++)r+=s.junk[CATALOG_ORDER[i]]+'|';return r;}
 function sigJunkLocked(){var r='';for(var i=0;i<CATALOG_ORDER.length;i++)r+=s.junk[CATALOG_ORDER[i]]+(s.locked[CATALOG_ORDER[i]]?'L':'u')+'|';return r;}
 function sigLocs(){var r=s.activeLoc+'|'+s.locPage+'|'+p.lv.locDiscount+'|';for(var i=0;i<s.locs.length;i++){var l=s.locs[i];r+=l.stock+(l.unlocked?'1':'0')+(p.autoDig[l.key]?'A':'')+'|';}return r;}
-function sigAcid(){var r='';for(var i=0;i<s.acid.length;i++)r+=s.acid[i].active?'1':'0';r+='|'+Math.round(s.solution*100)+'|'+Math.round(junkGoldValueUnlocked()*100);return r;}
-function sigFire(){var r='';for(var i=0;i<s.fire.length;i++)r+=s.fire[i].active?'1':'0';r+='|'+Math.round(s.solution*100);return r;}
 function sigRegen(){var r='';for(var i=0;i<s.locs.length;i++){var l=s.locs[i];if(!l.unlocked)continue;r+=l.regenLv+'|';}return r;}
 function sigAuto(){var r='';for(var i=0;i<LOCATIONS.length;i++)r+=p.autoDig[LOCATIONS[i].key]?'1':'0';r+='|';for(var i=0;i<s.locs.length;i++)r+=s.locs[i].unlocked?'1':'0';return r;}
 function sigAmulet(){var r=(s.forgeUnlocked?'1':'0')+'|'+(s.equippedAmulet||'')+'|';for(var k in s.amulets)r+=k+'|';r+=s.forgeCrafts.length+'|';r+=sigJunk();r+='|'+(Date.now()>>16);return r;}
-function sigCraft(){var r='';for(var i=0;i<s.forgeCrafts.length;i++){var c=s.forgeCrafts[i];r+=c.id+':'+c.startedAt+':'+c.duration+'|';}return r;}
 
 var audioCtx=null,audioBroken=false,activeLoops={};
 function initAudio(){if(audioCtx||audioBroken)return;try{var Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx){audioBroken=true;return;}audioCtx=new Ctx();}catch(e){audioBroken=true;audioCtx=null;}}
@@ -844,6 +931,10 @@ function sndPriceMiss(){slide(rnd(500),rnd(250),0.22,'sawtooth');}
 function sndDoubleDrop(){tone(rnd(2200),0.08,'square');tone(rnd(2800),0.1,'square',null,0.05);tone(rnd(3400),0.12,'square',null,0.1);}
 function sndCraftStart(){[600,900,1200].forEach(function(f,i){tone(rnd(f),0.15,'triangle',null,i*0.08);});}
 function sndCraftDone(){[1400,1800,2400,3000].forEach(function(f,i){tone(rnd(f),0.25,'square',null,i*0.08);});}
+function sndMgFill(){tone(rnd(1500),0.04,'triangle');}
+function sndMgOk(){[1400,1800].forEach(function(f,i){tone(rnd(f),0.14,'square',null,i*0.07);});}
+function sndMgWin(){[1600,2000,2400,3000].forEach(function(f,i){tone(rnd(f),0.22,'square',null,i*0.08);});}
+function sndMgFail(){slide(rnd(700),rnd(200),0.35,'sawtooth');}
 
 function avgAcidProgress(){var a=0,sum=0;for(var i=0;i<s.acid.length;i++){if(s.acid[i].active){a++;sum+=s.acid[i].progress/s.acid[i].duration;}}return a>0?sum/a:0;}
 function startAcidLoop(){try{if(!canPlay()||activeLoops.acid)return;activeLoops.acid={tick:0};var bubble=function(){if(!activeLoops.acid)return;var prog=avgAcidProgress();var base=600+prog*1200;var f1=base+Math.random()*150;var f2=f1+150+Math.random()*350;slide(f1,f2,0.1,'triangle');activeLoops.acid.tick=setTimeout(bubble,140+Math.random()*180);};bubble();}catch(e){}}
@@ -854,7 +945,6 @@ function stopFireLoop(){try{if(activeLoops.fire){clearTimeout(activeLoops.fire.t
 function vibe(ms){try{if(!s||!s.settings||!s.settings.vibe)return;if(navigator.vibrate)navigator.vibrate(ms||15);}catch(e){}}
 var hapticInput=null;
 function initHaptic(){try{var el=document.createElement('input');el.type='checkbox';el.setAttribute('switch','');el.style.position='absolute';el.style.opacity='0';el.style.pointerEvents='none';el.style.left='-9999px';el.setAttribute('aria-hidden','true');document.body.appendChild(el);hapticInput=el;}catch(e){}}
-function iosHaptic(){try{if(!s.settings.vibe)return;if(!hapticInput)return;hapticInput.checked=!hapticInput.checked;var evt=document.createEvent('HTMLEvents');evt.initEvent('change',true,false);hapticInput.dispatchEvent(evt);}catch(e){}}
 
 function bumpCash(){try{var el=document.getElementById('cashWrap');if(!el)return;el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump');setTimeout(function(){el.classList.remove('bump');},200);}catch(e){}}
 function bumpToast(){try{var el=document.getElementById('toast');if(!el)return;el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump');setTimeout(function(){el.classList.remove('bump');},200);}catch(e){}}
@@ -930,7 +1020,211 @@ function scavenge(){
 function selectLoc(k){var ls=locState(k);if(!ls.unlocked)return;s.activeLoc=k;sndSelectLoc();vibe(8);saveGame();}
 function unlockLoc(k){var def=locDef(k),ls=locState(k);if(ls.unlocked)return;var cost=locUnlockCost(def);if(s.cash<cost){sndDeny();vibe(40);return;}s.cash-=cost;ls.unlocked=true;s.activeLoc=k;sndBuy();vibe(25);bumpCash();saveGame();}
 
-function startAcid(idx){
+// ==== КИСЛОТА: мини-игра ====
+var agActive=false,agState=null;
+function openAcidMiniGame(idx){
+  agState={idx:idx,done:[false,false,false],pos:[0,0,0],dir:[1,1,1],zones:[],speeds:[40,55,70],active:-1,pouring:false,raf:0,lastTs:0,gameOver:false,pausing:false};
+  for(var i=0;i<3;i++){
+    var w=16+Math.random()*6;
+    var start=12+Math.random()*(100-12-w-12);
+    agState.zones.push({start:start,end:start+w});
+    var zEl=document.getElementById('amgZone'+i);
+    if(zEl){zEl.style.bottom=start+'%';zEl.style.height=w+'%';}
+    var fl=document.getElementById('amgFlask'+i);
+    if(fl)fl.classList.remove('ok','fail');
+    var btn=document.getElementById('amgBtn'+i);
+    if(btn){btn.classList.remove('done','pouring');btn.disabled=false;btn.textContent='Держи';}
+    updateAcidFlaskVisual(i);
+  }
+  var res=document.getElementById('amgResult');if(res){res.textContent='';res.className='mg-result';}
+  agActive=true;
+  document.getElementById('acidMgOverlay').classList.add('show');
+  agState.lastTs=performance.now();
+  agState.raf=requestAnimationFrame(agLoop);
+}
+function updateAcidFlaskVisual(i){
+  var pos=agState.pos[i];
+  var mEl=document.getElementById('amgMarker'+i);if(mEl)mEl.style.bottom=pos+'%';
+  var fEl=document.getElementById('amgFill'+i);if(fEl)fEl.style.height=pos+'%';
+}
+function agLoop(ts){
+  if(!agActive)return;
+  if(!agState.lastTs)agState.lastTs=ts;
+  var dt=(ts-agState.lastTs)/1000;agState.lastTs=ts;
+  if(dt>0.1)dt=0.1;
+  if(agState.pouring&&agState.active>=0&&!agState.gameOver&&!agState.pausing){
+    var i=agState.active;
+    if(!agState.done[i]){
+      agState.pos[i]+=agState.dir[i]*agState.speeds[i]*dt;
+      if(agState.pos[i]>=100){agState.pos[i]=100;agState.dir[i]=-1;}
+      if(agState.pos[i]<=0){agState.pos[i]=0;agState.dir[i]=1;}
+      updateAcidFlaskVisual(i);
+    }
+  }
+  agState.raf=requestAnimationFrame(agLoop);
+}
+function agStartPour(i){
+  if(!agActive||!agState||agState.gameOver||agState.pausing)return;
+  if(i<0||i>2)return;
+  if(agState.done[i])return;
+  if(agState.pouring)return;
+  agState.active=i;agState.pouring=true;
+  var btn=document.getElementById('amgBtn'+i);if(btn)btn.classList.add('pouring');
+  vibe(10);
+}
+function agStopPour(i){
+  if(!agActive||!agState)return;
+  if(!agState.pouring)return;
+  if(agState.active!==i)return;
+  agState.pouring=false;agState.active=-1;
+  var btn=document.getElementById('amgBtn'+i);if(btn)btn.classList.remove('pouring');
+  if(agState.gameOver||agState.pausing)return;
+  var pos=agState.pos[i];
+  var z=agState.zones[i];
+  var hit=pos>=z.start&&pos<=z.end;
+  if(hit){
+    agState.done[i]=true;
+    var fl=document.getElementById('amgFlask'+i);if(fl)fl.classList.add('ok');
+    var b=document.getElementById('amgBtn'+i);if(b){b.classList.add('done');b.textContent='✓';}
+    sndMgOk();vibe(30);
+    if(agState.done[0]&&agState.done[1]&&agState.done[2]){
+      agWin();
+    }
+  } else {
+    agFail();
+  }
+}
+function agWin(){
+  if(!agState||agState.gameOver)return;
+  agState.gameOver=true;agState.pausing=true;
+  var res=document.getElementById('amgResult');if(res){res.textContent='✓ Раствор готов';res.className='mg-result ok';}
+  sndMgWin();vibe(50);
+  var st=agState;var idx=st.idx;
+  setTimeout(function(){
+    if(agState!==st)return;
+    agClose();
+    _acidGraceUntil=Date.now()+3000;
+    actuallyStartAcid(idx);
+  },700);
+}
+function agFail(){
+  if(!agState||agState.gameOver)return;
+  agState.gameOver=true;agState.pausing=true;
+  for(var i=0;i<3;i++){
+    var fl=document.getElementById('amgFlask'+i);if(fl)fl.classList.add('fail');
+  }
+  var res=document.getElementById('amgResult');if(res){res.textContent='✕ Промах — попробуй снова';res.className='mg-result fail';}
+  sndMgFail();vibe(60);
+  var st=agState;
+  setTimeout(function(){
+    if(agState!==st)return;
+    agClose();
+  },800);
+}
+function agClose(){
+  agActive=false;
+  if(agState&&agState.raf){cancelAnimationFrame(agState.raf);agState.raf=0;}
+  document.getElementById('acidMgOverlay').classList.remove('show');
+  agState=null;
+}
+
+// ==== ПЕЧЬ: мини-игра ====
+var fgActive=false,fgState=null;
+function openFireMiniGame(idx){
+  fgState={
+    idx:idx,
+    zonePos:30+Math.random()*40,
+    zoneDir:Math.random()<0.5?1:-1,
+    zoneHalf:9,
+    zoneSpeed:35+Math.random()*20,
+    runnerPos:50,
+    runnerSpeed:55,
+    success:0,
+    failMs:0,
+    holdLeft:false,
+    holdRight:false,
+    raf:0,
+    lastTs:0,
+    gameOver:false
+  };
+  var res=document.getElementById('fmgResult');if(res){res.textContent='';res.className='mg-result';}
+  updateFireMiniGameVisual();
+  fgActive=true;
+  document.getElementById('fireMgOverlay').classList.add('show');
+  fgState.lastTs=performance.now();
+  fgState.raf=requestAnimationFrame(fgLoop);
+}
+function updateFireMiniGameVisual(){
+  var zEl=document.getElementById('fmgZone');
+  if(zEl){zEl.style.left=(fgState.zonePos-fgState.zoneHalf)+'%';zEl.style.width=(fgState.zoneHalf*2)+'%';}
+  var rEl=document.getElementById('fmgRunner');
+  if(rEl)rEl.style.left=fgState.runnerPos+'%';
+  var pEl=document.getElementById('fmgProgress');
+  if(pEl)pEl.style.width=fgState.success+'%';
+}
+function fgLoop(ts){
+  if(!fgActive||!fgState)return;
+  if(!fgState.lastTs)fgState.lastTs=ts;
+  var dt=(ts-fgState.lastTs)/1000;fgState.lastTs=ts;
+  if(dt>0.1)dt=0.1;
+  if(fgState.gameOver){fgState.raf=requestAnimationFrame(fgLoop);return;}
+  fgState.zonePos+=fgState.zoneDir*fgState.zoneSpeed*dt;
+  if(fgState.zonePos>=100-fgState.zoneHalf){fgState.zonePos=100-fgState.zoneHalf;fgState.zoneDir=-1;}
+  if(fgState.zonePos<=fgState.zoneHalf){fgState.zonePos=fgState.zoneHalf;fgState.zoneDir=1;}
+  if(fgState.holdLeft&&!fgState.holdRight){
+    fgState.runnerPos-=fgState.runnerSpeed*dt;
+  } else if(fgState.holdRight&&!fgState.holdLeft){
+    fgState.runnerPos+=fgState.runnerSpeed*dt;
+  }
+  if(fgState.runnerPos<0)fgState.runnerPos=0;
+  if(fgState.runnerPos>100)fgState.runnerPos=100;
+  var inZone=Math.abs(fgState.runnerPos-fgState.zonePos)<=fgState.zoneHalf;
+  if(inZone){
+    fgState.success+=dt*(100/3);
+    if(fgState.success>100)fgState.success=100;
+  } else {
+    fgState.success-=dt*(100/1);
+    if(fgState.success<0)fgState.success=0;
+    fgState.failMs+=dt*1000;
+    if(fgState.failMs>=5000){fgFail();}
+  }
+  if(fgState.success>=100){fgWin();return;}
+  updateFireMiniGameVisual();
+  if(!fgState.gameOver)fgState.raf=requestAnimationFrame(fgLoop);
+}
+function fgWin(){
+  if(!fgState||fgState.gameOver)return;
+  fgState.gameOver=true;
+  var res=document.getElementById('fmgResult');if(res){res.textContent='✓ Готово';res.className='mg-result ok';}
+  sndMgWin();vibe(50);
+  var st=fgState;var idx=st.idx;
+  setTimeout(function(){
+    if(fgState!==st)return;
+    fgClose();
+    _fireGraceUntil=Date.now()+3000;
+    actuallyStartFurnace(idx);
+  },700);
+}
+function fgFail(){
+  if(!fgState||fgState.gameOver)return;
+  fgState.gameOver=true;
+  var res=document.getElementById('fmgResult');if(res){res.textContent='✕ Прогар — попробуй снова';res.className='mg-result fail';}
+  sndMgFail();vibe(60);
+  var st=fgState;
+  setTimeout(function(){
+    if(fgState!==st)return;
+    fgClose();
+  },800);
+}
+function fgClose(){
+  fgActive=false;
+  if(fgState&&fgState.raf){cancelAnimationFrame(fgState.raf);fgState.raf=0;}
+  document.getElementById('fireMgOverlay').classList.remove('show');
+  fgState=null;
+}
+
+// ==== НАСТОЯЩИЕ ЗАПУСКИ ====
+function actuallyStartAcid(idx){
  var bath=s.acid[idx];if(!bath||bath.active)return;
  var gv=junkGoldValueUnlocked();if(gv<=0){sndDeny();vibe(30);return;}
  var freeCount=0;for(var i=0;i<s.acid.length;i++)if(!s.acid[i].active)freeCount++;
@@ -970,7 +1264,27 @@ function startAcid(idx){
  bath.active=true;bath.progress=0;bath.duration=acidDuration();
  startAcidLoop();sndStartProcess('acid');vibe(20);saveGame();
 }
-function startFurnace(idx){var f=s.fire[idx];if(!f||f.active)return;if(s.solution<=0){sndDeny();vibe(30);return;}var freeCount=0;for(var i=0;i<s.fire.length;i++)if(!s.fire[i].active)freeCount++;if(freeCount<=0)return;var fraction=1/freeCount,taken=s.solution*fraction;if(taken<=0)return;s.solution-=taken;f.yieldAmt=taken*fireEffEffective();f.active=true;f.progress=0;f.duration=fireDuration();startFireLoop();vibe(20);saveGame();}
+function startAcid(idx){
+ var bath=s.acid[idx];if(!bath||bath.active)return;
+ var gv=junkGoldValueUnlocked();if(gv<=0){sndDeny();vibe(30);return;}
+ var freeCount=0;for(var i=0;i<s.acid.length;i++)if(!s.acid[i].active)freeCount++;
+ if(freeCount<=0)return;
+ if(Date.now()<_acidGraceUntil){actuallyStartAcid(idx);return;}
+ openAcidMiniGame(idx);
+}
+function actuallyStartFurnace(idx){
+ var f=s.fire[idx];if(!f||f.active)return;if(s.solution<=0){sndDeny();vibe(30);return;}
+ var freeCount=0;for(var i=0;i<s.fire.length;i++)if(!s.fire[i].active)freeCount++;if(freeCount<=0)return;
+ var fraction=1/freeCount,taken=s.solution*fraction;if(taken<=0)return;
+ s.solution-=taken;f.yieldAmt=taken*fireEffEffective();f.active=true;f.progress=0;f.duration=fireDuration();
+ startFireLoop();vibe(20);saveGame();
+}
+function startFurnace(idx){
+ var f=s.fire[idx];if(!f||f.active)return;if(s.solution<=0){sndDeny();vibe(30);return;}
+ var freeCount=0;for(var i=0;i<s.fire.length;i++)if(!s.fire[i].active)freeCount++;if(freeCount<=0)return;
+ if(Date.now()<_fireGraceUntil){actuallyStartFurnace(idx);return;}
+ openFireMiniGame(idx);
+}
 function sellIngots(){if(s.ingots<=0.0005){sndDeny();vibe(30);return;}openPriceGame();}
 
 var pgActive=false,pgPos=0,pgDir=1,pgLastTs=0,pgZoneCenter=50,pgZoneHalf=5,pgSpeed=1.3,pgRafId=0,pgResultTimer=null,pgSecondChanceUsed=false;
@@ -1039,7 +1353,7 @@ function craftAmulet(id){
 function equipAmulet(id){if(!s.amulets[id])return;s.equippedAmulet=id;updateBloom();sndBuy();vibe(25);saveGame();}
 function unequipAmulet(){s.equippedAmulet=null;updateBloom();sndToggle();vibe(15);saveGame();}
 
-function resetAll(){p=makePrest();for(var li=0;li<LOCATIONS.length;li++){p.autoDig[LOCATIONS[li].key]=false;p.autoTimers[LOCATIONS[li].key]=0;}var keepSettings=s&&s.settings?s.settings:{sound:true,vibe:true,music:false};s=makeState();s.settings=keepSettings;try{localStorage.removeItem(SAVE_KEY_A);localStorage.removeItem(SAVE_KEY_B);for(var oi=0;oi<OLD_KEYS.length;oi++)localStorage.removeItem(OLD_KEYS[oi]);}catch(e){}lastSaveTs=0;stopAcidLoop();stopFireLoop();cancelAllPress();currentDigLabel=DIG_LABELS[0];window._revealedAmulet=null;_sigs={inv:null,acidinv:null,loc:null,regen:null,auto:null,amulet:null,craft:null};updateBloom();switchTab('dig');}
+function resetAll(){p=makePrest();for(var li=0;li<LOCATIONS.length;li++){p.autoDig[LOCATIONS[li].key]=false;p.autoTimers[LOCATIONS[li].key]=0;}var keepSettings=s&&s.settings?s.settings:{sound:true,vibe:true,music:false};s=makeState();s.settings=keepSettings;try{localStorage.removeItem(SAVE_KEY_A);localStorage.removeItem(SAVE_KEY_B);for(var oi=0;oi<OLD_KEYS.length;oi++)localStorage.removeItem(OLD_KEYS[oi]);}catch(e){}lastSaveTs=0;stopAcidLoop();stopFireLoop();cancelAllPress();currentDigLabel=DIG_LABELS[0];window._revealedAmulet=null;_acidGraceUntil=0;_fireGraceUntil=0;_sigs={inv:null,acidinv:null,loc:null,regen:null,auto:null,amulet:null,craft:null};updateBloom();switchTab('dig');}
 function doPrestige(){
  if(isMaxPrestige()){sndDeny();vibe(40);flashToast('Престиж '+MAX_PRESTIGE_LEVEL+' — максимум');return;}
  var thr=prestigeThreshold();
@@ -1210,6 +1524,94 @@ function applyDev(action){var parts=action.split(':');var type=parts[0];if(type=
   });
 })();
 
+// ==== Обработчики мини-игр ====
+function initMiniGames(){
+  for(var i=0;i<3;i++){
+    (function(idx){
+      var btn=document.getElementById('amgBtn'+idx);
+      if(!btn)return;
+      if(window.PointerEvent){
+        btn.addEventListener('pointerdown',function(e){
+          try{e.preventDefault();btn.setPointerCapture(e.pointerId);}catch(er){}
+          if(!agActive)return;
+          agStartPour(idx);
+        });
+        btn.addEventListener('pointerup',function(e){
+          try{e.preventDefault();}catch(er){}
+          if(!agActive)return;
+          agStopPour(idx);
+        });
+        btn.addEventListener('pointercancel',function(e){
+          if(!agActive)return;
+          agStopPour(idx);
+        });
+      } else {
+        btn.addEventListener('touchstart',function(e){
+          try{e.preventDefault();}catch(er){}
+          if(!agActive)return;
+          agStartPour(idx);
+        },{passive:false});
+        btn.addEventListener('touchend',function(e){
+          try{e.preventDefault();}catch(er){}
+          if(!agActive)return;
+          agStopPour(idx);
+        },{passive:false});
+        btn.addEventListener('touchcancel',function(e){
+          if(!agActive)return;
+          agStopPour(idx);
+        });
+      }
+    })(i);
+  }
+  function attachHold(btnEl, which){
+    if(!btnEl)return;
+    if(window.PointerEvent){
+      btnEl.addEventListener('pointerdown',function(e){
+        try{e.preventDefault();btnEl.setPointerCapture(e.pointerId);}catch(er){}
+        if(!fgActive||!fgState||fgState.gameOver)return;
+        if(which==='right'){fgState.holdRight=true;fgState.runnerPos+=2;}
+        else{fgState.holdLeft=true;fgState.runnerPos-=2;}
+        if(fgState.runnerPos<0)fgState.runnerPos=0;
+        if(fgState.runnerPos>100)fgState.runnerPos=100;
+        vibe(8);
+      });
+      btnEl.addEventListener('pointerup',function(e){
+        try{e.preventDefault();}catch(er){}
+        if(!fgActive||!fgState)return;
+        if(which==='right')fgState.holdRight=false;
+        else fgState.holdLeft=false;
+      });
+      btnEl.addEventListener('pointercancel',function(e){
+        if(!fgActive||!fgState)return;
+        if(which==='right')fgState.holdRight=false;
+        else fgState.holdLeft=false;
+      });
+    } else {
+      btnEl.addEventListener('touchstart',function(e){
+        try{e.preventDefault();}catch(er){}
+        if(!fgActive||!fgState||fgState.gameOver)return;
+        if(which==='right'){fgState.holdRight=true;fgState.runnerPos+=2;}
+        else{fgState.holdLeft=true;fgState.runnerPos-=2;}
+        if(fgState.runnerPos<0)fgState.runnerPos=0;
+        if(fgState.runnerPos>100)fgState.runnerPos=100;
+      },{passive:false});
+      btnEl.addEventListener('touchend',function(e){
+        try{e.preventDefault();}catch(e){}
+        if(!fgActive||!fgState)return;
+        if(which==='right')fgState.holdRight=false;
+        else fgState.holdLeft=false;
+      },{passive:false});
+      btnEl.addEventListener('touchcancel',function(e){
+        if(!fgActive||!fgState)return;
+        if(which==='right')fgState.holdRight=false;
+        else fgState.holdLeft=false;
+      });
+    }
+  }
+  attachHold(document.getElementById('fmgPlus'),'right');
+  attachHold(document.getElementById('fmgMinus'),'left');
+}
+
 var currentScreen='menu';
 function showScreen(name){currentScreen=name;var screens=document.querySelectorAll('.screen');for(var i=0;i<screens.length;i++)screens[i].classList.remove('active');if(name==='menu'){document.getElementById('menuScreen').classList.add('active');}else if(name==='game'){document.getElementById('gameScreen').classList.add('active');var gs=document.getElementById('gameScreen');var activeTab='dig';var ats=document.querySelectorAll('.tab-section.active');if(ats.length)activeTab=ats[0].getAttribute('data-tab');if(activeTab==='dig')gs.classList.add('dig-lock');else gs.classList.remove('dig-lock');}window.scrollTo(0,0);}
 function updateMenu(){var btn=document.getElementById('btnContinue'),info=document.getElementById('saveInfo');if(hasSave()){btn.style.display='';var t=lastSaveTs?new Date(lastSaveTs):null;if(t){info.textContent='Сохранение от '+t.getDate()+'.'+('0'+(t.getMonth()+1)).slice(-2)+' '+('0'+t.getHours()).slice(-2)+':'+('0'+t.getMinutes()).slice(-2);}else info.textContent='';}else{btn.style.display='none';info.textContent='';}}
@@ -1284,8 +1686,8 @@ function renderInventory(){
  }
 }
 function renderAcidInventory(){var box=document.getElementById('acidInvList');if(!box)return;box.innerHTML='';var any=false;for(var i=0;i<CATALOG_ORDER.length;i++){var k=CATALOG_ORDER[i],c=CATALOG[k],cnt=s.junk[k],au=cnt*c.gold;var locked=!!s.locked[k];var div=document.createElement('div');div.className='inv-line'+(cnt===0?' dim':'')+(locked?' locked':'');div.setAttribute('data-act','lock');div.setAttribute('data-key',k);div.innerHTML='<span class="il-lock">🔒</span><span class="il-ic">'+c.icon+'</span><span class="il-name" title="'+c.name+'">'+c.name+'</span><span class="il-cnt">'+cnt+' шт</span><span class="il-au">'+fmt(au,3)+' г</span>';box.appendChild(div);if(cnt>0)any=true;}if(!any)box.innerHTML='<div class="empty-note">Склад пуст — иди покопайся в мусорке</div>';var hdr=document.getElementById('acidStockAu');if(hdr)hdr.textContent=fmt(junkGoldValue(),3)+' г Au';}
-function renderAcidStages(){var box=document.getElementById('acidStages');if(!box)return;var html='',freeCount=0,jv=junkGoldValueUnlocked();for(var j=0;j<s.acid.length;j++)if(!s.acid[j].active)freeCount++;for(var i=0;i<s.acid.length;i++){var b=s.acid[i],label=s.acid.length>1?'Ванна #'+(i+1):'Процесс';var status,btnTxt='',btnDis='',btnCls='',prog=0;if(b.active){prog=b.progress/b.duration*100;status=fmt(b.yieldAmt,2)+' г Au';btnTxt='Растворяется...';btnDis='disabled';}else{status=fmt(s.solution,2)+' л раствора';if(jv<=0){btnTxt='Нечего растворять';btnDis='disabled';}else{var frac=freeCount>1?1/freeCount:1;btnTxt='Растворить ~'+fmt(jv*frac*acidEffEffective(),2)+' г Au';btnCls=' ready';}}var activeCls=b.active?' active':'';html+='<div class="stage"><div class="stage-icon ic-acid'+activeCls+'">🧪</div><div class="stage-body"><div class="stage-top"><span>'+label+'</span><b>'+status+'</b></div><div class="bar"><div class="bar-fill acid" style="width:'+prog+'%"></div></div><button class="stage-btn'+btnCls+'" data-act="acid-start" data-idx="'+i+'" '+btnDis+'>'+btnTxt+'</button></div></div>';}box.innerHTML=html;}
-function renderFireStages(){var box=document.getElementById('fireStages');if(!box)return;var html='',freeCount=0;for(var j=0;j<s.fire.length;j++)if(!s.fire[j].active)freeCount++;for(var i=0;i<s.fire.length;i++){var f=s.fire[i],label=s.fire.length>1?'Печь #'+(i+1):'Процесс';var status,btnTxt='',btnDis='',btnCls='',prog=0;if(f.active){prog=f.progress/f.duration*100;status=fmt(f.yieldAmt,3)+' г слитков';btnTxt='Плавится...';btnDis='disabled';}else{status=fmt(s.solution,2)+' л раствора';if(s.solution<=0){btnTxt='Нет раствора';btnDis='disabled';}else{var frac=freeCount>1?1/freeCount:1;btnTxt='Выпарить ~'+fmt(s.solution*frac*fireEffEffective(),3)+' г';btnCls=' ready';}}var activeCls=f.active?' active':'';html+='<div class="stage"><div class="stage-icon ic-fire'+activeCls+'">🔥</div><div class="stage-body"><div class="stage-top"><span>'+label+'</span><b>'+status+'</b></div><div class="bar"><div class="bar-fill fire" style="width:'+prog+'%"></div></div><button class="stage-btn'+btnCls+'" data-act="fire-start" data-idx="'+i+'" '+btnDis+'>'+btnTxt+'</button></div></div>';}box.innerHTML=html;}
+function renderAcidStages(){var box=document.getElementById('acidStages');if(!box)return;var html='',freeCount=0,jv=junkGoldValueUnlocked();for(var j=0;j<s.acid.length;j++)if(!s.acid[j].active)freeCount++;for(var i=0;i<s.acid.length;i++){var b=s.acid[i],label=s.acid.length>1?'Ванна #'+(i+1):'Процесс';var status,btnTxt='',btnDis='',btnCls='',prog=0;if(b.active){prog=b.progress/b.duration*100;status=fmt(b.yieldAmt,2)+' г Au';btnTxt='Растворяется...';btnDis='disabled';}else{status=fmt(s.solution,2)+' л раствора';if(jv<=0){btnTxt='Нечего растворять';btnDis='disabled';}else{var frac=freeCount>1?1/freeCount:1;btnTxt='▶ Растворить ~'+fmt(jv*frac*acidEffEffective(),2)+' г Au';btnCls=' ready';}}var activeCls=b.active?' active':'';html+='<div class="stage"><div class="stage-icon ic-acid'+activeCls+'">🧪</div><div class="stage-body"><div class="stage-top"><span>'+label+'</span><b>'+status+'</b></div><div class="bar"><div class="bar-fill acid" style="width:'+prog+'%"></div></div><button class="stage-btn'+btnCls+'" data-act="acid-start" data-idx="'+i+'" '+btnDis+'>'+btnTxt+'</button></div></div>';}box.innerHTML=html;}
+function renderFireStages(){var box=document.getElementById('fireStages');if(!box)return;var html='',freeCount=0;for(var j=0;j<s.fire.length;j++)if(!s.fire[j].active)freeCount++;for(var i=0;i<s.fire.length;i++){var f=s.fire[i],label=s.fire.length>1?'Печь #'+(i+1):'Процесс';var status,btnTxt='',btnDis='',btnCls='',prog=0;if(f.active){prog=f.progress/f.duration*100;status=fmt(f.yieldAmt,3)+' г слитков';btnTxt='Плавится...';btnDis='disabled';}else{status=fmt(s.solution,2)+' л раствора';if(s.solution<=0){btnTxt='Нет раствора';btnDis='disabled';}else{var frac=freeCount>1?1/freeCount:1;btnTxt='▶ Выпарить ~'+fmt(s.solution*frac*fireEffEffective(),3)+' г';btnCls=' ready';}}var activeCls=f.active?' active':'';html+='<div class="stage"><div class="stage-icon ic-fire'+activeCls+'">🔥</div><div class="stage-body"><div class="stage-top"><span>'+label+'</span><b>'+status+'</b></div><div class="bar"><div class="bar-fill fire" style="width:'+prog+'%"></div></div><button class="stage-btn'+btnCls+'" data-act="fire-start" data-idx="'+i+'" '+btnDis+'>'+btnTxt+'</button></div></div>';}box.innerHTML=html;}
 function renderRegenList(){var c=document.getElementById('regenList');if(!c)return;var html='';for(var i=0;i<LOCATIONS.length;i++){var def=LOCATIONS[i],ls=locState(def.key);if(!ls.unlocked)continue;var curIv=locRegenIv(def,ls)/1000,nextIv=(def.regenBase/(1+Math.min(ls.regenLv+1,MAX_REGEN)*0.28))/1000;var cost=regenCostFor(def,ls);var maxed=ls.regenLv>=MAX_REGEN;var dis=(maxed||s.cash<cost)?'disabled':'';var btnTxt=maxed?'✓ макс':(fmt(cost)+' ₽');var btnCls='upg-btn'+(maxed?' owned':'');html+='<div class="upg"><div><div class="upg-name">'+def.icon+' '+def.name+'</div><div class="upg-desc">точка пополняется: '+curIv.toFixed(1)+'с → '+nextIv.toFixed(1)+'с на одну штуку (уровень '+ls.regenLv+'/'+MAX_REGEN+')</div></div><button class="'+btnCls+'" id="b-regen:'+def.key+'" type="button" '+dis+'>'+btnTxt+'</button></div>';}if(!html)html='<div class="upg-desc" style="padding:4px 0;">разблокируй точку, чтобы качать её скорость</div>';c.innerHTML=html;}
 function renderAutoDigList(){var c=document.getElementById('autoDigList');if(!c)return;var html='';for(var i=0;i<LOCATIONS.length;i++){var def=LOCATIONS[i];if(!locState(def.key).unlocked)continue;var owned=p.autoDig[def.key]===true;var cost=AUTO_DIG_COST[def.key]||0;var desc=owned?'куплен — копает сам':'покупка один раз — работяга копает в этой точке без остановки';var dis=(owned||s.cash<cost)?'disabled':'';var btnTxt=owned?'✓ куплен':(fmt(cost)+' ₽');var btnCls='upg-btn'+(owned?' owned':'');html+='<div class="upg"><div><div class="upg-name">'+def.icon+' '+def.name+'</div><div class="upg-desc">'+desc+'</div></div><button class="'+btnCls+'" id="b-auto:'+def.key+'" type="button" '+dis+'>'+btnTxt+'</button></div>';}if(!html)html='<div class="upg-desc" style="padding:4px 0;">разблокируй точку, чтобы нанять работягу</div>';c.innerHTML=html;}
 function renderCraftStatus(){
@@ -1426,7 +1828,6 @@ function renderAmuletHeader(){
  if(plate){plate.style.borderColor='rgba(255,255,255,0.10)';plate.style.background='rgba(255,255,255,0.04)';}
 }
 function setText(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
-function setDis(id,v){var e=document.getElementById(id);if(e)e.disabled=v;}
 function setBtnMax(id, maxed, cost, canBuy){
  var el=document.getElementById(id);if(!el)return;
  if(maxed){el.textContent='✓ макс';el.disabled=true;el.className='upg-btn owned';}
@@ -1590,6 +1991,8 @@ var ACTION_BTN={digBtn:scavenge,sellBtn:sellIngots};
 
 function handleDown(e){
  try{initAudio();if(audioCtx&&audioCtx.state==='suspended'){try{audioCtx.resume();}catch(er){}}}catch(er){}
+ // Игнорируем при открытых мини-играх (у них свои обработчики)
+ if(agActive||fgActive)return;
  if(window._revealedAmulet){
   var tOut=e.target,inside=false;
   while(tOut&&tOut!==document){
@@ -1628,6 +2031,7 @@ function processTap(target){
   return;
  }
  if(pgActive){var tt=target;while(tt&&tt!==document){if(tt.id==='pgStop'){pgStopPressed();return;}tt=tt.parentNode;}return;}
+ if(agActive||fgActive)return;
  var t=target;
  while(t&&t!==document){
   if(t.id==='ocClaim'){hideOfflineOverlay();sndOfflineClaim();vibe(40);bumpCash();return;}
@@ -1692,7 +2096,7 @@ function boot(){
  lastSaveTs=0;
  try{for(var oi=0;oi<OLD_KEYS.length;oi++)localStorage.removeItem(OLD_KEYS[oi]);}catch(e){}
  try{var a=readSlot(SAVE_KEY_A),b=readSlot(SAVE_KEY_B);var best;if(a&&b)best=(a.ts>=b.ts)?a:b;else best=a||b;if(best&&best.ts)lastSaveTs=best.ts;}catch(e){}
- ensureSettings();initHaptic();updateMenu();showScreen('menu');requestAnimationFrame(loop);
+ ensureSettings();initHaptic();initMiniGames();updateMenu();showScreen('menu');requestAnimationFrame(loop);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);
 else boot();

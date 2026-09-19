@@ -66,26 +66,24 @@ body{
 .menu-save-info{text-align:center;font-size:11.5px;color:var(--text-dim);margin-top:4px;margin-bottom:12px;min-height:16px;}
 #gameScreen{padding:8px 14px calc(96px + env(safe-area-inset-bottom));}
 .wrap{max-width:480px;margin:0 auto;}
-header{position:sticky;top:0;z-index:100;background:rgba(14,18,10,0.72);backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);display:flex;align-items:center;padding:10px 14px;border:none;margin:0 -14px 8px;box-shadow:0 12px 24px -12px rgba(0,0,0,0.9);gap:8px;}
-.hdr-money{display:flex;flex-direction:row;align-items:stretch;gap:8px;flex:1 1 0;min-width:0;}
-header.has-prestige .hdr-money{flex-direction:column;gap:6px;flex:1 1 0;}
-.hdr-right{display:flex;flex-direction:column;gap:6px;align-items:stretch;min-width:0;flex:1 1 0;justify-content:center;}
-.hdr-plate{display:flex;align-items:baseline;justify-content:center;border-radius:var(--r-sm);padding:8px 12px;min-width:0;white-space:nowrap;font-family:ui-monospace,monospace;font-weight:700;line-height:1;gap:4px;}
-.hdr-plate small{color:var(--text-dim);font-weight:400;font-size:11px;line-height:1;}
-.hdr-plate-cash{background:linear-gradient(180deg,rgba(201,162,39,0.16),rgba(201,162,39,0.06));color:var(--gold-bright);flex:1;box-shadow:0 0 18px rgba(201,162,39,0.18);}
+header{position:sticky;top:0;z-index:100;background:rgba(14,18,10,0.72);backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);display:flex;align-items:stretch;padding:10px 14px;border:none;margin:0 -14px 8px;box-shadow:0 12px 24px -12px rgba(0,0,0,0.9);gap:8px;}
+.hdr-money{display:flex;flex-direction:row;gap:6px;flex:1 1 0;min-width:0;}
+header.has-prestige .hdr-money{flex-direction:column;gap:6px;}
+.hdr-right{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1 1 0;}
+.hdr-plate{display:flex;align-items:center;justify-content:center;border-radius:var(--r-sm);padding:0 10px;min-height:44px;min-width:0;font-family:ui-monospace,monospace;font-weight:700;line-height:1;gap:4px;overflow:hidden;flex:1;}
+.hdr-plate small{color:var(--text-dim);font-weight:400;font-size:11px;line-height:1;flex-shrink:0;}
+.hdr-plate-cash{background:linear-gradient(180deg,rgba(201,162,39,0.16),rgba(201,162,39,0.06));color:var(--gold-bright);box-shadow:0 0 18px rgba(201,162,39,0.18);}
 .hdr-plate-cash span:first-child{font-size:18px;font-weight:800;}
-header.has-prestige .hdr-plate-cash{flex:0 0 auto;}
-.hdr-plate-ingot{background:linear-gradient(180deg,rgba(168,214,74,0.15),rgba(168,214,74,0.05));color:var(--acid-bright);flex:1;box-shadow:0 0 18px rgba(168,214,74,0.18);}
+.hdr-plate-ingot{background:linear-gradient(180deg,rgba(168,214,74,0.15),rgba(168,214,74,0.05));color:var(--acid-bright);box-shadow:0 0 18px rgba(168,214,74,0.18);}
 .hdr-plate-ingot span:first-child{font-size:16px;font-weight:800;}
-header.has-prestige .hdr-plate-ingot{flex:0 0 auto;}
-.hdr-plate-prest{background:linear-gradient(180deg,rgba(192,132,252,0.18),rgba(192,132,252,0.06));color:var(--prest-bright);flex-direction:column;align-items:flex-start;gap:2px;padding:7px 12px;box-shadow:0 0 20px rgba(192,132,252,0.22);}
-.hdr-plate-amulet{background:linear-gradient(180deg,rgba(255,255,255,0.07),rgba(255,255,255,0.02));color:var(--text);flex-direction:row;align-items:center;gap:6px;padding:7px 12px;justify-content:flex-start;max-width:100%;box-shadow:0 0 14px rgba(255,255,255,0.06);}
+.hdr-plate-prest{background:linear-gradient(180deg,rgba(192,132,252,0.18),rgba(192,132,252,0.06));color:var(--prest-bright);flex-direction:column;justify-content:center;align-items:center;gap:2px;box-shadow:0 0 20px rgba(192,132,252,0.22);}
+.hdr-plate-amulet{background:linear-gradient(180deg,rgba(255,255,255,0.07),rgba(255,255,255,0.02));color:var(--text);flex-direction:row;gap:6px;justify-content:center;box-shadow:0 0 14px rgba(255,255,255,0.06);}
 .hdr-plate-amulet .dot{font-size:13px;flex-shrink:0;line-height:1;color:#8a916e;}
 #amuletName{font-size:11.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);min-width:0;}
 .hdr-cash.bump{transform:scale(1.12);color:#f0c94a;}
-.hdr-prest-line{display:flex;align-items:baseline;gap:4px;font-size:13.5px;font-weight:700;color:var(--prest-bright);line-height:1.15;}
+.hdr-prest-line{display:flex;align-items:baseline;gap:4px;font-size:14px;font-weight:700;color:var(--prest-bright);line-height:1.15;}
 .hdr-prest-line small{color:var(--text-dim);font-weight:400;font-size:10px;}
-.gear-btn{background:rgba(255,255,255,0.05);border:none;width:36px;height:36px;border-radius:50%;color:var(--text-dim);font-size:15px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 2px 8px rgba(0,0,0,0.4);}
+.gear-btn{background:rgba(255,255,255,0.05);border:none;width:36px;height:36px;border-radius:50%;color:var(--text-dim);font-size:15px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 2px 8px rgba(0,0,0,0.4);align-self:center;}
 .gear-btn:active{background:var(--panel-2);color:var(--text);}
 .panel{background:var(--panel);backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%);border:none;border-radius:var(--r-lg);padding:14px;margin-bottom:10px;position:relative;box-shadow:0 8px 24px rgba(0,0,0,0.45),inset 0 1px 0 rgba(220,235,180,0.06);overflow:hidden;animation:panelIn 0.42s cubic-bezier(0.22,0.61,0.36,1);}
 @keyframes panelIn{0%{opacity:0;transform:translateY(14px);}100%{opacity:1;transform:translateY(0);}}
@@ -94,9 +92,9 @@ header.has-prestige .hdr-plate-ingot{flex:0 0 auto;}
 .panel-title b{color:var(--gold-bright);font-family:ui-monospace,monospace;font-weight:700;font-size:13px;text-shadow:0 0 10px rgba(201,162,39,0.35);}
 .tab-section{display:none;}
 .tab-section.active{display:block;}
-.loc-viewport{overflow:hidden;padding:14px 12px;margin:-14px -12px -6px -12px;}
+.loc-viewport{overflow:hidden;padding:14px 0;margin:-14px 0 -6px 0;}
 .loc-track{display:flex;transition:transform 0.36s cubic-bezier(0.22,0.61,0.36,1);will-change:transform;}
-.loc-slide{flex:0 0 100%;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;min-width:0;}
+.loc-slide{flex:0 0 100%;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;min-width:0;padding:0 8px;}
 .loc-card{background:linear-gradient(180deg,rgba(48,58,38,0.55),rgba(28,36,22,0.70));border:none;border-radius:var(--r-md);padding:8px 8px 7px;cursor:pointer;touch-action:manipulation;min-width:0;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.32);transition:transform 0.15s,box-shadow 0.25s,background 0.25s;}
 .loc-card:active{transform:scale(0.98);}
 .loc-card.active{background:linear-gradient(180deg,rgba(120,155,55,0.35),rgba(60,82,30,0.55));box-shadow:inset 0 0 22px rgba(168,214,74,0.35),0 0 18px rgba(168,214,74,0.40),0 4px 12px rgba(0,0,0,0.4);}
@@ -122,7 +120,7 @@ header.has-prestige .hdr-plate-ingot{flex:0 0 auto;}
 @keyframes shakeBtn{0%,100%{transform:translateX(0);}20%{transform:translateX(-6px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}
 .dig-fill{position:absolute;left:0;top:0;bottom:0;background:rgba(0,0,0,0.30);width:0%;pointer-events:none;border-radius:var(--r-sm) 0 0 var(--r-sm);}
 .dig-label{position:relative;z-index:1;pointer-events:none;}
-.toast{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(0.95);background:linear-gradient(180deg,rgba(36,44,28,0.96),rgba(20,26,16,0.98));border:none;padding:11px 18px;border-radius:var(--r-md);font-size:13.5px;font-weight:600;color:var(--gold);text-align:center;pointer-events:none;z-index:9990;white-space:nowrap;max-width:92%;opacity:0;transition:opacity 0.20s,transform 0.20s;box-shadow:0 12px 32px rgba(0,0,0,0.7);}
+.toast{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(0.95);background:linear-gradient(180deg,rgba(36,44,28,0.96),rgba(20,26,16,0.98));border:none;padding:10px 16px;border-radius:var(--r-md);font-size:12.5px;font-weight:600;color:var(--gold);text-align:center;pointer-events:none;z-index:9990;white-space:normal;word-break:break-word;max-width:68%;opacity:0;transition:opacity 0.20s,transform 0.20s;box-shadow:0 12px 32px rgba(0,0,0,0.7);line-height:1.3;}
 .toast.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
 .toast.t-jk{color:#8a916e;}
 .toast.t-cm{color:#dfe4c8;}
@@ -295,12 +293,7 @@ header.has-prestige .hdr-plate-ingot{flex:0 0 auto;}
 .forge-lock-badge{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:44px;pointer-events:none;z-index:6;filter:drop-shadow(0 4px 10px rgba(0,0,0,0.95));}
 .forge-unlocked .forge-lock-badge{display:none;}
 .forge-locked .forge-lock-badge{display:block;}
-.locked-amulets{position:relative;border-radius:var(--r-md);overflow:hidden;}
-.locked-amulets .locked-blur{filter:blur(3px);pointer-events:none;user-select:none;}
-.locked-amulets .locked-overlay{position:absolute;inset:0;background:rgba(10,14,8,0.6);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;z-index:5;}
-.locked-amulets .locked-overlay .big-lock{font-size:64px;filter:drop-shadow(0 4px 14px rgba(0,0,0,0.9));}
-.locked-amulets .locked-overlay .lock-label{font-size:11.5px;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;font-weight:800;}
-.amulet-row{display:flex;align-items:flex-start;gap:12px;padding:14px;background:linear-gradient(180deg,rgba(44,54,36,0.55),rgba(24,32,18,0.68));border:none;border-radius:var(--r-md);position:relative;overflow:hidden;transition:transform 0.25s ease-out;touch-action:pan-y;will-change:transform;box-shadow:0 3px 10px rgba(0,0,0,0.28);}
+.amulet-row{display:flex;align-items:flex-start;gap:12px;padding:14px;background:linear-gradient(180deg,#2c3620,#1a2310);border:none;border-radius:var(--r-md);position:relative;overflow:hidden;transition:transform 0.25s ease-out;touch-action:pan-y;will-change:transform;box-shadow:0 3px 10px rgba(0,0,0,0.28);}
 .amulet-row.swiping{transition:none;}
 .amulet-row .am-icon{width:42px;height:42px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;background:rgba(255,255,255,0.06);}
 .amulet-row .am-body{flex:1;min-width:0;}
@@ -317,8 +310,8 @@ header.has-prestige .hdr-plate-ingot{flex:0 0 auto;}
 .amulet-row .am-btn.unequip{color:var(--rust-bright);}
 .amulet-row .am-btn:disabled{background:rgba(24,28,20,0.75);color:#a5a584;opacity:1;}
 .amulet-row .am-time-to-craft{font-size:10px;color:var(--text-dim);margin-top:3px;font-family:ui-monospace,monospace;text-align:right;font-weight:600;}
-.amulet-trash{position:absolute;top:0;right:0;bottom:0;width:78px;background:linear-gradient(180deg,#d44a4a,#b52e2e);display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;border-radius:0 var(--r-md) var(--r-md) 0;cursor:pointer;touch-action:manipulation;}
-.amulet-row-wrap{position:relative;margin-bottom:10px;border-radius:var(--r-md);overflow:hidden;}
+.amulet-trash{position:absolute;top:0;right:0;bottom:0;width:78px;background:linear-gradient(180deg,#d44a4a,#b52e2e);display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;border-radius:0 var(--r-md) var(--r-md) 0;cursor:pointer;touch-action:manipulation;z-index:0;}
+.amulet-row-wrap{position:relative;margin-bottom:10px;border-radius:var(--r-md);overflow:hidden;background:#1a2310;}
 .craft-status{padding:14px;background:linear-gradient(180deg,rgba(44,54,36,0.60),rgba(24,32,18,0.75));border:none;border-radius:var(--r-md);margin-bottom:10px;font-size:12.5px;box-shadow:0 0 18px rgba(168,214,74,0.15);}
 .craft-status .cs-line{display:flex;justify-content:space-between;font-size:12px;color:var(--text-dim);margin-bottom:6px;align-items:baseline;gap:8px;}
 .craft-status .cs-line b{color:var(--acid-bright);font-weight:700;font-size:12.5px;}
@@ -390,12 +383,11 @@ header.has-prestige .hdr-plate-ingot{flex:0 0 auto;}
 .fmg-btn.fmg-minus{background:linear-gradient(180deg,rgba(109,196,232,0.18),rgba(45,93,115,0.35));color:var(--offline);}
 .fmg-btn.fmg-plus{background:linear-gradient(180deg,rgba(232,120,74,0.20),rgba(140,60,30,0.40));color:#f0a04a;}
 @media (max-width:380px){
-  .hdr-plate{padding:7px 9px;}
-  .hdr-plate-cash span:first-child{font-size:16px;}
-  .hdr-plate-ingot span:first-child{font-size:14px;}
+  .hdr-plate{min-height:40px;padding:0 8px;}
+  .hdr-plate-cash span:first-child{font-size:15px;}
+  .hdr-plate-ingot span:first-child{font-size:13.5px;}
   .gear-btn{width:32px;height:32px;}
-  .hdr-plate-prest{padding:5px 9px;}
-  .hdr-plate-amulet{padding:5px 9px;}
+  .hdr-prest-line{font-size:12.5px;}
   #amuletName{font-size:10.5px;}
 }
 </style>
@@ -1273,7 +1265,7 @@ function updateCraftStatus(){var box=document.getElementById('craftStatusBox');i
 function renderAmuletList(){
  if(window._amuletDragging)return;
  var box=document.getElementById('amuletList');if(!box)return;box.innerHTML='';
- if(!s.forgeUnlocked){var lockWrap=document.createElement('div');lockWrap.className='locked-amulets';var blurred=document.createElement('div');blurred.className='locked-blur';for(var bi=0;bi<3;bi++){var bl=document.createElement('div');bl.className='amulet-row';bl.style.marginBottom='8px';bl.innerHTML='<div class="am-icon" style="background:rgba(255,255,255,0.06);">?</div><div class="am-body"><p class="am-name">???</p><div class="am-effect">???</div></div>';blurred.appendChild(bl);}lockWrap.appendChild(blurred);var lockOv=document.createElement('div');lockOv.className='locked-overlay';lockOv.innerHTML='<div class="big-lock">🔒</div><div class="lock-label">Закрыто</div>';lockWrap.appendChild(lockOv);box.appendChild(lockWrap);return;}
+ if(!s.forgeUnlocked){box.innerHTML='<div class="empty-note" style="padding:24px 8px;font-size:13px;line-height:1.5;font-style:normal;"><div style="font-size:44px;margin-bottom:10px;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.9));">🔒</div>Откроется после первого престижа</div>';return;}
  var busy=forgeSlotsBusy();
  for(var i=0;i<AMULETS.length;i++){
   var a=AMULETS[i];var owned=!!s.amulets[a.key];var equipped=s.equippedAmulet===a.key;var rec=getRecipeAmulet(a.key);var canCraft=!owned&&canCraftAmulet(a.key);
@@ -1308,7 +1300,13 @@ function render(){
  setText('prestLvl',p.level);setText('prestPts',p.points);renderAmuletHeader();
  var pa=document.getElementById('prog-acid');if(pa){var tp=0,td=0;for(var i=0;i<s.acid.length;i++){var b=s.acid[i];if(b.active){tp+=b.progress;td+=b.duration;}}pa.style.width=td>0?(tp/td*100)+'%':'0%';}
  var pf=document.getElementById('prog-fire');if(pf){var tp2=0,td2=0;for(var i=0;i<s.fire.length;i++){var f2=s.fire[i];if(f2.active){tp2+=f2.progress;td2+=f2.duration;}}pf.style.width=td2>0?(tp2/td2*100)+'%':'0%';}
- if(currentTab==='forge'){var ff=document.getElementById('forgeFrame');if(ff){if(s.forgeUnlocked){ff.classList.remove('forge-locked');ff.classList.add('forge-unlocked');}else{ff.classList.add('forge-locked');ff.classList.remove('forge-unlocked');}}var fimg=document.querySelector('.forge-blacksmith img');if(fimg){var want=s.forgeUnlocked?'kuznec.png':'kuznec-locked.png';if(fimg.getAttribute('src')!==want)fimg.setAttribute('src',want);}var tf=document.getElementById('tabForge');if(tf){var tfi=tf.querySelector('.tab-ic'),tfl=tf.querySelector('.tab-lbl');if(tfi){var badgeInIc=tfi.querySelector('.tab-badge');tfi.textContent=s.forgeUnlocked?'⚒️':'🔒';if(badgeInIc)tfi.appendChild(badgeInIc);}if(tfl){tfl.textContent=s.forgeUnlocked?'Кузнец':'';}}var ftitle=document.getElementById('forgePanelTitle');if(ftitle)ftitle.style.display=s.forgeUnlocked?'':'none';var fw=document.getElementById('forgeAccordionWrap');if(fw)fw.style.display=s.forgeUnlocked?'':'none';var sg=sigAmulet();if(sg!==_sigs.amulet){_sigs.amulet=sg;renderAmuletList();}updateCraftStatus();}
+ var tf=document.getElementById('tabForge');
+ if(tf){var tfi=tf.querySelector('.tab-ic'),tfl=tf.querySelector('.tab-lbl');
+  if(tfi){var badgeInIc=tfi.querySelector('.tab-badge');tfi.textContent=s.forgeUnlocked?'⚒️':'🔒';if(badgeInIc)tfi.appendChild(badgeInIc);}
+  if(tfl){tfl.textContent=s.forgeUnlocked?'Кузнец':'';}}
+ var ftitle=document.getElementById('forgePanelTitle');if(ftitle)ftitle.style.display=s.forgeUnlocked?'':'none';
+ var fw=document.getElementById('forgeAccordionWrap');if(fw)fw.style.display=s.forgeUnlocked?'':'none';
+ if(currentTab==='forge'){var ff=document.getElementById('forgeFrame');if(ff){if(s.forgeUnlocked){ff.classList.remove('forge-locked');ff.classList.add('forge-unlocked');}else{ff.classList.add('forge-locked');ff.classList.remove('forge-unlocked');}}var fimg=document.querySelector('.forge-blacksmith img');if(fimg){var want=s.forgeUnlocked?'kuznec.png':'kuznec-locked.png';if(fimg.getAttribute('src')!==want)fimg.setAttribute('src',want);}var sg=sigAmulet();if(sg!==_sigs.amulet){_sigs.amulet=sg;renderAmuletList();}updateCraftStatus();}
  if(currentTab==='dig'){var sgL=sigLocs();if(sgL!==_sigs.loc){_sigs.loc=sgL;renderLocations();}var sgI=sigJunk();if(sgI!==_sigs.inv){_sigs.inv=sgI;renderInventory();}var ls=locState(s.activeLoc),def=locDef(s.activeLoc);var digBtn=document.getElementById('digBtn');if(digBtn){var digFill=document.getElementById('digFill'),digLabel=document.getElementById('digLabel');digFill.style.background='rgba(0,0,0,0.30)';if(ls.stock<=0){digBtn.disabled=true;digFill.style.width='0%';var iv=locRegenIv(def,ls);var left=Math.max(0,iv-ls.regenTimer);digLabel.textContent=def.name+': пусто, ~'+Math.ceil(left/1000)+'с';}else if(totalJunk()>=capMax()){digBtn.disabled=true;digFill.style.width='100%';digFill.style.background='rgba(143,179,57,0.45)';digLabel.textContent='Склад забит — переработай лом';}else if(s.scavCd>0){digBtn.disabled=false;digFill.style.width=(100-s.scavCd/scavCdMax()*100)+'%';digLabel.textContent=currentDigLabel;}else{digBtn.disabled=false;digFill.style.width='0%';digLabel.textContent='Порыться: '+def.name;}}setText('capTxt',totalJunk()+' / '+capMax()+' на складе');var cf=document.getElementById('capFill');if(cf)cf.style.width=Math.min(100,totalJunk()/capMax()*100)+'%';}
  if(currentTab==='acid'){var sgA=sigJunkLocked();if(sgA!==_sigs.acidinv){_sigs.acidinv=sgA;renderAcidInventory();}updateAcidStages();}
  if(currentTab==='fire'){updateFireStages();var pe=document.getElementById('priceTxt');if(pe){var mult=priceMultiplier();pe.innerHTML='<span style="color:var(--gold);">🎯 '+fmt(Math.round(PRICE_MIN*mult))+' – '+fmt(Math.round(PRICE_MAX*mult))+' ₽</span>';}var sb=document.getElementById('sellBtn');if(sb){sb.disabled=s.ingots<=0.0005;if(s.ingots<=0.0005)sb.textContent='Нет слитков на продажу';else sb.textContent='🎯 Продать '+fmt(s.ingots,3)+' г (стоп-игра)';}}

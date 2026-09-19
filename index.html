@@ -109,17 +109,17 @@ header.has-prestige .hdr-plate-ingot{flex:0 0 auto;}
 .loc-auto-txt{font-size:10px;color:var(--prest-bright);margin-top:2px;font-family:ui-monospace,monospace;font-weight:600;text-shadow:0 0 8px rgba(192,132,252,0.55);}
 .loc-unlock{font-size:11px;margin-top:6px;color:var(--gold-bright);font-family:ui-monospace,monospace;font-weight:700;text-shadow:0 0 8px rgba(201,162,39,0.4);}
 .loc-empty{color:var(--rust);}
-.loc-nav{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px;position:relative;}
+.loc-nav{display:flex;justify-content:space-between;align-items:center;gap:10px;position:relative;}
 .loc-nav-btn{background:linear-gradient(180deg,rgba(60,72,48,0.55),rgba(30,38,24,0.75));border:none;color:var(--text);padding:9px 20px;border-radius:var(--r-sm);font-size:17px;font-weight:700;font-family:inherit;cursor:pointer;touch-action:manipulation;line-height:1;box-shadow:0 4px 10px rgba(0,0,0,0.32);}
 .loc-nav-btn:disabled{opacity:0.3;}
 .loc-nav-btn:active:not(:disabled){background:linear-gradient(180deg,rgba(168,214,74,0.35),rgba(100,140,40,0.55));color:var(--acid-bright);box-shadow:0 0 18px rgba(168,214,74,0.45);}
 .loc-nav-info{font-size:12.5px;color:var(--text-dim);font-family:ui-monospace,monospace;font-weight:600;}
-.dig-btn{width:100%;padding:20px;background:linear-gradient(180deg,var(--rust-bright) 0%,var(--rust) 55%,#6e8a2c 100%);color:#0d1207;border:none;border-radius:var(--r-md);font-size:17px;font-weight:800;cursor:pointer;position:relative;overflow:hidden;touch-action:none;letter-spacing:0.4px;box-shadow:0 12px 32px rgba(143,179,57,0.35),inset 0 1px 0 rgba(255,255,255,0.30);transition:transform 0.08s;}
+.dig-btn{width:100%;padding:13px 16px;background:linear-gradient(180deg,var(--rust-bright) 0%,var(--rust) 55%,#6e8a2c 100%);color:#0d1207;border:none;border-radius:var(--r-sm);font-size:15px;font-weight:800;cursor:pointer;position:relative;overflow:hidden;touch-action:none;letter-spacing:0.4px;box-shadow:0 6px 18px rgba(143,179,57,0.28),inset 0 1px 0 rgba(255,255,255,0.30);transition:transform 0.08s;}
 .dig-btn:active:not(:disabled){transform:scale(0.99);}
 .dig-btn:disabled{background:linear-gradient(180deg,rgba(70,80,50,0.65),rgba(40,48,30,0.80));color:#a0a888;text-shadow:none;}
 .dig-btn.shake{animation:shakeBtn 0.35s;}
 @keyframes shakeBtn{0%,100%{transform:translateX(0);}20%{transform:translateX(-6px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}
-.dig-fill{position:absolute;left:0;top:0;bottom:0;background:rgba(0,0,0,0.30);width:0%;pointer-events:none;border-radius:var(--r-md) 0 0 var(--r-md);}
+.dig-fill{position:absolute;left:0;top:0;bottom:0;background:rgba(0,0,0,0.30);width:0%;pointer-events:none;border-radius:var(--r-sm) 0 0 var(--r-sm);}
 .dig-label{position:relative;z-index:1;pointer-events:none;}
 .toast{position:absolute;left:50%;transform:translate(-50%,-50%) scale(0.95);background:linear-gradient(180deg,rgba(36,44,28,0.96),rgba(20,26,16,0.98));border:none;padding:11px 18px;border-radius:var(--r-md);font-size:13.5px;font-weight:600;color:var(--gold);text-align:center;pointer-events:none;z-index:30;white-space:nowrap;max-width:92%;opacity:0;transition:opacity 0.20s,transform 0.20s;top:42%;box-shadow:0 12px 32px rgba(0,0,0,0.7);}
 .toast.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
@@ -128,15 +128,15 @@ header.has-prestige .hdr-plate-ingot{flex:0 0 auto;}
 .toast.t-vl{color:#6dc4e8;font-weight:700;}
 .toast.t-rp{color:#c084fc;font-weight:700;}
 .toast.t-lg{color:#f0c94a;font-weight:800;text-shadow:0 0 10px rgba(240,201,74,0.6);}
-.inv-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px;align-content:start;}
-.inv-item{text-align:center;background:linear-gradient(180deg,rgba(44,54,36,0.55),rgba(24,32,18,0.70));border-radius:var(--r-sm);padding:10px 5px;border:none;transition:transform 0.15s;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;box-shadow:0 3px 8px rgba(0,0,0,0.28);}
-.inv-item .ic{font-size:18px;line-height:1;margin-bottom:5px;}
-.inv-item .n{font-family:ui-monospace,monospace;font-size:15px;font-weight:800;line-height:1;color:var(--text);}
-.inv-item .l{font-size:9.5px;color:var(--text-dim);line-height:1.15;margin-top:4px;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.inv-item .g{font-size:9.5px;color:var(--gold-dim);font-family:ui-monospace,monospace;margin-top:2px;line-height:1;font-weight:600;}
-.cap-bar{height:7px;background:rgba(10,14,8,0.85);border-radius:4px;margin-top:12px;overflow:hidden;box-shadow:inset 0 1px 3px rgba(0,0,0,0.6);}
+.inv-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px;align-content:start;}
+.inv-item{text-align:center;background:linear-gradient(180deg,rgba(44,54,36,0.55),rgba(24,32,18,0.70));border-radius:12px;padding:6px 3px;border:none;transition:transform 0.15s;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;box-shadow:0 3px 8px rgba(0,0,0,0.28);}
+.inv-item .ic{font-size:15px;line-height:1;margin-bottom:3px;}
+.inv-item .n{font-family:ui-monospace,monospace;font-size:13.5px;font-weight:800;line-height:1;color:var(--text);}
+.inv-item .l{font-size:8.5px;color:var(--text-dim);line-height:1.1;margin-top:3px;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.inv-item .g{font-size:8.5px;color:var(--gold-dim);font-family:ui-monospace,monospace;margin-top:2px;line-height:1;font-weight:600;}
+.cap-bar{height:7px;background:rgba(10,14,8,0.85);border-radius:4px;margin-top:10px;overflow:hidden;box-shadow:inset 0 1px 3px rgba(0,0,0,0.6);}
 .cap-fill{height:100%;background:linear-gradient(90deg,rgba(143,179,57,0.55),rgba(201,162,39,0.85),rgba(240,201,74,0.95));width:0%;box-shadow:0 0 12px rgba(201,162,39,0.55);transition:width 0.3s;border-radius:4px;}
-.cap-txt{font-size:12px;color:var(--text-dim);text-align:right;margin-top:6px;font-weight:600;font-family:ui-monospace,monospace;}
+.cap-txt{font-size:11.5px;color:var(--text-dim);text-align:right;margin-top:5px;font-weight:600;font-family:ui-monospace,monospace;}
 .stage{display:flex;gap:12px;align-items:center;margin-bottom:14px;}
 .stage:last-child{margin-bottom:0;}
 .stage-icon{width:46px;height:46px;border-radius:var(--r-sm);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:21px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.10),0 3px 10px rgba(0,0,0,0.35);}
@@ -170,14 +170,16 @@ header.has-prestige .hdr-plate-ingot{flex:0 0 auto;}
 .upg:last-child{border-bottom:none;}
 .upg-name{font-size:14.5px;font-weight:700;letter-spacing:0.1px;color:var(--text);line-height:1.2;}
 .upg-desc{font-size:11.5px;color:var(--text-dim);margin-top:5px;line-height:1.45;font-weight:400;}
-.upg-btn{flex-shrink:0;padding:11px 16px;border-radius:var(--r-sm);border:none;background:linear-gradient(180deg,rgba(50,60,40,0.55),rgba(28,36,22,0.75));color:var(--gold-bright);font-family:ui-monospace,monospace;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;touch-action:manipulation;box-shadow:0 4px 12px rgba(0,0,0,0.28);transition:transform 0.08s;}
+.upg-btn{flex-shrink:0;padding:11px 16px;border-radius:var(--r-sm);border:none;background:linear-gradient(180deg,rgba(168,214,74,0.45),rgba(96,128,42,0.62));color:#0d1408;font-family:ui-monospace,monospace;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap;touch-action:manipulation;box-shadow:0 4px 14px rgba(168,214,74,0.32),inset 0 1px 0 rgba(255,255,255,0.22);transition:transform 0.08s;}
 .upg-btn:active:not(:disabled){transform:scale(0.97);}
-.upg-btn:disabled{background:rgba(24,28,20,0.75);color:#a5a584;opacity:1;}
-.upg-btn.owned{color:var(--acid-bright);box-shadow:0 0 14px rgba(168,214,74,0.20);}
-.upg-btn.prest{color:var(--prest-bright);box-shadow:0 0 14px rgba(192,132,252,0.20);}
-.upg-btn.offline{color:var(--offline);box-shadow:0 0 14px rgba(109,196,232,0.20);}
+.upg-btn:disabled{background:rgba(24,28,20,0.75);color:#8a8a72;opacity:1;box-shadow:0 4px 12px rgba(0,0,0,0.28);}
+.upg-btn.owned{background:linear-gradient(180deg,rgba(60,80,40,0.45),rgba(30,40,20,0.65));color:var(--acid-bright);box-shadow:0 0 14px rgba(168,214,74,0.18);}
+.upg-btn.prest{background:linear-gradient(180deg,rgba(210,158,255,0.72),rgba(150,98,225,0.88));color:#1a0b2e;box-shadow:0 4px 14px rgba(192,132,252,0.42),inset 0 1px 0 rgba(255,255,255,0.28);}
+.upg-btn.prest.owned{background:linear-gradient(180deg,rgba(60,40,100,0.45),rgba(30,18,50,0.65));color:var(--prest-bright);box-shadow:0 0 14px rgba(192,132,252,0.18);}
+.upg-btn.offline{background:linear-gradient(180deg,rgba(150,215,242,0.72),rgba(66,146,182,0.88));color:#0a1c26;box-shadow:0 4px 14px rgba(109,196,232,0.40),inset 0 1px 0 rgba(255,255,255,0.28);}
+.upg-btn.offline.owned{background:linear-gradient(180deg,rgba(40,60,80,0.45),rgba(20,30,45,0.65));color:var(--offline);box-shadow:0 0 14px rgba(109,196,232,0.18);}
 .upg-btn.bought{animation:boughtFlash 0.4s;}
-@keyframes boughtFlash{0%{background:var(--panel-2);}40%{background:rgba(168,214,74,0.35);transform:scale(1.08);}100%{background:var(--panel-2);transform:scale(1);}}
+@keyframes boughtFlash{0%{background:var(--panel-2);}40%{background:rgba(168,214,74,0.55);transform:scale(1.08);}100%{background:var(--panel-2);transform:scale(1);}}
 .inv-list{display:flex;flex-direction:column;gap:8px;}
 .inv-line{display:flex;align-items:center;gap:10px;padding:12px;background:linear-gradient(180deg,rgba(44,54,36,0.55),rgba(24,32,18,0.68));border:none;border-radius:var(--r-sm);font-size:12px;cursor:pointer;touch-action:manipulation;position:relative;user-select:none;-webkit-user-select:none;box-shadow:0 3px 8px rgba(0,0,0,0.25);transition:background 0.2s;}
 .inv-line.dim{opacity:0.55;}
@@ -207,7 +209,7 @@ header.has-prestige .hdr-plate-ingot{flex:0 0 auto;}
 @keyframes prestFlash{0%{transform:scale(1);}30%{transform:scale(1.06);}100%{transform:scale(1);}}
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:200;display:flex;justify-content:space-around;align-items:flex-end;background:rgba(10,14,8,0.78);backdrop-filter:blur(22px) saturate(140%);-webkit-backdrop-filter:blur(22px) saturate(140%);border:none;padding:8px 6px calc(10px + env(safe-area-inset-bottom));box-shadow:0 -12px 30px -10px rgba(0,0,0,0.9);}
 .tab-btn{flex:1;min-width:0;background:transparent;border:none;color:var(--text-dim);font-family:inherit;font-size:11px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 2px;cursor:pointer;position:relative;border-radius:12px;transition:color 0.2s;}
-.tab-btn .tab-ic{font-size:22px;line-height:1;position:relative;}
+.tab-btn .tab-ic{font-size:22px;line-height:1;position:relative;display:inline-block;}
 .tab-btn .tab-lbl{font-size:11px;letter-spacing:0.3px;white-space:nowrap;min-height:12px;line-height:12px;}
 .tab-btn.active{color:var(--acid-bright);}
 .tab-btn.active .tab-ic{filter:drop-shadow(0 0 10px rgba(168,214,74,0.85));}
@@ -217,6 +219,8 @@ header.has-prestige .hdr-plate-ingot{flex:0 0 auto;}
 .tab-btn.center.active .tab-ic{background:linear-gradient(180deg,var(--acid-bright),var(--acid));box-shadow:0 6px 14px rgba(0,0,0,0.6),0 0 30px rgba(168,214,74,0.55),0 0 0 4px var(--bg);}
 .tab-prog{position:absolute;left:8px;right:8px;bottom:0;height:2px;background:transparent;border-radius:1px;overflow:hidden;}
 .tab-prog span{display:block;height:100%;width:0%;background:var(--acid);}
+.tab-badge{position:absolute;top:-4px;right:-10px;min-width:18px;height:18px;padding:0 4px;background:linear-gradient(180deg,var(--acid-bright),var(--acid));color:#0d1408;border-radius:50%;font-size:10.5px;font-weight:900;display:none;align-items:center;justify-content:center;line-height:1;font-family:ui-monospace,monospace;letter-spacing:-0.3px;box-shadow:0 0 12px rgba(168,214,74,0.85),0 1px 3px rgba(0,0,0,0.55),inset 0 1px 0 rgba(255,255,255,0.35);pointer-events:none;z-index:5;}
+.tab-badge.show{display:flex;}
 .acc-head{display:flex;justify-content:space-between;align-items:center;padding:16px 0;cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none;border-bottom:1px solid rgba(180,200,140,0.06);}
 .acc-head .acc-title{font-size:13px;color:var(--rust-bright);font-weight:800;letter-spacing:0.7px;text-transform:uppercase;text-shadow:0 0 12px rgba(168,214,74,0.30);}
 .acc-head.prest .acc-title{color:var(--prest-bright);text-shadow:0 0 12px rgba(192,132,252,0.35);}
@@ -557,8 +561,10 @@ header.has-prestige .hdr-plate-ingot{flex:0 0 auto;}
         <span class="loc-nav-info" id="locPageInfo">1 / 3</span>
         <button class="loc-nav-btn" id="locNext" type="button">→</button>
       </div>
-      <button class="dig-btn" id="digBtn" type="button"><div class="dig-fill" id="digFill"></div><span class="dig-label" id="digLabel">Порыться</span></button>
       <div class="toast" id="toast"></div>
+    </div>
+    <div class="panel">
+      <button class="dig-btn" id="digBtn" type="button"><div class="dig-fill" id="digFill"></div><span class="dig-label" id="digLabel">Порыться</span></button>
       <div class="cap-bar"><div class="cap-fill" id="capFill"></div></div>
       <div class="cap-txt" id="capTxt"></div>
       <div class="inv-row" id="invRow"></div>
@@ -671,11 +677,11 @@ header.has-prestige .hdr-plate-ingot{flex:0 0 auto;}
 </div>
 
 <nav class="tabbar">
-  <button class="tab-btn" data-tab="forge" type="button" id="tabForge"><span class="tab-ic">🔒</span><span class="tab-lbl"></span></button>
-  <button class="tab-btn" data-tab="fire" type="button"><span class="tab-ic">🔥</span><span class="tab-lbl">Печь</span><span class="tab-prog"><span id="prog-fire"></span></span></button>
+  <button class="tab-btn" data-tab="forge" type="button" id="tabForge"><span class="tab-ic">🔒<span class="tab-badge" id="badge-forge"></span></span><span class="tab-lbl"></span></button>
+  <button class="tab-btn" data-tab="fire" type="button"><span class="tab-ic">🔥<span class="tab-badge" id="badge-fire"></span></span><span class="tab-lbl">Печь</span><span class="tab-prog"><span id="prog-fire"></span></span></button>
   <button class="tab-btn center active" data-tab="dig" type="button"><span class="tab-ic">⛏️</span><span class="tab-lbl">Копать</span></button>
-  <button class="tab-btn" data-tab="acid" type="button"><span class="tab-ic">🧪</span><span class="tab-lbl">Кислота</span><span class="tab-prog"><span id="prog-acid"></span></span></button>
-  <button class="tab-btn" data-tab="upg" type="button"><span class="tab-ic">⬆️</span><span class="tab-lbl">Прокачка</span></button>
+  <button class="tab-btn" data-tab="acid" type="button"><span class="tab-ic">🧪<span class="tab-badge" id="badge-acid"></span></span><span class="tab-lbl">Кислота</span><span class="tab-prog"><span id="prog-acid"></span></span></button>
+  <button class="tab-btn" data-tab="upg" type="button"><span class="tab-ic">⬆️<span class="tab-badge" id="badge-upg"></span></span><span class="tab-lbl">Прокачка</span></button>
 </nav>
 </div>
 
@@ -761,7 +767,7 @@ var LOCATIONS=[
  {key:'institute',name:'Институтский склад',icon:'🎓',unlockCost:180000,maxStock:3,regenBase:34000,regenCost:24000,loot:[{k:'cpus',w:16},{k:'connect',w:14},{k:'goldPins',w:14},{k:'rare',w:26},{k:'gContacts',w:12},{k:'platinum',w:10},{k:'legend',w:20}]}
 ];
 function makePrest(){return{level:0,points:0,lv:{bonusBoost:0,startCash:0,locDiscount:0,acidII:0,fireII:0,capII:0},autoDig:{},autoTimers:{}};}
-function makeState(){return{cash:0,ingots:0,junk:{chips:0,phones:0,ram:0,rare:0,legend:0,platinum:0,caps:0,resist:0,trans:0,hdd:0,cpus:0,connect:0,gContacts:0,silverWire:0,brass:0,goldPins:0},locked:{chips:false,phones:false,ram:false,rare:false,legend:false,platinum:false,caps:false,resist:false,trans:false,hdd:false,cpus:false,connect:false,gContacts:false,silverWire:false,brass:false,goldPins:false},cap:15,scavCd:0,solution:0,acid:[{active:false,progress:0,duration:4200,yieldAmt:0}],fire:[{active:false,progress:0,duration:3400,yieldAmt:0}],activeLoc:'yard',locPage:0,invExpanded:false,accState:{eq:true,spd:false,luck:false,income:false,regen:false,auto:false,forge:false,pbonus:true,pupg2:false},locs:LOCATIONS.map(function(l){return{key:l.key,stock:l.maxStock,regenTimer:0,regenLv:0,unlocked:l.unlockCost===0};}),lv:{acid:1,fire:1,cap:1,hold:0,scavspd:0,acidspd:0,firespd:0,secondacid:0,secondfire:0,goodeye:0,luck:0,reputation:0,wideZone:0,offlineRate:0,offlineCap:0,autoSpeed:0,autoPenalty:0,forgeSpeed:0,forgeDiscount:0,forgeDuration:0,twoForges:0},cost:{acid:170,fire:170,cap:120,hold:1200,scavspd:495,acidspd:495,firespd:495,secondacid:3000,secondfire:5000,goodeye:500,luck:700,reputation:REPUTATION_BASE_COST,wideZone:WIDE_ZONE_BASE,offlineRate:OFFLINE_RATE_BASE_COST,offlineCap:OFFLINE_CAP_BASE_COST,autoSpeed:AUTO_SPEED_BASE_COST,autoPenalty:AUTO_PENALTY_BASE_COST,forgeSpeed:FORGE_SPEED_BASE,forgeDiscount:FORGE_DISCOUNT_BASE,forgeDuration:FORGE_DURATION_BASE,twoForges:TWO_FORGES_COST},stats:{junkTotal:0,ingotsTotal:0,earnedTotal:0,offlineTotal:0},settings:{sound:true,vibe:true,music:false},forgeUnlocked:false,amulets:{},equippedAmulet:null,forgeCrafts:[],lastSeenTs:Date.now()};}
+function makeState(){return{cash:0,ingots:0,junk:{chips:0,phones:0,ram:0,rare:0,legend:0,platinum:0,caps:0,resist:0,trans:0,hdd:0,cpus:0,connect:0,gContacts:0,silverWire:0,brass:0,goldPins:0},locked:{chips:false,phones:false,ram:false,rare:false,legend:false,platinum:false,caps:false,resist:false,trans:false,hdd:false,cpus:false,connect:false,gContacts:false,silverWire:false,brass:false,goldPins:false},cap:15,scavCd:0,solution:0,acid:[{active:false,progress:0,duration:4200,yieldAmt:0}],fire:[{active:false,progress:0,duration:3400,yieldAmt:0}],activeLoc:'yard',locPage:0,invExpanded:false,accState:{eq:true,spd:false,luck:false,income:false,regen:false,auto:false,forge:false,pbonus:true,pupg2:false},locs:LOCATIONS.map(function(l){return{key:l.key,stock:l.maxStock,regenTimer:0,regenLv:0,unlocked:l.unlockCost===0};}),lv:{acid:1,fire:1,cap:1,hold:0,scavspd:0,acidspd:0,firespd:0,secondacid:0,secondfire:0,goodeye:0,luck:0,reputation:0,wideZone:0,offlineRate:0,offlineCap:0,autoSpeed:0,autoPenalty:0,forgeSpeed:0,forgeDiscount:0,forgeDuration:0,twoForges:0},cost:{acid:170,fire:170,cap:120,hold:1200,scavspd:495,acidspd:495,firespd:495,secondacid:3000,secondfire:5000,goodeye:500,luck:700,reputation:REPUTATION_BASE_COST,wideZone:WIDE_ZONE_BASE,offlineRate:OFFLINE_RATE_BASE_COST,offlineCap:OFFLINE_CAP_BASE_COST,autoSpeed:AUTO_SPEED_BASE_COST,autoPenalty:AUTO_PENALTY_BASE_COST,forgeSpeed:FORGE_SPEED_BASE,forgeDiscount:FORGE_DISCOUNT_BASE,forgeDuration:FORGE_DURATION_BASE,twoForges:TWO_FORGES_COST},stats:{junkTotal:0,ingotsTotal:0,earnedTotal:0,offlineTotal:0},settings:{sound:true,vibe:true,music:false},forgeUnlocked:false,amulets:{},equippedAmulet:null,forgeCrafts:[],lastSeenTs:Date.now(),badgeSeen:{fire:-1,acid:-1,upg:-1,forge:-1}};}
 var p=makePrest();
 for(var li=0;li<LOCATIONS.length;li++){p.autoDig[LOCATIONS[li].key]=false;p.autoTimers[LOCATIONS[li].key]=0;}
 var s=makeState();
@@ -772,7 +778,7 @@ var _acidGraceUntil=0;
 var _fireGraceUntil=0;
 var currentTab='dig';
 var _sigs={inv:null,acidinv:null,loc:null,regen:null,auto:null,amulet:null,craft:null};
-function ensureSettings(){if(!s)return;if(!s.settings)s.settings={sound:true,vibe:true,music:false};if(typeof s.settings.sound==='undefined')s.settings.sound=true;if(typeof s.settings.vibe==='undefined')s.settings.vibe=true;if(typeof s.settings.music==='undefined')s.settings.music=false;}
+function ensureSettings(){if(!s)return;if(!s.settings)s.settings={sound:true,vibe:true,music:false};if(typeof s.settings.sound==='undefined')s.settings.sound=true;if(typeof s.settings.vibe==='undefined')s.settings.vibe=true;if(typeof s.settings.music==='undefined')s.settings.music=false;if(!s.badgeSeen)s.badgeSeen={fire:-1,acid:-1,upg:-1,forge:-1};}
 function locDef(k){for(var i=0;i<LOCATIONS.length;i++)if(LOCATIONS[i].key===k)return LOCATIONS[i];}
 function locState(k){for(var i=0;i<s.locs.length;i++)if(s.locs[i].key===k)return s.locs[i];}
 function locRegenIv(def,ls){return def.regenBase/(1+ls.regenLv*0.28);}
@@ -838,6 +844,50 @@ function sigLocs(){var r=s.activeLoc+'|'+s.locPage+'|'+p.lv.locDiscount+'|';for(
 function sigRegen(){var r='';for(var i=0;i<s.locs.length;i++){var l=s.locs[i];if(!l.unlocked)continue;r+=l.regenLv+'|';}return r;}
 function sigAuto(){var r='';for(var i=0;i<LOCATIONS.length;i++)r+=p.autoDig[LOCATIONS[i].key]?'1':'0';r+='|';for(var i=0;i<s.locs.length;i++)r+=s.locs[i].unlocked?'1':'0';return r;}
 function sigAmulet(){var r=(s.forgeUnlocked?'1':'0')+'|'+(s.equippedAmulet||'')+'|';for(var k in s.amulets)r+=k+'|';r+=s.forgeCrafts.length+'|';r+=sigJunk();r+='|'+(Date.now()>>16);return r;}
+function countBadgeFire(){if(s.solution<=0)return 0;var free=0;for(var i=0;i<s.fire.length;i++)if(!s.fire[i].active)free++;return free;}
+function countBadgeAcid(){if(junkGoldValueUnlocked()<=0)return 0;var free=0;for(var i=0;i<s.acid.length;i++)if(!s.acid[i].active)free++;return free;}
+function countBadgeUpg(){
+ var n=0;
+ if(s.cash>=s.cost.acid && s.lv.acid<MAX_ACID)n++;
+ if(s.cash>=s.cost.fire && s.lv.fire<MAX_FIRE)n++;
+ if(s.cash>=s.cost.cap && s.lv.cap<MAX_CAP)n++;
+ if(s.cash>=s.cost.hold && !s.lv.hold)n++;
+ if(s.cash>=s.cost.scavspd && s.lv.scavspd<MAX_SCAVSPD)n++;
+ if(s.cash>=s.cost.acidspd && s.lv.acidspd<MAX_ACIDSPD)n++;
+ if(s.cash>=s.cost.firespd && s.lv.firespd<MAX_FIRESPD)n++;
+ if(s.cash>=s.cost.secondacid && !s.lv.secondacid)n++;
+ if(s.cash>=s.cost.secondfire && !s.lv.secondfire)n++;
+ if(s.cash>=s.cost.goodeye && s.lv.goodeye<MAX_GOODEYE)n++;
+ if(s.cash>=s.cost.luck && s.lv.luck<MAX_LUCK)n++;
+ if(s.cash>=s.cost.reputation && s.lv.reputation<MAX_REPUTATION)n++;
+ if(s.cash>=s.cost.wideZone && s.lv.wideZone<MAX_WIDEZONE)n++;
+ if(s.cash>=s.cost.offlineRate && s.lv.offlineRate<MAX_OFFLINE_RATE)n++;
+ if(s.cash>=s.cost.offlineCap && s.lv.offlineCap<MAX_OFFLINE_CAP)n++;
+ if(s.cash>=s.cost.autoSpeed && s.lv.autoSpeed<MAX_AUTO_SPEED)n++;
+ if(s.cash>=s.cost.autoPenalty && s.lv.autoPenalty<MAX_AUTO_PENALTY)n++;
+ if(s.cash>=s.cost.forgeSpeed && s.lv.forgeSpeed<MAX_FORGE_SPEED)n++;
+ if(s.cash>=s.cost.forgeDiscount && s.lv.forgeDiscount<MAX_FORGE_DISCOUNT)n++;
+ if(s.cash>=s.cost.forgeDuration && s.lv.forgeDuration<MAX_FORGE_DURATION)n++;
+ if(s.cash>=s.cost.twoForges && !s.lv.twoForges)n++;
+ for(var i=0;i<s.locs.length;i++){var ls=s.locs[i];if(!ls.unlocked)continue;if(ls.regenLv>=MAX_REGEN)continue;var def=locDef(ls.key);if(def && s.cash>=regenCostFor(def,ls))n++;}
+ for(var i=0;i<LOCATIONS.length;i++){var d=LOCATIONS[i];if(!locState(d.key).unlocked)continue;if(p.autoDig[d.key])continue;var ac=AUTO_DIG_COST[d.key]||0;if(s.cash>=ac)n++;}
+ if(p.points>=(1+p.lv.bonusBoost) && p.lv.bonusBoost<MAX_BONUS_BOOST)n++;
+ if(p.points>=(2+p.lv.startCash*2) && p.lv.startCash<MAX_START_CASH)n++;
+ if(p.points>=(3+p.lv.locDiscount*3) && p.lv.locDiscount<MAX_LOC_DISCOUNT)n++;
+ if(p.points>=(2+p.lv.acidII*2) && p.lv.acidII<MAX_ACID_II)n++;
+ if(p.points>=(2+p.lv.fireII*2) && p.lv.fireII<MAX_FIRE_II)n++;
+ if(p.points>=(2+p.lv.capII*2) && p.lv.capII<MAX_CAP_II)n++;
+ return n;
+}
+function countBadgeForge(){if(!s.forgeUnlocked)return 0;if(forgeSlotsBusy())return 0;var n=0;for(var i=0;i<AMULETS.length;i++){var id=AMULETS[i].key;if(s.amulets[id])continue;var crafting=false;for(var j=0;j<s.forgeCrafts.length;j++)if(s.forgeCrafts[j].id===id){crafting=true;break;}if(crafting)continue;if(canCraftAmulet(id))n++;}return n;}
+function setBadge(id,count,tabKey){
+ var el=document.getElementById(id);if(!el)return;
+ if(!s.badgeSeen)s.badgeSeen={fire:-1,acid:-1,upg:-1,forge:-1};
+ var seen=s.badgeSeen[tabKey];if(typeof seen!=='number')seen=-1;
+ if(count>0 && count>seen){el.textContent=count>9?'9+':String(count);el.classList.add('show');}
+ else{el.classList.remove('show');}
+}
+function updateBadges(){setBadge('badge-fire',countBadgeFire(),'fire');setBadge('badge-acid',countBadgeAcid(),'acid');setBadge('badge-upg',countBadgeUpg(),'upg');setBadge('badge-forge',countBadgeForge(),'forge');}
 var audioCtx=null,audioBroken=false,activeLoops={};
 function initAudio(){if(audioCtx||audioBroken)return;try{var Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx){audioBroken=true;return;}audioCtx=new Ctx();}catch(e){audioBroken=true;audioCtx=null;}}
 function canPlay(){return audioCtx&&s&&s.settings&&s.settings.sound;}
@@ -1064,7 +1114,7 @@ function calcOfflinePerHour(){var totalGold=0;for(var i=0;i<LOCATIONS.length;i++
 function applyOfflineIncome(){if(!s.lastSeenTs){s.lastSeenTs=Date.now();return 0;}var elapsed=Date.now()-s.lastSeenTs;var elapsedSec=elapsed/1000;if(elapsedSec<OFFLINE_MIN_SEC){return 0;}var capHours=offlineCapHours();var elapsedHours=elapsedSec/3600;var countedHours=Math.min(elapsedHours,capHours);var perHour=calcOfflinePerHour();var ratePct=offlineRatePct()/100;var earned=Math.floor(perHour*countedHours*ratePct);s.lastSeenTs=Date.now();if(earned<=0)return 0;s.cash+=earned;s.stats.earnedTotal+=earned;s.stats.offlineTotal+=earned;return {earned:earned,elapsed:elapsedSec,hours:countedHours,cap:capHours,rate:offlineRatePct(),perHour:perHour};}
 function showOfflineOverlay(info){var el=document.getElementById('offlineOverlay');if(!el)return;var sec=Math.floor(info.elapsed);var h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60);var timeStr=h>0?(h+' ч '+m+' мин'):(m+' мин');document.getElementById('ocTime').textContent='Тебя не было: '+timeStr;document.getElementById('ocTotal').textContent='+'+fmt(info.earned)+' ₽';var note=document.getElementById('ocNote');if(note)note.textContent=OFFLINE_PHRASES[Math.floor(Math.random()*OFFLINE_PHRASES.length)];el.classList.add('show');}
 function hideOfflineOverlay(){var el=document.getElementById('offlineOverlay');if(!el)return;el.classList.remove('show');}
-function buildSaveData(){var jk={},lk={};for(var k in s.junk)jk[k]=s.junk[k];for(var k2 in s.locked)lk[k2]=s.locked[k2];return {p:{level:p.level,points:p.points,lv:{bonusBoost:p.lv.bonusBoost,startCash:p.lv.startCash,locDiscount:p.lv.locDiscount,acidII:p.lv.acidII,fireII:p.lv.fireII,capII:p.lv.capII},autoDig:p.autoDig,autoTimers:p.autoTimers},s:{cash:s.cash,ingots:s.ingots,junk:jk,locked:lk,cap:s.cap,scavCd:s.scavCd,solution:s.solution,acid:s.acid.map(function(x){return{active:x.active,progress:x.progress,duration:x.duration,yieldAmt:x.yieldAmt};}),fire:s.fire.map(function(x){return{active:x.active,progress:x.progress,duration:x.duration,yieldAmt:x.yieldAmt};}),activeLoc:s.activeLoc,locPage:s.locPage,invExpanded:s.invExpanded,accState:s.accState,locs:s.locs.map(function(x){return{key:x.key,stock:x.stock,regenTimer:x.regenTimer,regenLv:x.regenLv,unlocked:x.unlocked};}),lv:{acid:s.lv.acid,fire:s.lv.fire,cap:s.lv.cap,hold:s.lv.hold,scavspd:s.lv.scavspd,acidspd:s.lv.acidspd,firespd:s.lv.firespd,secondacid:s.lv.secondacid,secondfire:s.lv.secondfire,goodeye:s.lv.goodeye,luck:s.lv.luck,reputation:s.lv.reputation,wideZone:s.lv.wideZone,offlineRate:s.lv.offlineRate,offlineCap:s.lv.offlineCap,autoSpeed:s.lv.autoSpeed,autoPenalty:s.lv.autoPenalty,forgeSpeed:s.lv.forgeSpeed,forgeDiscount:s.lv.forgeDiscount,forgeDuration:s.lv.forgeDuration,twoForges:s.lv.twoForges},cost:{acid:s.cost.acid,fire:s.cost.fire,cap:s.cost.cap,hold:s.cost.hold,scavspd:s.cost.scavspd,acidspd:s.cost.acidspd,firespd:s.cost.firespd,secondacid:s.cost.secondacid,secondfire:s.cost.secondfire,goodeye:s.cost.goodeye,luck:s.cost.luck,reputation:s.cost.reputation,wideZone:s.cost.wideZone,offlineRate:s.cost.offlineRate,offlineCap:s.cost.offlineCap,autoSpeed:s.cost.autoSpeed,autoPenalty:s.cost.autoPenalty,forgeSpeed:s.cost.forgeSpeed,forgeDiscount:s.cost.forgeDiscount,forgeDuration:s.cost.forgeDuration,twoForges:s.cost.twoForges},stats:{junkTotal:s.stats.junkTotal,ingotsTotal:s.stats.ingotsTotal,earnedTotal:s.stats.earnedTotal,offlineTotal:s.stats.offlineTotal},settings:{sound:s.settings.sound,vibe:s.settings.vibe,music:s.settings.music},forgeUnlocked:s.forgeUnlocked,amulets:s.amulets,equippedAmulet:s.equippedAmulet,forgeCrafts:s.forgeCrafts,lastSeenTs:s.lastSeenTs},ts:Date.now(),ver:24};}
+function buildSaveData(){var jk={},lk={};for(var k in s.junk)jk[k]=s.junk[k];for(var k2 in s.locked)lk[k2]=s.locked[k2];return {p:{level:p.level,points:p.points,lv:{bonusBoost:p.lv.bonusBoost,startCash:p.lv.startCash,locDiscount:p.lv.locDiscount,acidII:p.lv.acidII,fireII:p.lv.fireII,capII:p.lv.capII},autoDig:p.autoDig,autoTimers:p.autoTimers},s:{cash:s.cash,ingots:s.ingots,junk:jk,locked:lk,cap:s.cap,scavCd:s.scavCd,solution:s.solution,acid:s.acid.map(function(x){return{active:x.active,progress:x.progress,duration:x.duration,yieldAmt:x.yieldAmt};}),fire:s.fire.map(function(x){return{active:x.active,progress:x.progress,duration:x.duration,yieldAmt:x.yieldAmt};}),activeLoc:s.activeLoc,locPage:s.locPage,invExpanded:s.invExpanded,accState:s.accState,locs:s.locs.map(function(x){return{key:x.key,stock:x.stock,regenTimer:x.regenTimer,regenLv:x.regenLv,unlocked:x.unlocked};}),lv:{acid:s.lv.acid,fire:s.lv.fire,cap:s.lv.cap,hold:s.lv.hold,scavspd:s.lv.scavspd,acidspd:s.lv.acidspd,firespd:s.lv.firespd,secondacid:s.lv.secondacid,secondfire:s.lv.secondfire,goodeye:s.lv.goodeye,luck:s.lv.luck,reputation:s.lv.reputation,wideZone:s.lv.wideZone,offlineRate:s.lv.offlineRate,offlineCap:s.lv.offlineCap,autoSpeed:s.lv.autoSpeed,autoPenalty:s.lv.autoPenalty,forgeSpeed:s.lv.forgeSpeed,forgeDiscount:s.lv.forgeDiscount,forgeDuration:s.lv.forgeDuration,twoForges:s.lv.twoForges},cost:{acid:s.cost.acid,fire:s.cost.fire,cap:s.cost.cap,hold:s.cost.hold,scavspd:s.cost.scavspd,acidspd:s.cost.acidspd,firespd:s.cost.firespd,secondacid:s.cost.secondacid,secondfire:s.cost.secondfire,goodeye:s.cost.goodeye,luck:s.cost.luck,reputation:s.cost.reputation,wideZone:s.cost.wideZone,offlineRate:s.cost.offlineRate,offlineCap:s.cost.offlineCap,autoSpeed:s.cost.autoSpeed,autoPenalty:s.cost.autoPenalty,forgeSpeed:s.cost.forgeSpeed,forgeDiscount:s.cost.forgeDiscount,forgeDuration:s.cost.forgeDuration,twoForges:s.cost.twoForges},stats:{junkTotal:s.stats.junkTotal,ingotsTotal:s.stats.ingotsTotal,earnedTotal:s.stats.earnedTotal,offlineTotal:s.stats.offlineTotal},settings:{sound:s.settings.sound,vibe:s.settings.vibe,music:s.settings.music},forgeUnlocked:s.forgeUnlocked,amulets:s.amulets,equippedAmulet:s.equippedAmulet,forgeCrafts:s.forgeCrafts,lastSeenTs:s.lastSeenTs,badgeSeen:s.badgeSeen},ts:Date.now(),ver:24};}
 function readSlot(key){try{var raw=localStorage.getItem(key);if(!raw)return null;var d=JSON.parse(raw);if(!d||!d.s||!d.p)return null;return d;}catch(e){return null;}}
 function saveGame(){try{s.lastSeenTs=Date.now();var data=buildSaveData();var a=readSlot(SAVE_KEY_A),b=readSlot(SAVE_KEY_B);var aTs=a?a.ts:0,bTs=b?b.ts:0;var targetKey=(aTs<=bTs)?SAVE_KEY_A:SAVE_KEY_B;localStorage.setItem(targetKey,JSON.stringify(data));lastSaveTs=data.ts;return true;}catch(e){return false;}}
 function hasSave(){try{if(localStorage.getItem(SAVE_KEY_A)||localStorage.getItem(SAVE_KEY_B))return true;return false;}catch(e){return false;}}
@@ -1096,6 +1146,7 @@ function applyLoad(data){
  if(data.s.forgeCrafts&&data.s.forgeCrafts.length)newS.forgeCrafts=data.s.forgeCrafts.slice();
  else if(data.s.forgeCraft)newS.forgeCrafts=[data.s.forgeCraft];
  newS.lastSeenTs=data.s.lastSeenTs||Date.now();
+ if(data.s.badgeSeen&&typeof data.s.badgeSeen==='object'){newS.badgeSeen={fire:(typeof data.s.badgeSeen.fire==='number'?data.s.badgeSeen.fire:-1),acid:(typeof data.s.badgeSeen.acid==='number'?data.s.badgeSeen.acid:-1),upg:(typeof data.s.badgeSeen.upg==='number'?data.s.badgeSeen.upg:-1),forge:(typeof data.s.badgeSeen.forge==='number'?data.s.badgeSeen.forge:-1)};}
  if(newP.level>MAX_PRESTIGE_LEVEL)newP.level=MAX_PRESTIGE_LEVEL;
  if(newS.lv.acid>MAX_ACID)newS.lv.acid=MAX_ACID;
  if(newS.lv.fire>MAX_FIRE)newS.lv.fire=MAX_FIRE;
@@ -1178,7 +1229,21 @@ function updateMenu(){var btn=document.getElementById('btnContinue'),info=docume
 function updateSettingsModal(){var el=document.getElementById('settingsSaveInfo');if(!el)return;if(hasSave()){var t=lastSaveTs?new Date(lastSaveTs):null;el.textContent=t?('последнее: '+('0'+t.getHours()).slice(-2)+':'+('0'+t.getMinutes()).slice(-2)):'есть';}else el.textContent='нет сохранения';try{var ts=document.getElementById('tglSound');if(ts)ts.checked=!!s.settings.sound;var tv=document.getElementById('tglVibe');if(tv)tv.checked=!!s.settings.vibe;var tm=document.getElementById('tglMusic');if(tm)tm.checked=!!s.settings.music;}catch(e){}}
 function openSettings(){updateSettingsModal();document.getElementById('settingsModal').classList.add('show');}
 function closeSettings(){document.getElementById('settingsModal').classList.remove('show');}
-function switchTab(name){window._revealedAmulet=null;currentTab=name;var secs=document.querySelectorAll('.tab-section');for(var i=0;i<secs.length;i++){if(secs[i].getAttribute('data-tab')===name)secs[i].classList.add('active');else secs[i].classList.remove('active');}var tbs=document.querySelectorAll('.tab-btn');for(var j=0;j<tbs.length;j++){if(tbs[j].getAttribute('data-tab')===name)tbs[j].classList.add('active');else tbs[j].classList.remove('active');}var gs=document.getElementById('gameScreen');if(gs){if(name==='dig')gs.classList.add('dig-lock');else gs.classList.remove('dig-lock');}_sigs={inv:null,acidinv:null,loc:null,regen:null,auto:null,amulet:null,craft:null};if(name==='upg'){applyAccState();}window.scrollTo(0,0);sndTab();vibe(8);}
+function switchTab(name){
+ window._revealedAmulet=null;currentTab=name;
+ var secs=document.querySelectorAll('.tab-section');for(var i=0;i<secs.length;i++){if(secs[i].getAttribute('data-tab')===name)secs[i].classList.add('active');else secs[i].classList.remove('active');}
+ var tbs=document.querySelectorAll('.tab-btn');for(var j=0;j<tbs.length;j++){if(tbs[j].getAttribute('data-tab')===name)tbs[j].classList.add('active');else tbs[j].classList.remove('active');}
+ var gs=document.getElementById('gameScreen');if(gs){if(name==='dig')gs.classList.add('dig-lock');else gs.classList.remove('dig-lock');}
+ _sigs={inv:null,acidinv:null,loc:null,regen:null,auto:null,amulet:null,craft:null};
+ if(name==='upg'){applyAccState();}
+ if(s.badgeSeen){
+   if(name==='fire')s.badgeSeen.fire=countBadgeFire();
+   else if(name==='acid')s.badgeSeen.acid=countBadgeAcid();
+   else if(name==='upg')s.badgeSeen.upg=countBadgeUpg();
+   else if(name==='forge')s.badgeSeen.forge=countBadgeForge();
+ }
+ window.scrollTo(0,0);sndTab();vibe(8);
+}
 function switchSub(name){var n=document.getElementById('subview-normal'),pr=document.getElementById('subview-prest');var bn=document.getElementById('subtab-normal'),bp=document.getElementById('subtab-prest');if(name==='prest'){n.style.display='none';pr.style.display='';bp.classList.add('active');bn.classList.remove('active');}else{n.style.display='';pr.style.display='none';bn.classList.add('active');bp.classList.remove('active');}window.scrollTo(0,0);sndTab();vibe(8);}
 function toggleAcc(key){s.accState[key]=!s.accState[key];if(s.accState[key])sndAccOpen();else sndAccClose();vibe(8);saveGame();var heads=document.querySelectorAll('.acc-head');for(var i=0;i<heads.length;i++){if(heads[i].getAttribute('data-acc')===key){if(s.accState[key])heads[i].classList.add('open');else heads[i].classList.remove('open');}}var bodies=document.querySelectorAll('.acc-body');for(var j=0;j<bodies.length;j++){if(bodies[j].getAttribute('data-accbody')===key){if(s.accState[key])bodies[j].classList.add('open');else bodies[j].classList.remove('open');}}}
 function applyAccState(){var heads=document.querySelectorAll('.acc-head');for(var i=0;i<heads.length;i++){var k=heads[i].getAttribute('data-acc');if(s.accState[k])heads[i].classList.add('open');else heads[i].classList.remove('open');}var bodies=document.querySelectorAll('.acc-body');for(var j=0;j<bodies.length;j++){var k2=bodies[j].getAttribute('data-accbody');if(s.accState[k2])bodies[j].classList.add('open');else bodies[j].classList.remove('open');}}
@@ -1228,7 +1293,7 @@ function render(){
  setText('prestLvl',p.level);setText('prestPts',p.points);renderAmuletHeader();
  var pa=document.getElementById('prog-acid');if(pa){var tp=0,td=0;for(var i=0;i<s.acid.length;i++){var b=s.acid[i];if(b.active){tp+=b.progress;td+=b.duration;}}pa.style.width=td>0?(tp/td*100)+'%':'0%';}
  var pf=document.getElementById('prog-fire');if(pf){var tp2=0,td2=0;for(var i=0;i<s.fire.length;i++){var f2=s.fire[i];if(f2.active){tp2+=f2.progress;td2+=f2.duration;}}pf.style.width=td2>0?(tp2/td2*100)+'%':'0%';}
- if(currentTab==='forge'){var ff=document.getElementById('forgeFrame');if(ff){if(s.forgeUnlocked){ff.classList.remove('forge-locked');ff.classList.add('forge-unlocked');}else{ff.classList.add('forge-locked');ff.classList.remove('forge-unlocked');}}var fimg=document.querySelector('.forge-blacksmith img');if(fimg){var want=s.forgeUnlocked?'kuznec.png':'kuznec-locked.png';if(fimg.getAttribute('src')!==want)fimg.setAttribute('src',want);}var tf=document.getElementById('tabForge');if(tf){var tfi=tf.querySelector('.tab-ic'),tfl=tf.querySelector('.tab-lbl');if(tfi)tfi.textContent=s.forgeUnlocked?'⚒️':'🔒';if(tfl){tfl.textContent=s.forgeUnlocked?'Кузнец':'';}}var ftitle=document.getElementById('forgePanelTitle');if(ftitle)ftitle.style.display=s.forgeUnlocked?'':'none';var fw=document.getElementById('forgeAccordionWrap');if(fw)fw.style.display=s.forgeUnlocked?'':'none';var sg=sigAmulet();if(sg!==_sigs.amulet){_sigs.amulet=sg;renderAmuletList();}renderCraftStatus();}
+ if(currentTab==='forge'){var ff=document.getElementById('forgeFrame');if(ff){if(s.forgeUnlocked){ff.classList.remove('forge-locked');ff.classList.add('forge-unlocked');}else{ff.classList.add('forge-locked');ff.classList.remove('forge-unlocked');}}var fimg=document.querySelector('.forge-blacksmith img');if(fimg){var want=s.forgeUnlocked?'kuznec.png':'kuznec-locked.png';if(fimg.getAttribute('src')!==want)fimg.setAttribute('src',want);}var tf=document.getElementById('tabForge');if(tf){var tfi=tf.querySelector('.tab-ic'),tfl=tf.querySelector('.tab-lbl');if(tfi){var badgeInIc=tfi.querySelector('.tab-badge');tfi.textContent=s.forgeUnlocked?'⚒️':'🔒';if(badgeInIc)tfi.appendChild(badgeInIc);}if(tfl){tfl.textContent=s.forgeUnlocked?'Кузнец':'';}}var ftitle=document.getElementById('forgePanelTitle');if(ftitle)ftitle.style.display=s.forgeUnlocked?'':'none';var fw=document.getElementById('forgeAccordionWrap');if(fw)fw.style.display=s.forgeUnlocked?'':'none';var sg=sigAmulet();if(sg!==_sigs.amulet){_sigs.amulet=sg;renderAmuletList();}renderCraftStatus();}
  if(currentTab==='dig'){var sgL=sigLocs();if(sgL!==_sigs.loc){_sigs.loc=sgL;renderLocations();}var sgI=sigJunk();if(sgI!==_sigs.inv){_sigs.inv=sgI;renderInventory();}var ls=locState(s.activeLoc),def=locDef(s.activeLoc);var digBtn=document.getElementById('digBtn');if(digBtn){var digFill=document.getElementById('digFill'),digLabel=document.getElementById('digLabel');digFill.style.background='rgba(0,0,0,0.30)';if(ls.stock<=0){digBtn.disabled=true;digFill.style.width='0%';var iv=locRegenIv(def,ls);var left=Math.max(0,iv-ls.regenTimer);digLabel.textContent=def.name+': пусто, ~'+Math.ceil(left/1000)+'с';}else if(totalJunk()>=capMax()){digBtn.disabled=true;digFill.style.width='100%';digFill.style.background='rgba(143,179,57,0.45)';digLabel.textContent='Склад забит — переработай лом';}else if(s.scavCd>0){digBtn.disabled=false;digFill.style.width=(100-s.scavCd/scavCdMax()*100)+'%';digLabel.textContent=currentDigLabel;}else{digBtn.disabled=false;digFill.style.width='0%';digLabel.textContent='Порыться: '+def.name;}}setText('capTxt',totalJunk()+' / '+capMax()+' на складе');var cf=document.getElementById('capFill');if(cf)cf.style.width=Math.min(100,totalJunk()/capMax()*100)+'%';}
  if(currentTab==='acid'){var sgA=sigJunkLocked();if(sgA!==_sigs.acidinv){_sigs.acidinv=sgA;renderAcidInventory();}renderAcidStages();}
  if(currentTab==='fire'){renderFireStages();var pe=document.getElementById('priceTxt');if(pe){var mult=priceMultiplier();pe.innerHTML='<span style="color:var(--gold);">🎯 '+fmt(Math.round(PRICE_MIN*mult))+' – '+fmt(Math.round(PRICE_MAX*mult))+' ₽</span>';}var sb=document.getElementById('sellBtn');if(sb){sb.disabled=s.ingots<=0.0005;if(s.ingots<=0.0005)sb.textContent='Нет слитков на продажу';else sb.textContent='🎯 Продать '+fmt(s.ingots,3)+' г (стоп-игра)';}}
@@ -1266,6 +1331,7 @@ function render(){
   var c5=2+p.lv.fireII*2;var bfi=document.getElementById('b-fireII');if(bfi){if(p.lv.fireII>=MAX_FIRE_II){bfi.textContent='✓ макс';bfi.disabled=true;bfi.className='upg-btn prest owned';}else{bfi.textContent=c5+' очк.';bfi.disabled=p.points<c5;bfi.className='upg-btn prest';}}var dfi=document.getElementById('d-fireII');if(dfi)dfi.textContent='доп. эффективность печи: +'+(p.lv.fireII*5)+'% → +'+((p.lv.fireII+1)*5)+'% (уровень '+p.lv.fireII+'/'+MAX_FIRE_II+')';
   var c6=2+p.lv.capII*2;var bci=document.getElementById('b-capII');if(bci){if(p.lv.capII>=MAX_CAP_II){bci.textContent='✓ макс';bci.disabled=true;bci.className='upg-btn prest owned';}else{bci.textContent=c6+' очк.';bci.disabled=p.points<c6;bci.className='upg-btn prest';}}var dci=document.getElementById('d-capII');if(dci)dci.textContent='доп. места на складе: +'+(p.lv.capII*2)+' → +'+((p.lv.capII+1)*2)+' (уровень '+p.lv.capII+'/'+MAX_CAP_II+')';
  }
+ updateBadges();
 }
 var pressActive=false,pressTarget=null,pressX=0,pressY=0,pressMoved=false,pressIsAction=false,tapTimer=null,holdStartTimer=null,holdRepeatTimer=null,actionFn=null;
 function cancelAllPress(){pressActive=false;if(tapTimer){clearTimeout(tapTimer);tapTimer=null;}if(holdStartTimer){clearTimeout(holdStartTimer);holdStartTimer=null;}if(holdRepeatTimer){clearInterval(holdRepeatTimer);holdRepeatTimer=null;}actionFn=null;pressTarget=null;pressMoved=false;pressIsAction=false;}

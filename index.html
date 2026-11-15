@@ -8,7 +8,44 @@
 <meta name="apple-mobile-web-app-title" content="ДРАГМЕТ">
 <meta name="theme-color" content="#0a0e08">
 <title>ДРАГМЕТ</title>
-<link rel="stylesheet" href="css/style.css">
+<!-- Тёмный фон сразу, даже если стили ещё не загрузились (иначе на телефоне белый экран) -->
+<style>html,body{background:#0a0e08;color:#e8eede;}</style>
+<!--
+  Аварийная диагностика запуска. Если игра не запустилась за 5 секунд или при загрузке
+  была ошибка — показывает на экране текст с причиной (что не загрузилось, на какой строке ошибка).
+  Нужна, потому что на телефоне не видно консоли разработчика.
+-->
+<script>
+(function () {
+  var problems = [];
+  function show(title) {
+    var box = document.getElementById('bootDiag');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'bootDiag';
+      box.style.cssText = 'position:fixed;left:10px;right:10px;top:40px;z-index:999999;background:#5a1515;color:#ffd6d6;padding:12px 14px;border-radius:12px;font:12px/1.45 ui-monospace,monospace;white-space:pre-wrap;word-break:break-word;';
+      (document.body || document.documentElement).appendChild(box);
+    }
+    box.textContent = title + '\n\n' + problems.join('\n') + '\n\n' + navigator.userAgent;
+  }
+  window.addEventListener('error', function (e) {
+    var t = e.target;
+    if (t && t !== window && (t.src || t.href)) problems.push('Не загрузился файл: ' + (t.src || t.href));
+    else problems.push('Ошибка: ' + e.message + ' (' + (e.filename || '?') + ':' + e.lineno + ':' + e.colno + ')');
+    if (window.__dmBooted) return;
+    if (document.body) show('ДРАГМЕТ: ошибка при запуске');
+  }, true);
+  window.addEventListener('unhandledrejection', function (e) {
+    problems.push('Ошибка: ' + (e.reason && e.reason.message || e.reason));
+  });
+  window.addEventListener('load', function () {
+    setTimeout(function () {
+      if (!window.__dmBooted) show('ДРАГМЕТ: игра не запустилась. Пришли скрин этого текста.');
+    }, 5000);
+  });
+})();
+</script>
+<link rel="stylesheet" href="css/style.css?v=0.10.2">
 </head>
 <body>
 
@@ -270,18 +307,18 @@
   Порядок важен: каждый следующий файл пользуется тем, что объявлено в предыдущих.
   dev.js — DEV-консоль для тестов. Перед релизом просто удалить эту строку (и сам файл).
 -->
-<script src="js/util.js"></script>
-<script src="js/data.js"></script>
-<script src="js/formulas.js"></script>
-<script src="js/state.js"></script>
-<script src="js/upgrades.js"></script>
-<script src="js/save.js"></script>
-<script src="js/audio.js"></script>
-<script src="js/game.js"></script>
-<script src="js/minigames.js"></script>
-<script src="js/ui.js"></script>
-<script src="js/input.js"></script>
-<script src="js/dev.js"></script>
-<script src="js/main.js"></script>
+<script src="js/util.js?v=0.10.2"></script>
+<script src="js/data.js?v=0.10.2"></script>
+<script src="js/formulas.js?v=0.10.2"></script>
+<script src="js/state.js?v=0.10.2"></script>
+<script src="js/upgrades.js?v=0.10.2"></script>
+<script src="js/save.js?v=0.10.2"></script>
+<script src="js/audio.js?v=0.10.2"></script>
+<script src="js/game.js?v=0.10.2"></script>
+<script src="js/minigames.js?v=0.10.2"></script>
+<script src="js/ui.js?v=0.10.2"></script>
+<script src="js/input.js?v=0.10.2"></script>
+<script src="js/dev.js?v=0.10.2"></script>
+<script src="js/main.js?v=0.10.2"></script>
 </body>
 </html>

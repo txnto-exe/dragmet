@@ -87,6 +87,7 @@ function boot() {
 
   showScreen('menu');
   requestAnimationFrame(loop);
+  window.__dmBooted = true;   // для аварийной диагностики в index.html: запуск прошёл
 }
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);

@@ -46,7 +46,7 @@
 })();
 </script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=0.13">
+<link rel="stylesheet" href="css/style.css?v=0.14">
 </head>
 <body>
 
@@ -102,8 +102,8 @@
     <div class="oc-sub" id="ocTime">—</div>
     <div class="oc-total" id="ocTotal">+0 ₽</div>
     <div class="oc-breakdown">
-      <div class="oc-bd-row"><span class="oc-bd-k">⛏ Ручные</span><span class="oc-bd-v" id="ocManual">+0 ₽</span></div>
-      <div class="oc-bd-row" id="ocAutoRow"><span class="oc-bd-k">🏭 Авто</span><span class="oc-bd-v" id="ocAuto">+0 ₽</span></div>
+      <div class="oc-bd-row"><span class="oc-bd-k"><img data-icon="pickaxe" data-scale="1" alt=""> Ручные</span><span class="oc-bd-v" id="ocManual">+0 ₽</span></div>
+      <div class="oc-bd-row" id="ocAutoRow"><span class="oc-bd-k"><img data-icon="worker" data-scale="1" alt=""> Авто</span><span class="oc-bd-v" id="ocAuto">+0 ₽</span></div>
     </div>
     <div class="oc-note" id="ocNote"></div>
     <button class="offline-claim" data-action="claim-offline" type="button">Забрать</button>
@@ -113,7 +113,7 @@
 <!-- ===== Стоп-игра «Контроль цены» ===== -->
 <div class="pg-overlay" id="pgOverlay">
   <div class="pg-card">
-    <div class="pg-title">🎯 Контроль цены</div>
+    <div class="pg-title">Контроль цены</div>
     <div class="pg-sub" id="pgSub">Останови бегунок в зелёной зоне</div>
     <div class="pg-bar"><div class="pg-zone" id="pgZone"></div><div class="pg-runner" id="pgRunner"></div></div>
     <div class="pg-hint">Чем ближе бегунок к зелёной зоне — тем дороже продашь.</div>
@@ -126,7 +126,7 @@
 <!-- ===== Мини-игра «Растворение» (кислота) ===== -->
 <div class="mg-overlay" id="acidMgOverlay">
   <div class="mg-card">
-    <div class="mg-title">🧪 Растворение</div>
+    <div class="mg-title"><img data-icon="flask" alt=""> Растворение</div>
     <div class="mg-sub">Зажми — уровень пойдёт вверх. Отпусти в зоне. Промах — заново.</div>
     <div class="amg-flasks" id="amgFlasks"></div>
     <div class="mg-result" id="amgResult"></div>
@@ -136,7 +136,7 @@
 <!-- ===== Мини-игра «Выплавка» (печь) ===== -->
 <div class="mg-overlay" id="fireMgOverlay">
   <div class="mg-card fire">
-    <div class="mg-title">🔥 Выплавка</div>
+    <div class="mg-title"><img data-icon="fire" alt=""> Выплавка</div>
     <div class="mg-sub">Держи бегунок в оранжевой зоне. Три секунды — победа.</div>
     <div class="fmg-bar"><div class="fmg-zone" id="fmgZone"></div><div class="fmg-runner" id="fmgRunner"></div></div>
     <div class="fmg-progress-label">Готовность</div>
@@ -151,6 +151,7 @@
 
 <!-- ===== Главное меню ===== -->
 <div class="screen active" id="menuScreen">
+  <canvas class="menu-cv" id="menuCanvas"></canvas>
   <div class="menu-logo"><h1>ДРАГ<span>МЕТ</span></h1></div>
   <div class="menu-tag">аффинаж · мусор · золото</div>
   <div class="menu-buttons">
@@ -176,12 +177,12 @@
         <div class="hdr-prest-line"><span id="prestPts">0</span> <small>очк</small></div>
       </div>
       <div class="hdr-plate hdr-plate-amulet" id="amuletPlate">
-        <span class="dot" id="amuletDot">○</span>
+        <img class="dot" id="amuletDot" alt="">
         <span id="amuletName">Нет амулета</span>
       </div>
     </div>
     <!-- Тап — настройки. Зажатие на 3 сек — DEV-консоль (если подключён js/dev.js). -->
-    <button class="gear-btn" id="gearBtn" data-action="open-settings" data-long="open-dev" type="button">⚙️</button>
+    <button class="gear-btn" id="gearBtn" data-action="open-settings" data-long="open-dev" type="button"><img data-icon="gear" alt=""></button>
   </header>
 
   <!-- Вкладка «Кузнец» -->
@@ -197,28 +198,35 @@
       <div class="forge-fireflies">
         <div class="forge-firefly"></div><div class="forge-firefly"></div><div class="forge-firefly"></div><div class="forge-firefly"></div><div class="forge-firefly"></div>
       </div>
-      <div class="forge-lock-badge">🔒</div>
+      <div class="forge-lock-badge"><img data-icon="lock" data-scale="4" alt=""></div>
     </div>
     <div class="panel">
       <p class="panel-title" id="forgePanelTitle">Кузница</p>
       <div id="craftStatusBox"></div>
-      <div class="empty-note forge-locked-note" id="forgeLockedNote"><div class="lock-big">🔒</div>Откроется после первого престижа</div>
+      <div class="empty-note forge-locked-note" id="forgeLockedNote"><div class="lock-big"><img data-icon="lock" data-scale="3" alt=""></div>Откроется после первого престижа</div>
       <div id="amuletList"></div>
     </div>
   </section>
 
   <!-- Вкладка «Копать» -->
   <section class="tab-section active" data-tab="dig">
-    <div class="panel">
-      <p class="panel-title">Точки сбора</p>
-      <div class="loc-viewport"><div class="loc-track" id="locTrack"></div></div>
-      <div class="loc-nav" id="locNav">
-        <button class="loc-nav-btn" id="locPrev" data-action="loc-page" data-arg="-1" type="button">←</button>
-        <span class="loc-nav-info" id="locPageInfo">1 / 3</span>
-        <button class="loc-nav-btn" id="locNext" data-action="loc-page" data-arg="1" type="button">→</button>
+    <!-- Живая сцена точки сбора (рисует js/scene.js). Тап по сцене — порыться. -->
+    <div class="scene-wrap" id="digSceneWrap">
+      <canvas class="scene-cv" id="digCanvas" data-press="dig"></canvas>
+      <div class="scene-top">
+        <div class="scene-plate" id="locName">—</div>
+        <div class="scene-plate scene-stock"><span class="scene-auto hidden" id="locAuto">работяга</span><span id="locStock">—</span></div>
       </div>
+      <button class="scene-arrow left" id="locPrev" data-action="loc-step" data-arg="-1" type="button"><img data-icon="arrowL" alt=""></button>
+      <button class="scene-arrow right" id="locNext" data-action="loc-step" data-arg="1" type="button"><img data-icon="arrowR" alt=""></button>
+      <div class="scene-lock hidden" id="locLock">
+        <img data-icon="lock" data-scale="3" alt="">
+        <button class="unlock-btn" id="unlockBtn" data-action="loc-unlock" type="button">Открыть</button>
+        <div class="scene-lock-note" id="locDiscount"></div>
+      </div>
+      <div class="scene-dots" id="locDots"></div>
     </div>
-    <div class="panel">
+    <div class="panel dig-panel">
       <button class="dig-btn" id="digBtn" data-press="dig" type="button"><div class="dig-fill" id="digFill"></div><span class="dig-label" id="digLabel">Порыться</span></button>
       <div class="cap-bar"><div class="cap-fill" id="capFill"></div></div>
       <div class="cap-rows">
@@ -237,6 +245,7 @@
   <section class="tab-section" data-tab="acid">
     <div class="panel">
       <p class="panel-title">Кислотная ванна</p>
+      <div class="scene-box"><canvas class="scene-cv" id="acidCanvas"></canvas></div>
       <div id="acidStages"></div>
       <div class="hint">Растворяет лом в кислоте. Общая эффективность переработки лома в слитки — качается «Кислотой почище» и «Печью помощнее».</div>
     </div>
@@ -249,7 +258,7 @@
     <div class="panel hidden" id="autoAcidPanel">
       <p class="panel-title">Авто-кислота</p>
       <div class="auto-stage">
-        <div class="as-head"><span class="as-title">🧪 Авто-ванна</span><span class="as-status" id="autoAcidStatus">Ждёт лом</span></div>
+        <div class="as-head"><span class="as-title">Авто-ванна</span><span class="as-status" id="autoAcidStatus">Ждёт лом</span></div>
         <div class="as-bar"><div class="as-bar-fill" id="autoAcidBar"></div></div>
         <div class="as-info">Авто-раствор: <b id="autoAcidSolution">0.0</b> ед. · Авто-склад: <b id="autoAcidJunk">0 / 50</b></div>
       </div>
@@ -260,11 +269,13 @@
   <section class="tab-section" data-tab="fire">
     <div class="panel">
       <p class="panel-title">Печь</p>
+      <div class="scene-box"><canvas class="scene-cv" id="fireCanvas"></canvas></div>
       <div id="fireStages"></div>
       <div class="hint">Выпаривает раствор, на выходе — слитки.</div>
     </div>
     <div class="panel">
       <p class="panel-title">Скупщик</p>
+      <div class="scene-box"><canvas class="scene-cv" id="marketCanvas"></canvas></div>
       <div class="ingot-big"><span id="ingotBig">0.000</span><small>г слитков</small></div>
       <div class="market-row"><span>Цена за грамм</span><span class="price"><span class="price-range" id="priceTxt">—</span></span></div>
       <button class="sell-btn" id="sellBtn" data-press="sell" type="button">Продать слитки</button>
@@ -272,7 +283,7 @@
     <div class="panel hidden" id="autoFirePanel">
       <p class="panel-title">Авто-печь</p>
       <div class="auto-stage">
-        <div class="as-head"><span class="as-title">🔥 Авто-печь</span><span class="as-status" id="autoFireStatus">Ждёт раствор</span></div>
+        <div class="as-head"><span class="as-title">Авто-печь</span><span class="as-status" id="autoFireStatus">Ждёт раствор</span></div>
         <div class="as-bar"><div class="as-bar-fill" id="autoFireBar"></div></div>
         <div class="as-info">Авто-слитки: <b id="autoFireIngots">0.0</b> г · Авто-раствор: <b id="autoFireSolution">0.0</b> ед.</div>
       </div>
@@ -304,11 +315,11 @@
 </div>
 
 <nav class="tabbar">
-  <button class="tab-btn" data-action="tab" data-arg="forge" data-tab="forge" type="button"><span class="tab-ic"><span id="forgeTabIcon">🔒</span><span class="tab-badge" id="badge-forge"></span></span><span class="tab-lbl" id="forgeTabLabel"></span></button>
-  <button class="tab-btn" data-action="tab" data-arg="fire" data-tab="fire" type="button"><span class="tab-ic">🔥<span class="tab-badge" id="badge-fire"></span></span><span class="tab-lbl">Печь</span><span class="tab-prog"><span id="prog-fire"></span></span></button>
-  <button class="tab-btn center active" data-action="tab" data-arg="dig" data-tab="dig" type="button"><span class="tab-ic">⛏️</span><span class="tab-lbl">Копать</span></button>
-  <button class="tab-btn" data-action="tab" data-arg="acid" data-tab="acid" type="button"><span class="tab-ic">🧪<span class="tab-badge" id="badge-acid"></span></span><span class="tab-lbl">Кислота</span><span class="tab-prog"><span id="prog-acid"></span></span></button>
-  <button class="tab-btn" data-action="tab" data-arg="upg" data-tab="upg" type="button"><span class="tab-ic">⬆️<span class="tab-badge" id="badge-upg"></span></span><span class="tab-lbl">Прокачка</span></button>
+  <button class="tab-btn" data-action="tab" data-arg="forge" data-tab="forge" type="button"><span class="tab-ic"><img id="forgeTabIcon" alt=""><span class="tab-badge" id="badge-forge"></span></span><span class="tab-lbl" id="forgeTabLabel"></span></button>
+  <button class="tab-btn" data-action="tab" data-arg="fire" data-tab="fire" type="button"><span class="tab-ic"><img data-icon="fire" alt=""><span class="tab-badge" id="badge-fire"></span></span><span class="tab-lbl">Печь</span><span class="tab-prog"><span id="prog-fire"></span></span></button>
+  <button class="tab-btn center active" data-action="tab" data-arg="dig" data-tab="dig" type="button"><span class="tab-ic"><img data-icon="pickaxe" alt=""></span><span class="tab-lbl">Копать</span></button>
+  <button class="tab-btn" data-action="tab" data-arg="acid" data-tab="acid" type="button"><span class="tab-ic"><img data-icon="flask" alt=""><span class="tab-badge" id="badge-acid"></span></span><span class="tab-lbl">Кислота</span><span class="tab-prog"><span id="prog-acid"></span></span></button>
+  <button class="tab-btn" data-action="tab" data-arg="upg" data-tab="upg" type="button"><span class="tab-ic"><img data-icon="up" alt=""><span class="tab-badge" id="badge-upg"></span></span><span class="tab-lbl">Прокачка</span></button>
 </nav>
 </div>
 
@@ -316,18 +327,20 @@
   Порядок важен: каждый следующий файл пользуется тем, что объявлено в предыдущих.
   dev.js — DEV-консоль для тестов. Перед релизом просто удалить эту строку (и сам файл).
 -->
-<script src="js/util.js?v=0.13"></script>
-<script src="js/data.js?v=0.13"></script>
-<script src="js/formulas.js?v=0.13"></script>
-<script src="js/state.js?v=0.13"></script>
-<script src="js/upgrades.js?v=0.13"></script>
-<script src="js/save.js?v=0.13"></script>
-<script src="js/audio.js?v=0.13"></script>
-<script src="js/game.js?v=0.13"></script>
-<script src="js/minigames.js?v=0.13"></script>
-<script src="js/ui.js?v=0.13"></script>
-<script src="js/input.js?v=0.13"></script>
-<script src="js/dev.js?v=0.13"></script>
-<script src="js/main.js?v=0.13"></script>
+<script src="js/util.js?v=0.14"></script>
+<script src="js/data.js?v=0.14"></script>
+<script src="js/art.js?v=0.14"></script>
+<script src="js/formulas.js?v=0.14"></script>
+<script src="js/state.js?v=0.14"></script>
+<script src="js/upgrades.js?v=0.14"></script>
+<script src="js/save.js?v=0.14"></script>
+<script src="js/audio.js?v=0.14"></script>
+<script src="js/game.js?v=0.14"></script>
+<script src="js/minigames.js?v=0.14"></script>
+<script src="js/scene.js?v=0.14"></script>
+<script src="js/ui.js?v=0.14"></script>
+<script src="js/input.js?v=0.14"></script>
+<script src="js/dev.js?v=0.14"></script>
+<script src="js/main.js?v=0.14"></script>
 </body>
 </html>

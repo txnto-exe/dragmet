@@ -43,9 +43,9 @@ function setMgResult(id, text, kind) {
 // ===== «Растворение»: три колбы, зажми и отпусти уровень в зоне =====
 
 const FLASKS = [
-  { label: '💧 Вода', speed: 40 },
-  { label: '🧪 Кислота', speed: 55 },
-  { label: '⚗️ Щёлочь', speed: 70 },
+  { label: 'Вода', speed: 40 },
+  { label: 'Кислота', speed: 55 },
+  { label: 'Щёлочь', speed: 70 },
 ];
 const flaskEls = [];
 

@@ -55,6 +55,8 @@ function loop(now) {
         sinceSave = 0;
         saveGame();
       }
+    } else if (currentScreen === 'menu') {
+      renderMenuScene();
     }
   } catch (err) {
     showError(err);

@@ -55,7 +55,7 @@ function makeMeta() {
 
 function makeUi() {
   return {
-    locPage: 0,
+    locView: 0,            // какая точка сбора на экране (номер в LOCATIONS)
     acc: { eq: true, pbonus: true },
     badgeSeen: { fire: -1, acid: -1, upg: -1, forge: -1 },
   };

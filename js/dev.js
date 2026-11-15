@@ -25,7 +25,7 @@
     return n >= 1000000 ? n / 1000000 + 'M' : n >= 10000 ? n / 1000 + 'k' : String(n);
   }
 
-  const items = ITEM_KEYS.map(k => `<div class="dev-item-row"><span class="ic">${ITEMS[k].icon}</span><span class="nm">${ITEMS[k].name}</span>`
+  const items = ITEM_KEYS.map(k => `<div class="dev-item-row"><img class="ic px-ic" src="${spriteURL(k)}" width="28" height="28" alt=""><span class="nm">${ITEMS[k].name}</span>`
     + [10, 100, 1000].map(n => btn(`item:${k}:${n}`, '+' + n)).join('') + '</div>').join('');
 
   const style = document.createElement('style');

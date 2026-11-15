@@ -190,7 +190,7 @@ function sanitizeGame(src) {
   }
 
   // --- Интерфейс и настройки ---
-  g.ui.locPage = clamp(Math.floor(num(ui.locPage)), 0, LOC_PAGES - 1);
+  g.ui.locView = clamp(Math.floor(num(ui.locView, LOCATIONS.findIndex(l => l.key === g.run.activeLoc))), 0, LOCATIONS.length - 1);
   if (isObj(ui.acc)) for (const k in ui.acc) g.ui.acc[k] = !!ui.acc[k];
   if (isObj(ui.badgeSeen)) for (const k in g.ui.badgeSeen) g.ui.badgeSeen[k] = num(ui.badgeSeen[k], -1);
   if (isObj(src.settings)) {
@@ -239,7 +239,7 @@ function migrateOldSave(old) {
       forgeUnlocked: s.forgeUnlocked,
       amulets: s.amulets, equipped: s.equippedAmulet, crafts,
     },
-    ui: { locPage: s.locPage, acc: s.accState, badgeSeen: s.badgeSeen },
+    ui: { acc: s.accState, badgeSeen: s.badgeSeen },
     settings: s.settings,
     lastSeenTs: s.lastSeenTs,
   };

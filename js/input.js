@@ -64,10 +64,11 @@ const ACTIONS = {
   'tab': name => switchTab(name),
   'subtab': name => switchSub(name),
   'acc': key => toggleAccordion(key),
-  'loc-page': delta => changeLocPage(Number(delta)),
+  'loc-step': delta => stepLoc(Number(delta)),
 
   // Игра
-  'loc': key => (G.run.locs[key].unlocked ? selectLoc(key) : unlockLoc(key)),
+  'loc-unlock': () => unlockLoc(LOCATIONS[G.ui.locView].key),
+  'item-info': k => flashToast(`${ITEMS[k].name} · ${fmt(ITEMS[k].gold * 1000)} мг золота`, ITEMS[k].tier, k),
   'lock': item => toggleLock(item),
   'acid-start': idx => startAcid(Number(idx)),
   'fire-start': idx => startFurnace(Number(idx)),
@@ -82,7 +83,8 @@ const ACTIONS = {
 
 /** Действия по data-press (срабатывают сразу, с турбо-пальцем повторяются). */
 const PRESS = {
-  dig: () => dig(),
+  // Копать можно, только если на экране открытая точка
+  dig: () => { if (G.run.locs[LOCATIONS[G.ui.locView].key].unlocked) dig(); },
   sell: () => sellIngots(),
 };
 

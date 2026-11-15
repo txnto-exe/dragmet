@@ -168,25 +168,7 @@ header.has-prestige .hdr-money{flex-direction:column;gap:10px;}
 .tab-section.active{display:block;}
 
 /* ===== Вкладка «Копать»: точки сбора ===== */
-.loc-viewport{overflow:hidden;padding:6px 0;margin:-6px 0 0 0;}
-.loc-track{display:flex;transition:transform 0.3s steps(6);will-change:transform;}
-.loc-slide{flex:0 0 100%;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;min-width:0;padding:0 5px;}
-.loc-card{background:var(--panel-2);padding:8px 8px 7px;cursor:pointer;touch-action:manipulation;min-width:0;overflow:hidden;}
-.loc-card:active{transform:translateY(var(--px));}
-.loc-card.active{background:#33441c;--fc:var(--rust-bright);}
-.loc-card.locked{background:var(--panel-3);--fc:var(--line-dark);}
-.loc-card.autodig:not(.active){--fc:var(--prest-dark);}
-.loc-ic{font-size:18px;line-height:1.1;}
-.loc-name{font-size:var(--fs-s);font-weight:600;margin-top:4px;line-height:1.15;min-height:28px;color:var(--text);}
-.loc-stock-bar{height:6px;margin-top:6px;}
-.loc-stock-txt{font-size:var(--fs-xs);color:var(--text-dim);margin-top:6px;}
-.loc-auto-txt{font-size:var(--fs-xs);color:var(--prest-bright);margin-top:2px;}
-.loc-unlock{font-size:var(--fs-s);margin-top:6px;color:var(--gold-bright);font-weight:700;}
 .loc-empty{color:var(--danger);}
-.loc-nav{display:flex;justify-content:space-between;align-items:center;gap:8px;position:relative;margin-top:10px;}
-.loc-nav-btn{background:var(--panel-2);color:var(--text);padding:6px 16px;font-size:var(--fs-l);font-weight:700;line-height:1;margin:0 3px;--fd:var(--line-dark);}
-.loc-nav-btn:disabled{opacity:0.35;}
-.loc-nav-info{font-size:var(--fs-s);color:var(--text-dim);}
 
 /* ===== Вкладка «Копать»: кнопка, склад, инвентарь ===== */
 .dig-btn{width:100%;padding:12px 14px;background:var(--rust-bright);color:var(--ink);font-size:var(--fs-l);font-weight:700;position:relative;overflow:hidden;touch-action:none;letter-spacing:0.5px;--fc:var(--rust-dark);--fd:#33460f;}
@@ -523,7 +505,6 @@ header.has-prestige .hdr-money{flex-direction:column;gap:10px;}
 
 /* ===== Тесные места: мельче шрифт ===== */
 .tab-btn .tab-lbl,.loc-name,.loc-stock-txt,.loc-auto-txt,.loc-unlock,.inv-item .l,.inv-item .g,.cap-cell-k{font-size:var(--fs-xxs);}
-.loc-name{min-height:30px;line-height:1.1;}
 .inv-item .n{font-size:var(--fs-xs);}
 .dig-btn{font-size:var(--fs-m);}
 /* Ячейка склада: иконка и число в одну строку — экономим высоту */
@@ -667,9 +648,79 @@ header{background-color:#0a0d07;background-image:var(--tex-plate);background-siz
 }
 
 /* Карточки локаций */
-.loc-card.active{background-color:#3a2a14;--fc:#e0a050;}
-.loc-card.locked{background-image:var(--tex-dither);background-size:4px 4px;}
 
 /* Меню: логотип с пиксельной обводкой */
 .menu-logo h1{text-shadow:2px 0 0 #050604,-2px 0 0 #050604,0 2px 0 #050604,0 -2px 0 #050604,4px 4px 0 #3c4a29;}
 .menu-logo h1 span{text-shadow:2px 0 0 #050604,-2px 0 0 #050604,0 2px 0 #050604,0 -2px 0 #050604,4px 4px 0 var(--rust-dark);}
+
+/* =====================================================================
+   ПИКСЕЛЬНЫЕ КАРТИНКИ И ЖИВЫЕ СЦЕНЫ (js/art.js, js/scene.js)
+   ===================================================================== */
+.px-ic{image-rendering:pixelated;display:inline-block;vertical-align:middle;flex-shrink:0;pointer-events:none;}
+.scene-cv{display:block;image-rendering:pixelated;margin:0 auto;}
+
+/* Сцена «Копать» */
+.scene-wrap{position:relative;margin:2px 2px 18px;background:#05070a;line-height:0;overflow:hidden;
+  box-shadow:0 -2px 0 0 #050604,0 2px 0 0 #050604,-2px 0 0 0 #050604,2px 0 0 0 #050604,0 4px 0 0 #2a331d;}
+.scene-wrap canvas{touch-action:none;cursor:pointer;}
+.scene-top{position:absolute;left:6px;right:6px;top:6px;display:flex;justify-content:space-between;gap:8px;pointer-events:none;line-height:1.2;}
+.scene-plate{background:rgba(8,10,6,0.82);color:var(--text);font-size:12px;padding:3px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  box-shadow:0 -2px 0 0 rgba(8,10,6,0.82),0 2px 0 0 rgba(8,10,6,0.82),-2px 0 0 0 rgba(8,10,6,0.82),2px 0 0 0 rgba(8,10,6,0.82);}
+.scene-stock{display:flex;gap:6px;align-items:center;flex-shrink:0;}
+.scene-auto{color:var(--prest-bright);}
+.scene-arrow{position:absolute;top:50%;margin-top:-20px;width:30px;height:40px;background:rgba(8,10,6,0.55);border:none;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;touch-action:manipulation;}
+.scene-arrow.left{left:4px;}
+.scene-arrow.right{right:4px;}
+.scene-arrow:active{background:rgba(8,10,6,0.85);}
+.scene-arrow:disabled{opacity:0;pointer-events:none;}
+.scene-lock{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;line-height:1.2;}
+.unlock-btn{font-family:var(--font);font-size:16px;padding:9px 14px;border:none;background:var(--gold-bright);color:var(--ink);cursor:pointer;touch-action:manipulation;
+  box-shadow:0 -2px 0 0 var(--gold-dark),0 2px 0 0 var(--gold-dark),-2px 0 0 0 var(--gold-dark),2px 0 0 0 var(--gold-dark),0 4px 0 0 #4a3a0a,inset 0 2px 0 0 rgba(255,255,255,0.4),inset 0 -2px 0 0 rgba(0,0,0,0.25);}
+.unlock-btn:active:not(:disabled){transform:translateY(2px);}
+.unlock-btn:disabled{background:#3a3424;color:#a89870;box-shadow:0 -2px 0 0 #2a2414,0 2px 0 0 #2a2414,-2px 0 0 0 #2a2414,2px 0 0 0 #2a2414;}
+.scene-lock-note{font-size:12px;color:var(--prest-bright);text-shadow:2px 2px 0 #000;}
+.scene-dots{position:absolute;bottom:5px;left:0;right:0;display:flex;justify-content:center;gap:4px;pointer-events:none;}
+.scene-dot{width:4px;height:4px;background:rgba(255,255,255,0.35);}
+.scene-dot.locked{background:rgba(0,0,0,0.55);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.3);}
+.scene-dot.on{background:#fff;width:10px;}
+.scene-float{position:absolute;transform:translate(-50%,0);font-size:16px;line-height:1;color:#fff;text-shadow:2px 2px 0 #000;pointer-events:none;animation:floatUp 1s steps(10) forwards;}
+@keyframes floatUp{0%{opacity:1;transform:translate(-50%,0);}100%{opacity:0;transform:translate(-50%,-32px);}}
+.legend-pop{animation:legendPop 0.9s steps(6);}
+@keyframes legendPop{0%{filter:brightness(2.2);}100%{filter:brightness(1);}}
+.fly-coin{position:fixed;z-index:99999;pointer-events:none;margin:-9px 0 0 -9px;}
+
+/* Сцены внутри панелей: во всю ширину, сразу под шапкой */
+.scene-box{margin:-14px -14px 14px;line-height:0;background:#05070a;box-shadow:inset 0 -2px 0 0 rgba(0,0,0,0.5);}
+
+/* Склад на «Копать»: картинка + число */
+.inv-item{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:6px;padding:4px 2px;min-height:38px;cursor:pointer;}
+.inv-item .n{font-size:16px;}
+.inv-item.empty{opacity:0.4;}
+.inv-item.empty .ic{filter:grayscale(1);}
+.dig-panel{padding-top:14px;}
+
+/* Склад под растворение */
+.inv-line .il-ic{width:auto;}
+.inv-line{padding:6px 12px;}
+
+/* Тост с картинкой */
+.toast{display:flex;align-items:center;justify-content:center;gap:8px;}
+.toast.t-lg{font-size:20px;padding:12px 16px;}
+
+/* Амулеты */
+.amulet-row .am-icon{background:#151b0f;}
+.rec-chip{display:inline-flex;align-items:center;gap:4px;}
+.hdr-plate-amulet .dot{width:auto;}
+.mg-title .px-ic{margin:-6px 4px 0 0;}
+.oc-bd-k .px-ic{margin:-2px 4px 0 0;}
+
+/* ===== Главное меню: живой ночной двор ===== */
+.menu-cv{position:fixed;left:0;top:0;z-index:0;image-rendering:pixelated;}
+#menuScreen > *:not(.menu-cv){position:relative;z-index:1;}
+#menuScreen .menu-version{position:fixed;}
+.menu-tag{background:rgba(5,6,4,0.7);padding:4px 10px;display:inline-block;}
+#menuScreen.active{justify-content:flex-start;padding-top:12vh;}
+.menu-logo h1 span{animation:neon 5s steps(1) infinite;
+  text-shadow:2px 0 0 #050604,-2px 0 0 #050604,0 2px 0 #050604,0 -2px 0 #050604,4px 4px 0 var(--rust-dark),0 0 0 #000,
+    -4px 0 0 rgba(200,238,104,0.25),4px 0 0 rgba(200,238,104,0.25),0 -4px 0 rgba(200,238,104,0.25),0 6px 0 rgba(200,238,104,0.2);}
+@keyframes neon{0%,90%,92%,95%,100%{opacity:1;}91%{opacity:0.35;}94%{opacity:0.6;}}

@@ -104,7 +104,7 @@ const UPGRADES = [
 
   // ===== Восстановление точек (по строке на каждую открытую локацию) =====
   ...LOCATIONS.map(loc => ({
-    key: 'regen:' + loc.key, group: 'regen', currency: 'cash', name: `${loc.icon} ${loc.name}`, max: 10,
+    key: 'regen:' + loc.key, group: 'regen', currency: 'cash', name: loc.name, max: 10,
     get: g => g.run.locs[loc.key].regenLv,
     set: (g, v) => { g.run.locs[loc.key].regenLv = v; },
     visible: () => G.run.locs[loc.key].unlocked,
@@ -121,7 +121,7 @@ const UPGRADES = [
     desc: (l, n) => `шанс двойного дропа: ${F.workerLuck(l)}% → ${F.workerLuck(n)}%`,
     extra: () => hasAmulet('nightShift') ? ' · +10% от амулета' : '' },
   ...LOCATIONS.map(loc => ({
-    key: 'autoDig:' + loc.key, group: 'auto', currency: 'cash', name: `${loc.icon} ${loc.name}`, max: 1, doneLabel: '✓ куплен',
+    key: 'autoDig:' + loc.key, group: 'auto', currency: 'cash', name: loc.name, max: 1, doneLabel: '✓ куплен',
     get: g => g.meta.autoDig[loc.key] ? 1 : 0,
     set: (g, v) => { g.meta.autoDig[loc.key] = v > 0; },
     visible: () => G.run.locs[loc.key].unlocked,

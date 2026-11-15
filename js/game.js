@@ -54,9 +54,10 @@ function scavengeOnce(loc, byWorker) {
 
   ls.stock--;
   const it = ITEMS[item];
-  const msg = isDouble ? `Двойной дроп! ${it.icon} ${it.name} ×2`
-    : `${it.prefix || 'Нашёл: '}${it.icon} ${it.name}`;
-  flashToast(msg, it.tier);
+  const msg = isDouble ? `Двойной дроп! ${it.name} ×2`
+    : `${it.prefix || 'Нашёл: '}${it.name}`;
+  flashToast(msg, it.tier, item);
+  sceneOnFind(item, isDouble);
   sndFind(item);
   if (isDouble) sndDoubleDrop();
   return true;
@@ -77,13 +78,6 @@ function dig() {
   shakeDigBtn(); sndDeny(); vibe(40);
 }
 
-function selectLoc(key) {
-  if (!G.run.locs[key].unlocked) return;
-  G.run.activeLoc = key;
-  sndSelect(); vibe(8);
-  saveGame();
-}
-
 function unlockLoc(key) {
   const loc = locDef(key), ls = G.run.locs[key];
   if (ls.unlocked) return;
@@ -96,10 +90,13 @@ function unlockLoc(key) {
   saveGame();
 }
 
-function changeLocPage(delta) {
-  const page = G.ui.locPage + delta;
-  if (page < 0 || page >= LOC_PAGES) return;
-  G.ui.locPage = page;
+/** Стрелки на сцене: листать точки сбора. Открытая точка сразу становится текущей. */
+function stepLoc(delta) {
+  const i = clamp(G.ui.locView + delta, 0, LOCATIONS.length - 1);
+  if (i === G.ui.locView) return;
+  G.ui.locView = i;
+  const loc = LOCATIONS[i];
+  if (G.run.locs[loc.key].unlocked) G.run.activeLoc = loc.key;
   sndTab(); vibe(8);
   saveGame();
 }
@@ -209,6 +206,7 @@ function finishSale(price, hit, msg) {
   G.run.cash += earned;
   G.run.ingots = 0;
   sndCoins(); bumpCash(); flashSellBtn();
+  sceneOnSale(hit);
   saveGame();
   flashToast(`${msg} +${fmt(Math.floor(earned))} ₽`, hit ? 'lg' : null);
 }
@@ -240,7 +238,7 @@ function doPrestige() {
   G.run = makeRun();
   fillUpgradeLevels(G);
   G.run.cash = F.startCash(lv('startCash'));
-  G.ui.locPage = 0;
+  G.ui.locView = 0;
   G.ui.badgeSeen = makeUi().badgeSeen;
 
   updateBloom();
@@ -317,7 +315,7 @@ function dissolveAmulet(key) {
     const amount = Math.floor(rec[k] * BAL.dissolveReturn);
     if (amount <= 0) continue;
     G.run.junk[k] += amount;
-    returned.push(`${ITEMS[k].icon} ${ITEMS[k].name} ×${amount}`);
+    returned.push(`${ITEMS[k].name} ×${amount}`);
   }
   removeAmulet(key);
   updateBloom();

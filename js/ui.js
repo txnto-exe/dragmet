@@ -55,18 +55,20 @@ function applyAccordions() {
 // ===== Короткие эффекты =====
 
 let toastTimer = null;
-/** Всплывающее сообщение. tier — цвет (jk/cm/vl/rp/lg). */
-function flashToast(msg, tier) {
+/** Всплывающее сообщение. tier — цвет (jk/cm/vl/rp/lg), icon — спрайт перед текстом. */
+function flashToast(msg, tier, icon) {
   const t = el('toast');
   t.className = 'toast' + (tier ? ' t-' + tier : '');
-  t.textContent = msg;
-  // На вкладке «Копать» тост встаёт на строку «1 / 3» между стрелками локаций
+  t.textContent = '';
+  if (icon) t.appendChild(pxIcon(icon, 'toast-ic'));
+  t.appendChild(document.createTextNode(msg));
+  // На вкладке «Копать» тост встаёт на небо сцены, чтобы не закрывать кнопки
   let left = '50%', top = '50%';
-  if (currentTab === 'dig') {
-    const r = el('locNav').getBoundingClientRect();
-    if (r.top >= 70 && r.bottom <= window.innerHeight - 120) {
+  if (currentTab === 'dig' && currentScreen === 'game') {
+    const r = el('digSceneWrap').getBoundingClientRect();
+    if (r.top >= 40 && r.bottom <= window.innerHeight - 120) {
       left = (r.left + r.width / 2) + 'px';
-      top = (r.top + r.height / 2) + 'px';
+      top = (r.top + 52) + 'px';
     }
   }
   t.style.left = left;
@@ -155,10 +157,12 @@ function hideOfflineOverlay() {
 
 // ===== Построение элементов (один раз при запуске) =====
 
-const ui = { locCards: {}, invCells: {}, acidLines: {}, upgRows: {}, groupWraps: {}, amuletRows: {} };
+const ui = { locDots: [], invCells: {}, acidLines: {}, upgRows: {}, groupWraps: {}, amuletRows: {} };
 
 function buildUi() {
-  buildLocations();
+  fillStaticIcons();
+  buildScenes();
+  buildLocDots();
   buildInventory();
   buildAcidInventory();
   buildUpgradePanels();
@@ -168,28 +172,21 @@ function buildUi() {
   document.addEventListener('pointerdown', closeRevealedOnOutsideTap, true);
 }
 
-function buildLocations() {
-  const track = el('locTrack');
-  for (let p = 0; p < LOC_PAGES; p++) {
-    const slide = make('div', 'loc-slide');
-    for (const loc of LOCATIONS.slice(p * LOCS_PER_PAGE, (p + 1) * LOCS_PER_PAGE)) {
-      const card = make('div', 'loc-card');
-      card.dataset.action = 'loc';
-      card.dataset.arg = loc.key;
-      const c = {
-        card,
-        open: make('div'), stockFill: make('div', 'loc-stock-fill'), stockTxt: make('div', 'loc-stock-txt'), auto: make('div', 'loc-auto-txt', '★ авто'),
-        locked: make('div'), price: make('div', 'loc-unlock'), discount: make('div', 'loc-auto-txt'),
-      };
-      const bar = make('div', 'loc-stock-bar');
-      bar.appendChild(c.stockFill);
-      c.open.append(bar, c.stockTxt, c.auto);
-      c.locked.append(c.price, c.discount);
-      card.append(make('div', 'loc-ic', loc.icon), make('div', 'loc-name', loc.name), c.open, c.locked);
-      slide.appendChild(card);
-      ui.locCards[loc.key] = c;
-    }
-    track.appendChild(slide);
+/** Картинки в разметке: <img data-icon="имя" data-scale="2">. */
+function fillStaticIcons() {
+  document.querySelectorAll('img[data-icon]').forEach(img => {
+    img.classList.add('px-ic');
+    setIcon(img, img.dataset.icon, null, Number(img.dataset.scale || PX));
+  });
+}
+
+/** Точки-индикаторы под сценой: какая по счёту точка сбора на экране. */
+function buildLocDots() {
+  const box = el('locDots');
+  for (let i = 0; i < LOCATIONS.length; i++) {
+    const d = make('span', 'scene-dot');
+    box.appendChild(d);
+    ui.locDots.push(d);
   }
 }
 
@@ -198,10 +195,12 @@ function buildInventory() {
   for (const k of ITEM_KEYS) {
     const it = ITEMS[k];
     const cell = make('div', 'inv-item');
+    cell.dataset.action = 'item-info';
+    cell.dataset.arg = k;
     const n = make('div', 'n', '0');
-    cell.append(make('div', 'ic', it.icon), n, make('div', 'l', it.name), make('div', 'g', (it.gold * 1000).toFixed(0) + ' мг'));
+    cell.append(pxIcon(k, 'ic'), n);
     row.appendChild(cell);
-    ui.invCells[k] = n;
+    ui.invCells[k] = { cell, n };
   }
 }
 
@@ -213,7 +212,7 @@ function buildAcidInventory() {
     line.dataset.action = 'lock';
     line.dataset.arg = k;
     const cnt = make('span', 'il-cnt'), au = make('span', 'il-au');
-    line.append(make('span', 'il-lock', '🔒'), make('span', 'il-ic', it.icon), make('span', 'il-name', it.name), cnt, au);
+    line.append(pxIcon('lock', 'il-lock', null, 1), pxIcon(k, 'il-ic'), make('span', 'il-name', it.name), cnt, au);
     box.appendChild(line);
     ui.acidLines[k] = { line, cnt, au };
   }
@@ -253,23 +252,24 @@ function buildAmuletList() {
   const box = el('amuletList');
   for (const a of AMULETS) {
     const wrap = make('div', 'amulet-row-wrap');
-    const trash = make('div', 'amulet-trash', '🗑️');
+    const trash = make('div', 'amulet-trash');
+    trash.appendChild(pxIcon('trash'));
     trash.dataset.action = 'amulet-dissolve';
     trash.dataset.arg = a.key;
 
     const row = make('div', 'amulet-row');
-    const icon = make('div', 'am-icon', a.icon);
-    icon.style.color = a.color;
-    icon.style.background = a.color + '22';
-    icon.style.boxShadow = `0 0 10px ${a.color}55`;
+    const icon = make('div', 'am-icon');
+    icon.appendChild(pxIcon('amulet', null, { tint: a.color }));
 
     const body = make('div', 'am-body');
     const time = make('div', 'am-time');
     const recipe = make('div', 'am-recipe');
     const chips = {};
     for (const k in a.recipe) {
-      chips[k] = make('span', 'rec-chip');
-      recipe.appendChild(chips[k]);
+      const chip = make('span', 'rec-chip');
+      chips[k] = { chip, txt: make('span') };
+      chip.append(pxIcon(k, 'chip-ic', null, 1), chips[k].txt);
+      recipe.appendChild(chip);
     }
     body.append(make('p', 'am-name', a.name), make('div', 'am-effect', a.effect), time, recipe);
 
@@ -380,52 +380,49 @@ function renderHeader() {
   setText('prestPts', G.meta.points);
 
   const a = G.meta.equipped ? amuletDef(G.meta.equipped) : null;
-  setText('amuletDot', a ? a.icon : '○');
+  setIcon(el('amuletDot'), 'amulet', { tint: a ? a.color : '#4a4e46' });
   setText('amuletName', a ? a.name : 'Нет амулета');
-  el('amuletDot').style.color = a ? a.color : '#8a916e';
-  el('amuletName').style.color = a ? '' : '#8a916e';
-  el('amuletPlate').style.boxShadow = a ? `0 0 18px ${a.color}55` : '0 0 14px rgba(255,255,255,0.06)';
+  el('amuletName').style.color = a ? a.color : '#8a916e';
 
   setWidth('prog-acid', vesselsProgress(G.run.acid));
   setWidth('prog-fire', vesselsProgress(G.run.fire));
-  setText('forgeTabIcon', G.meta.forgeUnlocked ? '⚒️' : '🔒');
+  setIcon(el('forgeTabIcon'), G.meta.forgeUnlocked ? 'anvil' : 'lock');
   setText('forgeTabLabel', G.meta.forgeUnlocked ? 'Кузнец' : '');
 }
 
 // --- Копать ---
 
 function renderDig() {
-  // Точки сбора
-  for (const loc of LOCATIONS) {
-    const c = ui.locCards[loc.key], ls = G.run.locs[loc.key];
-    const auto = G.meta.autoDig[loc.key];
-    setClass(c.card, 'loc-card' + (G.run.activeLoc === loc.key ? ' active' : '') + (ls.unlocked ? '' : ' locked') + (auto ? ' autodig' : ''));
-    setHidden(c.open, !ls.unlocked);
-    setHidden(c.locked, ls.unlocked);
-    if (ls.unlocked) {
-      setWidth(c.stockFill, ls.stock / loc.stock * 100);
-      setText(c.stockTxt, `${ls.stock} / ${loc.stock}` + (ls.stock === 0 ? ' пусто' : ''));
-      setClass(c.stockTxt, 'loc-stock-txt' + (ls.stock === 0 ? ' loc-empty' : ''));
-      setHidden(c.auto, !auto);
-    } else {
-      setText(c.price, `🔒 ${fmt(locUnlockCost(loc))} ₽`);
-      const disc = lv('locDiscount');
-      setHidden(c.discount, disc === 0);
-      setText(c.discount, `скидка −${pct(F.locDiscount(disc))}%`);
-    }
+  // Сцена точки сбора
+  const view = LOCATIONS[G.ui.locView], vs = G.run.locs[view.key];
+  digScene.frame();
+  setText('locName', view.name);
+  setText('locStock', vs.unlocked ? `${vs.stock} / ${view.stock}` : 'закрыто');
+  toggleClass('locStock', 'loc-empty', vs.unlocked && vs.stock === 0);
+  setHidden('locAuto', !(vs.unlocked && G.meta.autoDig[view.key]));
+  setHidden('locLock', vs.unlocked);
+  if (!vs.unlocked) {
+    const cost = locUnlockCost(view);
+    setText('unlockBtn', `Открыть · ${fmt(cost)} ₽`);
+    setDisabled('unlockBtn', G.run.cash < cost);
+    const disc = lv('locDiscount');
+    setText('locDiscount', disc ? `скидка −${pct(F.locDiscount(disc))}%` : '');
   }
-  const page = G.ui.locPage;
-  const transform = `translateX(-${page * 100}%)`;
-  if (el('locTrack').style.transform !== transform) el('locTrack').style.transform = transform;
-  setText('locPageInfo', `${page + 1} / ${LOC_PAGES}`);
-  setDisabled('locPrev', page <= 0);
-  setDisabled('locNext', page >= LOC_PAGES - 1);
+  setDisabled('locPrev', G.ui.locView <= 0);
+  setDisabled('locNext', G.ui.locView >= LOCATIONS.length - 1);
+  ui.locDots.forEach((dEl, i) => {
+    const l = LOCATIONS[i];
+    setClass(dEl, 'scene-dot' + (i === G.ui.locView ? ' on' : '') + (G.run.locs[l.key].unlocked ? '' : ' locked'));
+  });
 
   // Кнопка «Порыться»
   const loc = locDef(G.run.activeLoc), ls = G.run.locs[loc.key];
   const full = totalJunk() >= capMax();
   let label, fill = 0, disabled = false, fillColor = 'rgba(0,0,0,0.30)';
-  if (ls.stock <= 0) {
+  if (!vs.unlocked) {
+    disabled = true;
+    label = 'Точка закрыта';
+  } else if (ls.stock <= 0) {
     disabled = true;
     label = `${loc.name}: пусто, ~${Math.ceil(Math.max(0, locRegenInterval(loc) - ls.regenTimer) / 1000)}с`;
   } else if (full) {
@@ -447,7 +444,10 @@ function renderDig() {
   setHidden('capCellAuto', !lv('automation'));
   setText('capAutoVal', `${Math.floor(G.meta.auto.junk)} / ${autoCap()}`);
   setText('capManVal', `${totalJunk()} / ${capMax()}`);
-  for (const k of ITEM_KEYS) setText(ui.invCells[k], G.run.junk[k]);
+  for (const k of ITEM_KEYS) {
+    setText(ui.invCells[k].n, G.run.junk[k]);
+    toggleClass(ui.invCells[k].cell, 'empty', G.run.junk[k] === 0);
+  }
 }
 
 // --- Кислота и печь ---
@@ -460,7 +460,8 @@ function ensureStages(boxId, kind, count) {
   for (let i = 0; i < count; i++) {
     const label = count > 1 ? (kind === 'acid' ? 'Ванна #' : 'Печь #') + (i + 1) : 'Процесс';
     const stage = make('div', 'stage');
-    const icon = make('div', `stage-icon ic-${kind}`, kind === 'acid' ? '🧪' : '🔥');
+    const icon = make('div', `stage-icon ic-${kind}`);
+    icon.appendChild(pxIcon(kind === 'acid' ? 'flask' : 'fire'));
     icon.id = `${kind}-icon-${i}`;
     const body = make('div', 'stage-body');
     const top = make('div', 'stage-top');
@@ -492,6 +493,7 @@ function renderStage(kind, i, v, status, btnText, ready) {
 }
 
 function renderAcid() {
+  acidScene.frame();
   ensureStages('acidStages', 'acid', G.run.acid.length);
   const gold = junkGold(true);
   const free = freeVessels(G.run.acid);
@@ -527,6 +529,8 @@ function renderAcid() {
 }
 
 function renderFire() {
+  fireScene.frame();
+  marketScene.frame();
   ensureStages('fireStages', 'fire', G.run.fire.length);
   const free = freeVessels(G.run.fire);
   G.run.fire.forEach((f, i) => {
@@ -538,10 +542,10 @@ function renderFire() {
   // Скупщик
   setText('ingotBig', fmt(G.run.ingots, 3));
   const mult = priceMultiplier();
-  setText('priceTxt', `🎯 ${fmt(Math.round(BAL.priceMin * mult))} – ${fmt(Math.round(BAL.priceMax * mult))} ₽`);
+  setText('priceTxt', `${fmt(Math.round(BAL.priceMin * mult))} – ${fmt(Math.round(BAL.priceMax * mult))} ₽`);
   const canSell = G.run.ingots > MIN_SELLABLE;
   setDisabled('sellBtn', !canSell);
-  setText('sellBtn', canSell ? `🎯 Продать ${fmt(G.run.ingots, 3)} г (стоп-игра)` : 'Нет слитков на продажу');
+  setText('sellBtn', canSell ? `Продать ${fmt(G.run.ingots, 3)} г` : 'Нет слитков на продажу');
 
   // Авто-печь
   const on = lv('automation') > 0;
@@ -637,8 +641,8 @@ function renderForge() {
       const rec = recipeFor(a.key);
       for (const k in rec) {
         const have = G.run.junk[k];
-        setText(r.chips[k], `${ITEMS[k].icon} ${ITEMS[k].name} ${have}/${rec[k]}`);
-        setClass(r.chips[k], 'rec-chip' + (have >= rec[k] ? '' : ' miss'));
+        setText(r.chips[k].txt, `${ITEMS[k].name} ${have}/${rec[k]}`);
+        setClass(r.chips[k].chip, 'rec-chip' + (have >= rec[k] ? '' : ' miss'));
       }
       const can = canCraft(a.key);
       setText(r.craftBtn, busy ? 'Занят' : can ? 'Создать' : 'Мало');

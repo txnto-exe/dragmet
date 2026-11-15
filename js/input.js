@@ -27,6 +27,8 @@ const ACTIONS = {
   'close-settings': () => closeSettings(),
   'open-album': () => openAlbum(),
   'close-album': () => el('albumModal').classList.remove('show'),
+  'close-cut': () => { if (cut.canClose) closePrestigeCut(); },
+  'tip-ok': () => dismissTip(),
   'to-menu': () => { saveGame(); closeSettings(); showScreen('menu'); },
   'reset-all': () => {
     if (!confirm('Сбросить весь прогресс?')) return;

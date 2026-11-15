@@ -180,6 +180,11 @@ function sanitizeGame(src) {
       .filter(c => isObj(c) && amuletDef(c.id) && isNum(c.startedAt) && isNum(c.duration))
       .map(c => ({ id: c.id, startedAt: c.startedAt, duration: c.duration }));
   }
+  if (isObj(meta.tips)) {
+    for (const k in meta.tips) if (meta.tips[k] === true) g.meta.tips[k] = true;
+  } else if (isNum(meta.prestige) && meta.prestige > 0 || isObj(meta.found) || Object.values(g.run.junk).some(n => n > 0)) {
+    g.meta.tips.all = true;   // сейв опытного игрока: подсказки не нужны
+  }
   if (isObj(meta.found)) {
     for (const k of ITEM_KEYS) if (isNum(meta.found[k]) && meta.found[k] > 0) g.meta.found[k] = Math.floor(meta.found[k]);
   } else {

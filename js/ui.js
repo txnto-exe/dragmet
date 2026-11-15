@@ -241,6 +241,18 @@ function buildAcidInventory() {
   }
 }
 
+// Картинка для каждой прокачки (по ключу; regen:… и autoDig:… — по началу ключа)
+const UPG_ICON = {
+  acid: 'flask', fire: 'fire', cap: 'box', hold: 'finger', scavspd: 'pickaxe', acidspd: 'clock', firespd: 'clock',
+  secondacid: 'flask', secondfire: 'fire', goodeye: 'eye', luck: 'clover', reputation: 'medal', wideZone: 'target',
+  offlineRate: 'moon', offlineCap: 'sack', regen: 'recycle', autoSpeed: 'clock', autoLuck: 'clover', autoDig: 'worker',
+  forgeSpeed: 'anvil', forgeDiscount: 'coin', forgeDuration: 'clock', twoForges: 'anvil',
+  bonusBoost: 'pstar', startCash: 'coin', locDiscount: 'lock', acidII: 'flask', fireII: 'fire', capII: 'box',
+  automation: 'gear', autoWorkers: 'worker', autoCapLv: 'box', autoAcidSpeed: 'flask', autoAcidPurity: 'flask',
+  autoFireSpeed: 'fire', autoFireHeat: 'fire', autoSaleSpeed: 'ingot', autoMarkup: 'coin',
+};
+const upgIconName = key => UPG_ICON[key] || UPG_ICON[key.split(':')[0]] || 'up';
+
 function buildUpgradePanels() {
   for (const group of UPG_GROUPS) {
     const isPrest = group.panel === 'prest';
@@ -253,17 +265,29 @@ function buildUpgradePanels() {
     const body = make('div', 'acc-body');
     body.dataset.accbody = group.key;
     for (const u of UPGRADES.filter(x => x.group === group.key)) {
-      const row = make('div', 'upg');
-      const info = make('div');
+      const row = make('div', 'upg' + (isPrest ? ' prest' : '') + (u.style ? ' ' + u.style : ''));
+      const slot = make('div', 'upg-ic');
+      slot.appendChild(pxIcon(upgIconName(u.key)));
+      const info = make('div', 'upg-info');
       const desc = make('div', 'upg-desc');
       info.append(make('div', 'upg-name', u.name), desc);
+      let segs = null;
+      const lvl = make('span', 'upg-lvl');
+      if (u.max > 1) {
+        const segRow = make('div', 'upg-segrow');
+        const bar = make('div', 'upg-segs');
+        segs = [];
+        for (let i = 0; i < u.max; i++) segs.push(bar.appendChild(make('span')));
+        segRow.append(bar, lvl);
+        info.appendChild(segRow);
+      }
       const btn = make('button', 'upg-btn');
       btn.type = 'button';
       btn.dataset.action = 'buy';
       btn.dataset.arg = u.key;
-      row.append(info, btn);
+      row.append(slot, info, btn);
       body.appendChild(row);
-      ui.upgRows[u.key] = { row, desc, btn };
+      ui.upgRows[u.key] = { row, desc, btn, lvl, segs, lastLv: -1 };
     }
     wrap.append(head, body);
     el(isPrest ? 'upgPrestPanel' : 'upgNormalPanel').appendChild(wrap);
@@ -375,6 +399,52 @@ function attachSwipe(row, key) {
   row.addEventListener('pointercancel', end);
 }
 
+// ===== Подсказки новичку =====
+// Показываются по одной, когда случается нужная ситуация. Пропадают по «Понял»
+// или когда игрок сделал то, что советовали.
+
+const TIPS = [
+  { id: 'dig', when: () => currentTab === 'dig' && !ITEM_KEYS.some(k => G.meta.found[k]),
+    text: 'Жми «Порыться» — я буду искать лом в мусоре.' },
+  { id: 'full', when: () => totalJunk() >= capMax(),
+    text: 'Склад полон! Неси лом на вкладку «Кислота» и растворяй.' },
+  { id: 'acid', when: () => currentTab === 'acid' && totalJunk() > 0 && G.run.solution <= 0 && !G.run.acid.some(v => v.active),
+    text: 'Жми «Растворить»: лом растворится, получится раствор.' },
+  { id: 'fire', when: () => G.run.solution > 0 && G.run.ingots <= MIN_SELLABLE && !G.run.fire.some(v => v.active),
+    text: 'Раствор есть — на вкладке «Печь» выплавь из него золото.' },
+  { id: 'sell', when: () => G.run.ingots > MIN_SELLABLE,
+    text: 'Золото готово! Продай его скупщику во вкладке «Печь».' },
+  { id: 'upg', when: () => currentTab !== 'upg' && UPGRADES.some(u => u.currency === 'cash' && upgVisible(u) && upgUnlocked(u) && !upgMaxed(u) && G.run.cash >= upgCost(u)),
+    text: 'Хватает денег на прокачку — загляни во вкладку «Прокачка».' },
+  { id: 'prest', when: () => !isMaxPrestige() && G.run.cash >= F.prestigeThreshold(G.meta.prestige),
+    text: 'Можно сделать престиж: «Прокачка» → «Престиж». Начнёшь заново, но сильнее.' },
+];
+let tipShown = null;
+
+function renderTip() {
+  const box = el('tipBox');
+  const seen = G.meta.tips;
+  let tip = null;
+  if (!seen.all && currentScreen === 'game' && !isMinigameOpen() && !isPriceGameOpen() && !cut.open) {
+    tip = TIPS.find(x => !seen[x.id] && x.when()) || null;
+  }
+  // Подсказка пропала сама — значит, игрок сделал, что советовали
+  if (tipShown && tip !== tipShown && !tipShown.when()) seen[tipShown.id] = true;
+  if (tip !== tipShown) {
+    tipShown = tip;
+    if (tip) setText('tipText', tip.text);
+    toggleClass(box, 'show', !!tip);
+  }
+}
+
+function dismissTip() {
+  if (!tipShown) return;
+  G.meta.tips[tipShown.id] = true;
+  tipShown = null;
+  el('tipBox').classList.remove('show');
+  sndTab();
+}
+
 // ===== Обновление экрана (каждый кадр) =====
 
 function render() {
@@ -385,6 +455,7 @@ function render() {
   else if (currentTab === 'fire') renderFire();
   else if (currentTab === 'upg') renderUpgrades();
   renderBadges();
+  renderTip();
 }
 
 function vesselsProgress(list) {
@@ -594,6 +665,13 @@ function renderUpgrades() {
     setHidden(r.row, !visible);
     if (!visible) continue;
     setText(r.desc, upgDescription(u));
+    const l = lv(u.key);
+    if (r.segs && r.lastLv !== l) {
+      r.lastLv = l;
+      r.segs.forEach((s, i) => { s.className = i < l ? 'on' : ''; });
+      setText(r.lvl, `${l}/${u.max}`);
+    }
+    toggleClass(r.row, 'maxed', upgMaxed(u));
 
     const base = 'upg-btn' + (u.currency === 'points' ? ' prest' : '') + (u.style ? ' ' + u.style : '');
     if (upgMaxed(u)) {

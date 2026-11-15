@@ -46,7 +46,7 @@
 })();
 </script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=0.15">
+<link rel="stylesheet" href="css/style.css?v=0.16">
 </head>
 <body>
 
@@ -99,6 +99,24 @@
   </div>
 </div>
 
+<!-- ===== Подсказка новичку ===== -->
+<div class="tip" id="tipBox" data-action="tip-ok">
+  <img data-icon="heroIdle" alt="">
+  <div class="tip-text" id="tipText"></div>
+  <span class="tip-ok">Понял</span>
+</div>
+
+<!-- ===== Катсцена престижа ===== -->
+<div class="cut-overlay" id="prestCut" data-action="close-cut">
+  <canvas id="cutCanvas"></canvas>
+  <div class="cut-text">
+    <div class="cut-big" id="cutBig"></div>
+    <div class="cut-sub" id="cutSub"></div>
+    <div class="cut-new">Новый забег. Одёжка получше, карманы пустые.</div>
+  </div>
+  <div class="cut-tap">нажми, чтобы продолжить</div>
+</div>
+
 <!-- ===== Альбом находок ===== -->
 <div class="modal-overlay" id="albumModal">
   <div class="modal-card album-card">
@@ -128,9 +146,9 @@
 <div class="pg-overlay" id="pgOverlay">
   <div class="pg-card">
     <div class="pg-title">Контроль цены</div>
-    <div class="pg-sub" id="pgSub">Останови бегунок в зелёной зоне</div>
+    <div class="pg-sub" id="pgSub">Скупщик торгуется — жми СТОП, когда даёт больше всего</div>
+    <div class="pg-scene"><canvas id="pgCanvas"></canvas><div class="pg-offer" id="pgOffer"></div></div>
     <div class="pg-bar"><div class="pg-zone" id="pgZone"></div><div class="pg-runner" id="pgRunner"></div></div>
-    <div class="pg-hint">Чем ближе бегунок к зелёной зоне — тем дороже продашь.</div>
     <div class="pg-result hint" id="pgResult"></div>
     <div class="pg-result-sub" id="pgResultSub"></div>
     <button class="pg-stop" id="pgStop" data-action="price-stop" type="button">СТОП</button>
@@ -141,7 +159,7 @@
 <div class="mg-overlay" id="acidMgOverlay">
   <div class="mg-card">
     <div class="mg-title"><img data-icon="flask" alt=""> Растворение</div>
-    <div class="mg-sub">Зажми — уровень пойдёт вверх. Отпусти в зоне. Промах — заново.</div>
+    <div class="mg-sub">Зажми — льётся. Отпусти, когда уровень между стрелками.</div>
     <div class="amg-flasks" id="amgFlasks"></div>
     <div class="mg-result" id="amgResult"></div>
   </div>
@@ -151,13 +169,13 @@
 <div class="mg-overlay" id="fireMgOverlay">
   <div class="mg-card fire">
     <div class="mg-title"><img data-icon="fire" alt=""> Выплавка</div>
-    <div class="mg-sub">Держи бегунок в оранжевой зоне. Три секунды — победа.</div>
-    <div class="fmg-bar"><div class="fmg-zone" id="fmgZone"></div><div class="fmg-runner" id="fmgRunner"></div></div>
+    <div class="mg-sub">Держи стрелку жара в рамке, пока тигель не раскалится.</div>
+    <div class="fmg-scene"><canvas id="fmgCanvas"></canvas></div>
     <div class="fmg-progress-label">Готовность</div>
     <div class="fmg-progress"><div class="fmg-progress-fill" id="fmgProgress"></div></div>
     <div class="fmg-controls">
-      <button class="fmg-btn fmg-minus" id="fmgMinus" type="button">−</button>
-      <button class="fmg-btn fmg-plus" id="fmgPlus" type="button">+</button>
+      <button class="fmg-btn fmg-minus" id="fmgMinus" type="button">−<small>прикрыть</small></button>
+      <button class="fmg-btn fmg-plus" id="fmgPlus" type="button">+<small>поддать</small></button>
     </div>
     <div class="mg-result" id="fmgResult"></div>
   </div>
@@ -342,20 +360,20 @@
   Порядок важен: каждый следующий файл пользуется тем, что объявлено в предыдущих.
   dev.js — DEV-консоль для тестов. Перед релизом просто удалить эту строку (и сам файл).
 -->
-<script src="js/util.js?v=0.15"></script>
-<script src="js/data.js?v=0.15"></script>
-<script src="js/art.js?v=0.15"></script>
-<script src="js/formulas.js?v=0.15"></script>
-<script src="js/state.js?v=0.15"></script>
-<script src="js/upgrades.js?v=0.15"></script>
-<script src="js/save.js?v=0.15"></script>
-<script src="js/audio.js?v=0.15"></script>
-<script src="js/game.js?v=0.15"></script>
-<script src="js/minigames.js?v=0.15"></script>
-<script src="js/scene.js?v=0.15"></script>
-<script src="js/ui.js?v=0.15"></script>
-<script src="js/input.js?v=0.15"></script>
-<script src="js/dev.js?v=0.15"></script>
-<script src="js/main.js?v=0.15"></script>
+<script src="js/util.js?v=0.16"></script>
+<script src="js/data.js?v=0.16"></script>
+<script src="js/art.js?v=0.16"></script>
+<script src="js/formulas.js?v=0.16"></script>
+<script src="js/state.js?v=0.16"></script>
+<script src="js/upgrades.js?v=0.16"></script>
+<script src="js/save.js?v=0.16"></script>
+<script src="js/audio.js?v=0.16"></script>
+<script src="js/game.js?v=0.16"></script>
+<script src="js/minigames.js?v=0.16"></script>
+<script src="js/scene.js?v=0.16"></script>
+<script src="js/ui.js?v=0.16"></script>
+<script src="js/input.js?v=0.16"></script>
+<script src="js/dev.js?v=0.16"></script>
+<script src="js/main.js?v=0.16"></script>
 </body>
 </html>

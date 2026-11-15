@@ -560,8 +560,7 @@ let digScene = null;
 const DIG_H = 120;
 
 /** Внешность героя меняется с престижем. */
-function heroSwap() {
-  const p = G.meta.prestige;
+function heroSwap(p = G.meta.prestige) {
   const swap = {};
   if (p >= 1) Object.assign(swap, { c: '#6b4a2a', d: '#4a301a' });          // кожанка
   if (p >= 5) Object.assign(swap, { h: '#2a2a30', i: '#4a4a58' });          // чёрная шапка
@@ -617,6 +616,9 @@ function drawDigScene(ctx, w, h, t, dt, scene) {
     ctx.fillRect(hx + 3, groundY - 1, 14, 2);
     const sackFill = Math.min(1, totalJunk() / capMax());
     st.sackBump = Math.max(0, (st.sackBump || 0) - dt);
+    // чем больше склад, тем больше полных мешков стоит позади
+    const extra = Math.min(3, Math.floor((lv('cap') - 1) / 6));
+    for (let k = extra; k >= 1; k--) drawSack(ctx, hx - 12 - k * 7, groundY - (k % 2), 0.55, d, 0);
     st.sack = drawSack(ctx, hx - 12, groundY, sackFill, d, st.sackBump);
     drawSprite(ctx, frame, hx, hy, { swap: heroSwap() });
     // золотая цепь с 3-го престижа и амулет на груди
@@ -728,6 +730,13 @@ function drawAcidScene(ctx, w, h, t, dt, scene) {
   glow(ctx, lx, 9, 14, 9, '255,230,150', 0.14);
 
   const tubs = G.run.acid.slice(0, 3);
+  // вид ванны по уровню «Кислота почище»: ржавая → пластиковая → стальная
+  const tier = lv('acid') >= 10 ? 2 : lv('acid') >= 5 ? 1 : 0;
+  const TUB = [
+    { rim: '#f4f6f0', body: '#d8dcd4', top: '#b8bcb4', side: '#a8aca4', bot: '#a0a49c', leg: '#3a3a3a' },
+    { rim: '#6aaae8', body: '#3a7ac8', top: '#2a5a98', side: '#2a5a98', bot: '#22487a', leg: '#2a2a30' },
+    { rim: '#eef4f8', body: '#a8b4bc', top: '#8a96a0', side: '#7a8690', bot: '#6a7680', leg: '#8a96a0' },
+  ][tier];
   const tw = tubs.length > 2 ? 34 : 42;
   const area = w - 34;   // справа — бочка и канистра
   const gap = Math.max(4, Math.floor((area - tubs.length * tw) / (tubs.length + 1)));
@@ -742,18 +751,29 @@ function drawAcidScene(ctx, w, h, t, dt, scene) {
     if (v.active) glow(ctx, x + tw / 2, ty + 4, tw / 2 + 8, 12, '170,240,80', 0.16);
     // ванна на ножках: бортик, жидкость, бок
     rect(ctx, x - 1, ty - 1, tw + 2, 18, '#1e1e1e');
-    rect(ctx, x, ty, tw, 3, '#f4f6f0');
+    rect(ctx, x, ty, tw, 3, TUB.rim);
     rect(ctx, x + 2, ty + 1, tw - 4, 2, liquid);
     if (v.active) {
       const sx = x + 3 + Math.floor((t / 80 + i * 7) % (tw - 7));
       rect(ctx, sx, ty + 1, 2, 1, lighten(liquid, 0.5));
     }
-    rect(ctx, x, ty + 3, tw, 13, '#d8dcd4');
-    rect(ctx, x, ty + 3, tw, 1, '#b8bcb4');
-    rect(ctx, x + tw - 4, ty + 4, 4, 12, '#a8aca4');
-    rect(ctx, x + 1, ty + 15, tw - 2, 1, '#a0a49c');
-    for (let k = 4; k < tw - 4; k += 9) dot(ctx, x + k, ty + 8 + (k % 3), '#c0b090');   // ржавые пятна
-    rect(ctx, x + 2, floorY - 3, 3, 3, '#3a3a3a'); rect(ctx, x + tw - 5, floorY - 3, 3, 3, '#3a3a3a');
+    rect(ctx, x, ty + 3, tw, 13, TUB.body);
+    rect(ctx, x, ty + 3, tw, 1, TUB.top);
+    rect(ctx, x + tw - 4, ty + 4, 4, 12, TUB.side);
+    rect(ctx, x + 1, ty + 15, tw - 2, 1, TUB.bot);
+    if (tier === 0) {
+      for (let k = 4; k < tw - 4; k += 9) dot(ctx, x + k, ty + 8 + (k % 3), '#c0b090');   // ржавые пятна
+    } else if (tier === 1) {
+      rect(ctx, x + 4, ty + 7, 7, 5, '#e8c83a');                                         // наклейка «опасно»
+      dot(ctx, x + 7, ty + 8, '#1a1a1a'); dot(ctx, x + 7, ty + 10, '#1a1a1a');
+      dot(ctx, x + 2, ty + 5, lighten(TUB.body, 0.3));
+    } else {
+      for (let k = 2; k < tw - 2; k += 5) { dot(ctx, x + k, ty + 4, '#5a6670'); dot(ctx, x + k, ty + 14, '#5a6670'); }   // заклёпки
+      rect(ctx, x + 4, ty + 7, 5, 5, '#2a2e34'); rect(ctx, x + 5, ty + 8, 3, 3, '#f2f4ea');                            // манометр
+      dot(ctx, x + 6 + (v.active ? 1 : 0), ty + 9, '#c8403c');
+      rect(ctx, x + tw - 3, ty - 6, 2, 6, '#7a8690');                                                                   // трубка
+    }
+    rect(ctx, x + 2, floorY - 3, 3, 3, TUB.leg); rect(ctx, x + tw - 5, floorY - 3, 3, 3, TUB.leg);
     if (v.active) {
       if (Math.random() < dt / 70) st.bubbles.push({ x: x + 3 + Math.random() * (tw - 7), y: ty + 1, age: 0, life: 260 + Math.random() * 200, c: liquid });
       if (Math.random() < dt / 160) st.steam.push({ x: x + 4 + Math.random() * (tw - 10), y: ty - 2, age: 0, life: 1200 + Math.random() * 800 });
@@ -818,6 +838,13 @@ function drawFireScene(ctx, w, h, t, dt, scene) {
   const st = scene.state;
   st.sparks = st.sparks || [];
   const stoves = G.run.fire.slice(0, 3);
+  // вид печи по уровню «Печь помощнее»: бочка → кирпичная → заводская
+  const tier = lv('fire') >= 10 ? 2 : lv('fire') >= 5 ? 1 : 0;
+  const STOVE = [
+    { body: '#3a3a40', band: '#5a5a62', hl: '#5a5a62', sh: '#2a2a30' },
+    { body: '#8a4a32', band: '#5a2e1e', hl: '#a8603e', sh: '#6a3624' },
+    { body: '#4a5460', band: '#e8b83a', hl: '#6a7480', sh: '#343c46' },
+  ][tier];
   const bw = stoves.length > 2 ? 22 : 26;
   const area = w - 38;
   const gap = Math.max(6, Math.floor((area - stoves.length * bw) / (stoves.length + 1)));
@@ -835,10 +862,20 @@ function drawFireScene(ctx, w, h, t, dt, scene) {
     rect(ctx, x + bw - 9, Math.floor(by / 2), 6, 2, '#3a3a40');
     // бочка
     rect(ctx, x - 1, by - 1, bw + 2, bh + 1, '#101012');
-    rect(ctx, x, by, bw, bh, '#3a3a40');
-    rect(ctx, x, by + 6, bw, 1, '#5a5a62'); rect(ctx, x, by + bh - 7, bw, 1, '#5a5a62');
-    rect(ctx, x + 1, by, 2, bh, '#5a5a62');
-    rect(ctx, x + bw - 3, by, 2, bh, '#2a2a30');
+    rect(ctx, x, by, bw, bh, STOVE.body);
+    if (tier === 1) {
+      for (let yy = 3; yy < bh; yy += 4) {
+        rect(ctx, x, by + yy, bw, 1, STOVE.band);
+        for (let xx = (yy / 4) % 2 ? 2 : 5; xx < bw; xx += 6) rect(ctx, x + xx, by + yy - 3, 1, 3, STOVE.band);
+      }
+    } else if (tier === 2) {
+      for (let xx = 0; xx < bw; xx += 4) { rect(ctx, x + xx, by + bh - 4, 2, 3, '#e8b83a'); rect(ctx, x + xx + 2, by + bh - 4, 2, 3, '#1a1a1a'); }
+      [2, bw - 4].forEach(xx => { dot(ctx, x + xx, by + 2, '#8a96a0'); dot(ctx, x + xx, by + bh - 7, '#8a96a0'); });
+    } else {
+      rect(ctx, x, by + 6, bw, 1, STOVE.band); rect(ctx, x, by + bh - 7, bw, 1, STOVE.band);
+    }
+    rect(ctx, x + 1, by, 2, bh, STOVE.hl);
+    rect(ctx, x + bw - 3, by, 2, bh, STOVE.sh);
     // окно с огнём
     const ox = x + 5, oy = by + 11, ow = bw - 10, oh = 9;
     rect(ctx, ox - 1, oy - 1, ow + 2, oh + 2, '#18181a');
@@ -1005,6 +1042,90 @@ function drawMenuScene(ctx, w, h, t, dt, scene) {
   // герой греет руки
   drawSprite(ctx, Math.floor(t / 800) % 2 ? 'heroIdle' : 'heroIdle2', bx - 20, by - 12);
   drawWeather(ctx, scene, w, h, dt);
+}
+
+// ===== Катсцена престижа =====
+// Ночь, с неба сыплются монеты → вспышка → рассвет, герой в новой одёжке.
+
+let cutScene = null;
+const cut = { open: false, stop: null, level: 0, canClose: false };
+
+function playPrestigeCut(level, reward) {
+  const ov = el('prestCut');
+  if (!cutScene) cutScene = new PixelScene(el('cutCanvas'), 400, drawCutScene);
+  Object.assign(cut, { open: true, level, canClose: false });
+  cutScene.h = Math.ceil(window.innerHeight / PX);
+  cutScene.w = 0;
+  cutScene.t = 0;
+  cutScene.last = 0;
+  cutScene.fx = [];
+  cutScene.state = { flashed: false };
+  setText('cutBig', `ПРЕСТИЖ ${level}`);
+  setText('cutSub', `+${reward} очков престижа · бонус +${parseFloat(prestigeBonusPct().toFixed(2))}%`);
+  ov.classList.remove('phase2', 'phase3');
+  ov.classList.add('show');
+  if (cut.stop) cut.stop();
+  cut.stop = frameLoop(() => {
+    cutScene.frame();
+    const t = cutScene.t;
+    if (t > 1900) ov.classList.add('phase2');
+    if (t > 3200) { ov.classList.add('phase3'); cut.canClose = true; }
+    if (t > 9000) closePrestigeCut();
+  });
+}
+
+function closePrestigeCut() {
+  if (!cut.open) return;
+  cut.open = false;
+  if (cut.stop) { cut.stop(); cut.stop = null; }
+  el('prestCut').classList.remove('show', 'phase2', 'phase3');
+}
+
+function drawCutScene(ctx, w, h, t, dt, scene) {
+  const st = scene.state;
+  // ночь → рассвет после вспышки
+  const d = t < 1800 ? 1 : Math.max(0.1, 1 - (t - 1800) / 1600);
+  const gy = Math.floor(h * 0.66);
+  drawSky(ctx, w, gy, d, 999);
+  bgFar(ctx, w, gy, d, seededRandom(998), Math.floor(h * 0.28));
+  bgYard(ctx, w, gy, d, seededRandom(999));
+  drawGround(ctx, w, gy, h, '#3a3b36', d, 999);
+  const cx = Math.floor(w / 2);
+  const feet = gy + 44;
+  // монетный дождь до вспышки
+  if (t < 1800 && Math.random() < dt / 30) {
+    scene.fx.push({ kind: 'coin', x: Math.random() * w, y: -8, vx: (Math.random() - 0.5) * 0.02, vy: 0.04 + Math.random() * 0.05, age: 0 });
+  }
+  // куча монет растёт у ног
+  const pile = Math.min(1, t / 1800);
+  const prnd = seededRandom(55);
+  for (let i = 0; i < Math.round(pile * 24); i++) {
+    const row = Math.floor(i / 6), a = prnd();
+    drawSprite(ctx, 'coin', cx - 34 + row * 4 + Math.round(a * (60 - row * 8)), feet - 6 - row * 3);
+  }
+  if (t >= 1800 && !st.flashed) {
+    st.flashed = true;
+    scene.flash = 1;
+    scene.shake = 350;
+    for (let i = 0; i < 40; i++) {
+      const a = Math.random() * Math.PI * 2, v = 0.04 + Math.random() * 0.08;
+      scene.fx.push({ kind: 'spark', x: cx, y: feet - 28, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 0.03, life: 700 + Math.random() * 600, age: 0, color: ['#f8d060', '#ffffff', '#c09af0'][i % 3] });
+    }
+  }
+  // сияние и звёзды вокруг героя после вспышки
+  if (t > 1800) {
+    glow(ctx, cx, feet - 26, 46, 36, '255,220,140', 0.16);
+    for (let i = 0; i < 6; i++) {
+      const a = t / 900 + i * Math.PI * 2 / 6;
+      drawSprite(ctx, i % 2 ? 'star' : 'pstar', cx - 4 + Math.round(Math.cos(a) * 38), feet - 30 + Math.round(Math.sin(a) * 14));
+    }
+  }
+  // герой: до вспышки — старая одёжка, после — новая, и подпрыгивает от радости
+  const jump = t > 1800 && t < 3000 ? Math.round(Math.abs(Math.sin((t - 1800) / 160)) * 5) : 0;
+  const swap = heroSwap(t < 1800 ? cut.level - 1 : cut.level);
+  const hero = spriteCanvas(Math.floor(t / 700) % 2 ? 'heroIdle' : 'heroIdle2', { swap });
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(hero, cx - hero.width, feet - hero.height * 2 - jump * 2, hero.width * 2, hero.height * 2);
 }
 
 // ===== Создание сцен и кадр =====

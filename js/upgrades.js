@@ -258,7 +258,6 @@ function upgDescription(u) {
   if (!upgUnlocked(u) && u.lockedDesc) return `${u.lockedDesc} (уровень ${l}/${u.max})`;
   const next = l >= u.max ? l : l + 1;
   let text = u.desc(l, next);
-  if (u.max > 1) text += ` (уровень ${l}/${u.max})`;
   if (u.extra) text += u.extra();
   return text;
 }

@@ -245,10 +245,10 @@ function doPrestige() {
   G.ui.badgeSeen = makeUi().badgeSeen;
 
   updateBloom();
-  flashToast(`Престиж ${level}! Получено ${reward} очков`);
   sndPrestige(); vibe(80); flashPrestBtn();
   saveGame();
   switchTab('dig');
+  playPrestigeCut(level, reward);
 }
 
 // ===== Кузница =====

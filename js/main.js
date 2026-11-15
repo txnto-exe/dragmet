@@ -78,7 +78,12 @@ function boot() {
   window.addEventListener('pagehide', saveOnLeave);
   window.addEventListener('blur', saveOnLeave);
   document.addEventListener('visibilitychange', saveOnLeave);
-  window.addEventListener('error', e => showError(e.error || e.message));
+  // Показываем только ошибки нашей игры. Чужие скрипты (например, Telegram,
+  // если ссылку открыли внутри него) дают «Script error.» без подробностей — их пропускаем.
+  window.addEventListener('error', e => {
+    if (!e.filename || !e.filename.startsWith(location.origin)) return;
+    showError(e.error || e.message);
+  });
 
   showScreen('menu');
   requestAnimationFrame(loop);

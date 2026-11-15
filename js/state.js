@@ -3,7 +3,7 @@
 //   G.run      — текущий забег: сбрасывается при престиже (деньги, лом, обычные прокачки…)
 //   G.meta     — то, что остаётся навсегда (престиж, очки, амулеты, работяги, авто-фабрика…)
 //   G.ui       — положение интерфейса (открытые аккордеоны, страница локаций, бейджи)
-//   G.settings — звук и вибрация
+//   G.settings — звук, музыка и вибрация
 // Благодаря этому делению престиж — это просто «G.run = новый забег».
 
 let G = null;
@@ -50,6 +50,7 @@ function makeMeta() {
     amulets: {},           // скованные амулеты: { ключ: { prestigeLeft } или { expiresAt } }
     equipped: null,        // надетый амулет
     crafts: [],            // что сейчас куётся: [{ id, startedAt, duration }]
+    found: {},             // альбом: сколько всего найдено каждого предмета { ключ: штук }
   };
 }
 
@@ -66,7 +67,7 @@ function makeGame() {
     run: makeRun(),
     meta: makeMeta(),
     ui: makeUi(),
-    settings: { sound: true, vibe: true },
+    settings: { sound: true, music: true, vibe: true },
     lastSeenTs: Date.now(),
   };
   fillUpgradeLevels(game);

@@ -609,6 +609,10 @@ function drawDigScene(ctx, w, h, t, dt, scene) {
     let frame = Math.floor(t / 700) % 2 ? 'heroIdle' : 'heroIdle2';
     if (st.anim > 0) frame = st.anim > 260 ? 'heroDig1' : 'heroDig2';
     const hx = px - 36, hy = groundY - 26;
+    st.hero = { x: hx + 9, y: hy };
+    // иногда герой что-то бормочет
+    st.talkIn = (st.talkIn == null ? 15000 : st.talkIn) - dt;
+    if (st.talkIn <= 0) { st.talkIn = 35000 + Math.random() * 40000; heroSay(pickRandom(idleLines())); }
     ctx.fillStyle = 'rgba(0,0,0,0.25)';
     ctx.fillRect(hx + 3, groundY - 1, 14, 2);
     const sackFill = Math.min(1, totalJunk() / capMax());
@@ -625,6 +629,7 @@ function drawDigScene(ctx, w, h, t, dt, scene) {
     const wf = Math.floor(t / 320) % 3;
     drawSprite(ctx, wf === 0 ? 'heroDig1' : wf === 1 ? 'heroDig2' : 'heroIdle', px + 12, groundY - 26, { swap: WORKER_SWAP }, true);
   }
+  if (!(ls.unlocked && G.run.activeLoc === loc.key)) scene.state.hero = null;
   drawCat(ctx, scene, w, groundY + 2, dt);
   if (!ls.unlocked) {
     ctx.fillStyle = 'rgba(6,8,12,0.55)';
@@ -657,6 +662,8 @@ function sceneOnFind(itemKey, isDouble) {
     addSparks(sc, from.x, from.y - 6, TIER_COLOR.lg, 30, 0.1);
     replayAnim('digSceneWrap', 'legend-pop', 900);
   }
+  if (it.tier === 'lg') heroSay(pickRandom(['Ого!', 'Вот это да!', 'Живём!', 'Это я удачно зашёл']), 2400);
+  else if (it.tier === 'rp' && Math.random() < 0.5) heroSay(pickRandom(['Неплохо', 'О, полезное', 'В хозяйстве пригодится']));
   const wrap = el('digSceneWrap');
   floatText(wrap, from.x * PX, (from.y - 16) * PX, isDouble ? '×2' : '+1', TIER_COLOR[it.tier]);
 }
@@ -922,6 +929,38 @@ function sceneOnSale(hit) {
     if (hit) marketScene.flash = 0.6;
   }
   coinBurst(el('sellBtn'), hit ? 14 : 8);
+  const box = el('marketCanvas') && el('marketCanvas').parentElement;
+  if (box && marketScene.w) {
+    bubble(box, marketScene.w / 2 * PX, 18, pickRandom(hit ? ['Хорош, по рукам', 'Отличный металл', 'Заходи ещё'] : ['Ну, сам виноват', 'Больше не дам', 'Бери, пока дают']), 2200);
+  }
+}
+
+// ===== Реплики =====
+
+function idleLines() {
+  const w = weatherNow(), d = nightness();
+  if (w === 'rain') return ['Опять дождь…', 'Промок до нитки', 'Хорошо, что не снег'];
+  if (w === 'snow') return ['Ну и холодрыга', 'Руки мёрзнут', 'Снег — к деньгам'];
+  if (d > 0.6) return ['Ночью тут спокойнее', 'Где-то тут было…', 'Темно, хоть глаз выколи'];
+  return ['Эх, жизнь…', 'Ещё чуть-чуть', 'Где-то тут было…', 'Золото само себя не найдёт'];
+}
+
+/** Облачко с текстом над точкой (x, y — в CSS-пикселях внутри контейнера). */
+function bubble(box, x, y, text, ms = 1800) {
+  const old = box.querySelector('.scene-bubble');
+  if (old) old.remove();
+  const b = make('div', 'scene-bubble', text);
+  b.style.left = x + 'px';
+  b.style.top = y + 'px';
+  box.appendChild(b);
+  setTimeout(() => b.remove(), ms);
+}
+
+/** Герой говорит (если он на экране). */
+function heroSay(text, ms) {
+  const st = digScene && digScene.state;
+  if (!st || !st.hero || currentTab !== 'dig') return;
+  bubble(el('digSceneWrap'), st.hero.x * PX, st.hero.y * PX - 6, text, ms);
 }
 
 // ===== Главное меню: ночной двор с костром =====

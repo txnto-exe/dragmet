@@ -74,9 +74,11 @@ function onVisibilityChange() {
   if (document.visibilityState === 'hidden') {
     saveOnLeave();
     stopAllLoops();
+    updateMusic();
     return;
   }
   // Вернулись: догоняем время, пока игра была свёрнута
+  updateMusic();
   if (currentScreen !== 'game') return;
   try {
     const offline = catchUp();

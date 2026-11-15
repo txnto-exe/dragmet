@@ -180,6 +180,12 @@ function sanitizeGame(src) {
       .filter(c => isObj(c) && amuletDef(c.id) && isNum(c.startedAt) && isNum(c.duration))
       .map(c => ({ id: c.id, startedAt: c.startedAt, duration: c.duration }));
   }
+  if (isObj(meta.found)) {
+    for (const k of ITEM_KEYS) if (isNum(meta.found[k]) && meta.found[k] > 0) g.meta.found[k] = Math.floor(meta.found[k]);
+  } else {
+    // сейв до появления альбома: считаем найденным то, что лежит на складе
+    for (const k of ITEM_KEYS) if (g.run.junk[k] > 0) g.meta.found[k] = g.run.junk[k];
+  }
 
   // --- Уровни прокачек (обрезаем по максимуму на случай, если максимум уменьшили) ---
   const runLv = isObj(run.lv) ? run.lv : {};
@@ -196,6 +202,7 @@ function sanitizeGame(src) {
   if (isObj(src.settings)) {
     if (typeof src.settings.sound === 'boolean') g.settings.sound = src.settings.sound;
     if (typeof src.settings.vibe === 'boolean') g.settings.vibe = src.settings.vibe;
+    if (typeof src.settings.music === 'boolean') g.settings.music = src.settings.music;
   }
   g.lastSeenTs = num(src.lastSeenTs, Date.now());
 

@@ -155,8 +155,8 @@ function spriteCanvas(name, opts) {
   const rows = SPR[name];
   if (!rows) throw new Error('Нет спрайта ' + name);
   const h = rows.length, w = Math.max(...rows.map(r => r.length));
-  const shade = !NO_SHADE[name] && opts.shade !== false;
-  const colorOf = ch => (ch === '@' ? opts.tint : (opts.swap && opts.swap[ch]) || PAL[ch]);
+  const shade = !NO_SHADE[name] && opts.shade !== false && !opts.silhouette;
+  const colorOf = ch => (opts.silhouette ? '#3a4232' : ch === '@' ? opts.tint : (opts.swap && opts.swap[ch]) || PAL[ch]);
   const at = (x, y) => (y >= 0 && y < h && x >= 0 && x < w && rows[y][x] && rows[y][x] !== '.' ? rows[y][x] : null);
 
   const pad = opts.outline === false ? 0 : 1;

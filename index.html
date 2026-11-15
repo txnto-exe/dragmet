@@ -46,7 +46,7 @@
 })();
 </script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=0.14">
+<link rel="stylesheet" href="css/style.css?v=0.15">
 </head>
 <body>
 
@@ -67,6 +67,10 @@
     <div class="modal-row">
       <div><div class="modal-name">Звук</div><div class="modal-desc">эффекты в игре</div></div>
       <div class="switch" id="tglSound" data-action="toggle-setting" data-arg="sound"><span class="switch-slider"></span></div>
+    </div>
+    <div class="modal-row">
+      <div><div class="modal-name">Музыка</div><div class="modal-desc">8-битная мелодия фоном</div></div>
+      <div class="switch" id="tglMusic" data-action="toggle-setting" data-arg="music"><span class="switch-slider"></span></div>
     </div>
     <div class="modal-row">
       <div><div class="modal-name">Вибрация</div><div class="modal-desc">отклик при нажатиях</div></div>
@@ -92,6 +96,16 @@
       <button class="modal-btn danger" data-action="reset-all" type="button">Сбросить</button>
     </div>
     <button class="modal-close" data-action="close-settings" type="button">Закрыть</button>
+  </div>
+</div>
+
+<!-- ===== Альбом находок ===== -->
+<div class="modal-overlay" id="albumModal">
+  <div class="modal-card album-card">
+    <h2 class="modal-title">Альбом находок</h2>
+    <div class="album-sub" id="albumSub"></div>
+    <div class="album-grid" id="albumGrid"></div>
+    <button class="modal-close" data-action="close-album" type="button">Закрыть</button>
   </div>
 </div>
 
@@ -236,6 +250,7 @@
         <div class="cap-cell cap-cell-man">
           <span class="cap-cell-k">склад</span><span class="cap-cell-v" id="capManVal">0 / 15</span>
         </div>
+        <button class="album-btn" id="albumBtn" data-action="open-album" type="button">Альбом</button>
       </div>
       <div class="inv-row" id="invRow"></div>
     </div>
@@ -327,20 +342,20 @@
   Порядок важен: каждый следующий файл пользуется тем, что объявлено в предыдущих.
   dev.js — DEV-консоль для тестов. Перед релизом просто удалить эту строку (и сам файл).
 -->
-<script src="js/util.js?v=0.14"></script>
-<script src="js/data.js?v=0.14"></script>
-<script src="js/art.js?v=0.14"></script>
-<script src="js/formulas.js?v=0.14"></script>
-<script src="js/state.js?v=0.14"></script>
-<script src="js/upgrades.js?v=0.14"></script>
-<script src="js/save.js?v=0.14"></script>
-<script src="js/audio.js?v=0.14"></script>
-<script src="js/game.js?v=0.14"></script>
-<script src="js/minigames.js?v=0.14"></script>
-<script src="js/scene.js?v=0.14"></script>
-<script src="js/ui.js?v=0.14"></script>
-<script src="js/input.js?v=0.14"></script>
-<script src="js/dev.js?v=0.14"></script>
-<script src="js/main.js?v=0.14"></script>
+<script src="js/util.js?v=0.15"></script>
+<script src="js/data.js?v=0.15"></script>
+<script src="js/art.js?v=0.15"></script>
+<script src="js/formulas.js?v=0.15"></script>
+<script src="js/state.js?v=0.15"></script>
+<script src="js/upgrades.js?v=0.15"></script>
+<script src="js/save.js?v=0.15"></script>
+<script src="js/audio.js?v=0.15"></script>
+<script src="js/game.js?v=0.15"></script>
+<script src="js/minigames.js?v=0.15"></script>
+<script src="js/scene.js?v=0.15"></script>
+<script src="js/ui.js?v=0.15"></script>
+<script src="js/input.js?v=0.15"></script>
+<script src="js/dev.js?v=0.15"></script>
+<script src="js/main.js?v=0.15"></script>
 </body>
 </html>

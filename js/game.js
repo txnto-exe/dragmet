@@ -50,12 +50,15 @@ function scavengeOnce(loc, byWorker) {
   const luck = byWorker ? workerLuckChance() : F.luck(lv('luck'));
   const isDouble = Math.random() < luck && totalJunk() + 2 <= capMax();
   G.run.junk[item] += isDouble ? 2 : 1;
+  const isNew = !G.meta.found[item];
+  G.meta.found[item] = (G.meta.found[item] || 0) + (isDouble ? 2 : 1);
   if (byWorker) return true;
 
   ls.stock--;
   const it = ITEMS[item];
-  const msg = isDouble ? `Двойной дроп! ${it.name} ×2`
+  let msg = isDouble ? `Двойной дроп! ${it.name} ×2`
     : `${it.prefix || 'Нашёл: '}${it.name}`;
+  if (isNew) msg = `Новое в альбоме! ${it.name}`;
   flashToast(msg, it.tier, item);
   sceneOnFind(item, isDouble);
   sndFind(item);

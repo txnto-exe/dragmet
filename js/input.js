@@ -25,6 +25,8 @@ const ACTIONS = {
   },
   'open-settings': () => openSettings(),
   'close-settings': () => closeSettings(),
+  'open-album': () => openAlbum(),
+  'close-album': () => el('albumModal').classList.remove('show'),
   'to-menu': () => { saveGame(); closeSettings(); showScreen('menu'); },
   'reset-all': () => {
     if (!confirm('Сбросить весь прогресс?')) return;
@@ -36,6 +38,7 @@ const ACTIONS = {
     G.settings[key] = !G.settings[key];
     toggleClass(node, 'on', G.settings[key]);
     if (key === 'sound' && G.settings.sound) initAudio();
+    updateMusic();
     sndToggle(); vibe(15);
     saveGame();
   },

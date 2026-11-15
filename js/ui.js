@@ -133,12 +133,35 @@ function openSettings() {
   const t = lastSaveTs ? new Date(lastSaveTs) : null;
   setText('settingsSaveInfo', t ? `последнее: ${pad2(t.getHours())}:${pad2(t.getMinutes())}` : 'нет сохранения');
   toggleClass('tglSound', 'on', G.settings.sound);
+  toggleClass('tglMusic', 'on', G.settings.music);
   toggleClass('tglVibe', 'on', G.settings.vibe);
   el('settingsModal').classList.add('show');
 }
 
 function closeSettings() {
   el('settingsModal').classList.remove('show');
+}
+
+// ===== Альбом находок =====
+
+const TIER_NAME = { jk: 'мусор', cm: 'обычное', vl: 'ценное', rp: 'редкое', lg: 'легендарное' };
+
+function openAlbum() {
+  const grid = el('albumGrid');
+  grid.innerHTML = '';
+  let have = 0;
+  for (const k of ITEM_KEYS) {
+    const it = ITEMS[k], n = G.meta.found[k] || 0;
+    if (n) have++;
+    const card = make('div', 'album-item t-' + it.tier + (n ? '' : ' unknown'));
+    card.appendChild(pxIcon(k, null, n ? null : { silhouette: true }));
+    card.appendChild(make('div', 'album-name', n ? it.name : '???'));
+    card.appendChild(make('div', 'album-meta', n ? `${TIER_NAME[it.tier]} · найдено ${fmt(n)}` : TIER_NAME[it.tier]));
+    grid.appendChild(card);
+  }
+  setText('albumSub', `Собрано ${have} из ${ITEM_KEYS.length}. Альбом не сбрасывается при престиже.`);
+  sndAccOpen();
+  el('albumModal').classList.add('show');
 }
 
 function showOfflineOverlay(info) {
@@ -444,6 +467,7 @@ function renderDig() {
   setHidden('capCellAuto', !lv('automation'));
   setText('capAutoVal', `${Math.floor(G.meta.auto.junk)} / ${autoCap()}`);
   setText('capManVal', `${totalJunk()} / ${capMax()}`);
+  setText('albumBtn', `Альбом ${ITEM_KEYS.filter(k => G.meta.found[k]).length}/${ITEM_KEYS.length}`);
   for (const k of ITEM_KEYS) {
     setText(ui.invCells[k].n, G.run.junk[k]);
     toggleClass(ui.invCells[k].cell, 'empty', G.run.junk[k] === 0);

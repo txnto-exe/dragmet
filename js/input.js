@@ -39,6 +39,25 @@ const ACTIONS = {
     sndToggle(); vibe(15);
     saveGame();
   },
+  'export-save': () => {
+    const text = exportSave();
+    const done = () => { closeSettings(); flashToast('Сейв скопирован — вставь его в заметки'); };
+    const manual = () => { window.prompt('Скопируй этот текст и сохрани в заметки:', text); closeSettings(); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, manual);
+    else manual();
+  },
+  'import-save': () => {
+    const text = window.prompt('Вставь сюда текст резервной копии:');
+    if (!text) return;
+    const game = parseBackup(text);
+    if (!game) { sndDeny(); window.alert('Это не похоже на сейв ДРАГМЕТ. Проверь, что скопирован весь текст.'); return; }
+    if (!window.confirm('Заменить текущий прогресс сейвом из копии?')) return;
+    G = game;
+    saveGame();
+    closeSettings();
+    enterGame();
+    flashToast('Сейв восстановлен');
+  },
   'claim-offline': () => { hideOfflineOverlay(); sndOfflineClaim(); vibe(40); bumpCash(); },
 
   // Навигация

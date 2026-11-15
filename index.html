@@ -45,7 +45,7 @@
   });
 })();
 </script>
-<link rel="stylesheet" href="css/style.css?v=0.10.2">
+<link rel="stylesheet" href="css/style.css?v=0.11">
 </head>
 <body>
 
@@ -73,6 +73,14 @@
     </div>
     <div class="modal-row">
       <div><div class="modal-name">Сохранение</div><div class="modal-desc" id="settingsSaveInfo">—</div></div>
+    </div>
+    <div class="modal-row">
+      <div><div class="modal-name">Резервная копия</div><div class="modal-desc">скопировать сейв текстом — сохрани в заметки</div></div>
+      <button class="modal-btn" data-action="export-save" type="button">Копировать</button>
+    </div>
+    <div class="modal-row">
+      <div><div class="modal-name">Восстановить</div><div class="modal-desc">вставить сейв из резервной копии</div></div>
+      <button class="modal-btn" data-action="import-save" type="button">Вставить</button>
     </div>
     <div class="modal-row">
       <div><div class="modal-name">В главное меню</div><div class="modal-desc">прогресс сохранится</div></div>
@@ -307,18 +315,18 @@
   Порядок важен: каждый следующий файл пользуется тем, что объявлено в предыдущих.
   dev.js — DEV-консоль для тестов. Перед релизом просто удалить эту строку (и сам файл).
 -->
-<script src="js/util.js?v=0.10.2"></script>
-<script src="js/data.js?v=0.10.2"></script>
-<script src="js/formulas.js?v=0.10.2"></script>
-<script src="js/state.js?v=0.10.2"></script>
-<script src="js/upgrades.js?v=0.10.2"></script>
-<script src="js/save.js?v=0.10.2"></script>
-<script src="js/audio.js?v=0.10.2"></script>
-<script src="js/game.js?v=0.10.2"></script>
-<script src="js/minigames.js?v=0.10.2"></script>
-<script src="js/ui.js?v=0.10.2"></script>
-<script src="js/input.js?v=0.10.2"></script>
-<script src="js/dev.js?v=0.10.2"></script>
-<script src="js/main.js?v=0.10.2"></script>
+<script src="js/util.js?v=0.11"></script>
+<script src="js/data.js?v=0.11"></script>
+<script src="js/formulas.js?v=0.11"></script>
+<script src="js/state.js?v=0.11"></script>
+<script src="js/upgrades.js?v=0.11"></script>
+<script src="js/save.js?v=0.11"></script>
+<script src="js/audio.js?v=0.11"></script>
+<script src="js/game.js?v=0.11"></script>
+<script src="js/minigames.js?v=0.11"></script>
+<script src="js/ui.js?v=0.11"></script>
+<script src="js/input.js?v=0.11"></script>
+<script src="js/dev.js?v=0.11"></script>
+<script src="js/main.js?v=0.11"></script>
 </body>
 </html>

@@ -62,9 +62,14 @@ function saveGame() {
     return true;
   } catch (e) {
     console.error('Не удалось сохранить игру', e);
+    if (!saveWarned) {
+      saveWarned = true;
+      showError(new Error('не получается сохранить игру — память браузера недоступна или переполнена'));
+    }
     return false;
   }
 }
+let saveWarned = false;
 
 /** Загрузить сейв в G. Возвращает true, если сейв нашёлся. */
 function loadGame() {
@@ -81,6 +86,29 @@ function deleteAllSaves() {
   } catch (e) { /* хранилище недоступно — и так пусто */ }
   lastSaveTs = 0;
   nextSlot = 0;
+}
+
+// ===== Резервная копия текстом (на случай удаления иконки или смены телефона) =====
+
+const BACKUP_PREFIX = 'DRAGMET:';
+
+/** Сейв одной строкой, которую можно сохранить в заметки или переслать себе. */
+function exportSave() {
+  saveGame();
+  const json = JSON.stringify({ format: SAVE_FORMAT, ts: Date.now(), game: G });
+  return BACKUP_PREFIX + btoa(unescape(encodeURIComponent(json)));
+}
+
+/** Разобрать строку резервной копии. Возвращает готовое состояние или null, если строка кривая. */
+function parseBackup(text) {
+  try {
+    const raw = String(text || '').trim();
+    if (!raw.startsWith(BACKUP_PREFIX)) return null;
+    const data = JSON.parse(decodeURIComponent(escape(atob(raw.slice(BACKUP_PREFIX.length)))));
+    return isNewSave(data) ? sanitizeGame(data.game) : null;
+  } catch (e) {
+    return null;
+  }
 }
 
 // ===== Проверка загруженных данных =====

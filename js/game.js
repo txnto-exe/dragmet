@@ -282,7 +282,8 @@ function craftAmulet(key) {
 function grantAmulet(key) {
   const a = amuletDef(key);
   if (a.dur.prestiges) {
-    G.meta.amulets[key] = { prestigeLeft: a.dur.prestiges };
+    // «Дольше живут»: +1 престиж срока за уровень
+    G.meta.amulets[key] = { prestigeLeft: a.dur.prestiges + lv('forgeDuration') };
   } else {
     const ms = a.dur.hours * 3600000 * (1 + F.forgeDuration(lv('forgeDuration')));
     G.meta.amulets[key] = { expiresAt: Date.now() + ms };
@@ -355,10 +356,11 @@ function tickRegen(dt) {
     if (!ls.unlocked || ls.stock >= loc.stock) continue;
     ls.regenTimer += dt;
     const iv = locRegenInterval(loc);
-    if (ls.regenTimer >= iv) {
+    while (ls.regenTimer >= iv && ls.stock < loc.stock) {
       ls.regenTimer -= iv;
       ls.stock++;
     }
+    if (ls.stock >= loc.stock) ls.regenTimer = 0;
   }
 }
 
@@ -489,12 +491,30 @@ function factoryIncomePerHour() {
   return junkPerHour * yA * yF * autoSalePrice();
 }
 
-/** Начислить доход за время отсутствия. Возвращает данные для окна или null. */
-function applyOfflineIncome() {
-  const elapsedSec = (Date.now() - G.lastSeenTs) / 1000;
+/**
+ * Догнать время, пока игры не было на экране (свёрнута или закрыта).
+ *   • Меньше 5 минут — честно «проматываем» игру: процессы, работяги, фабрика идут как обычно.
+ *   • 5 минут и больше — начисляем оффлайн-доход по формуле, а начатые процессы
+ *     (кислота, печь) успевают закончиться и точки сбора восстанавливаются.
+ * Возвращает данные для окна «Пока тебя не было» или null.
+ */
+function catchUp() {
+  const elapsedMs = Math.max(0, Date.now() - G.lastSeenTs);
   G.lastSeenTs = Date.now();
-  if (elapsedSec < BAL.offlineMinSec) return null;
+  if (elapsedMs < BAL.offlineMinSec * 1000) {
+    for (let left = elapsedMs; left > 0; left -= 1000) tick(Math.min(1000, left));
+    return null;
+  }
+  tickVessels(G.run.acid, elapsedMs, amt => { G.run.solution += amt; });
+  tickVessels(G.run.fire, elapsedMs, amt => { G.run.ingots += amt; });
+  tickRegen(elapsedMs);
+  G.run.scavCd = 0;
+  tickForge();
+  return applyOfflineIncome(elapsedMs / 1000);
+}
 
+/** Начислить оффлайн-доход за elapsedSec секунд. Возвращает данные для окна или null. */
+function applyOfflineIncome(elapsedSec) {
   const hours = Math.min(elapsedSec / 3600, F.offlineHours(lv('offlineCap')));
   const manual = Math.floor(workersIncomePerHour() * hours * F.offlineRate(lv('offlineRate')) / 100);
   const auto = Math.floor(factoryIncomePerHour() * hours * BAL.autoOfflineRate);

@@ -5,9 +5,9 @@
    полоски из блоков, пиксельный шрифт. Размер «пикселя» — переменная --px.
    ===================================================================== */
 
-/* ===== Шрифт (Galmuri, лицензия OFL) ===== */
+/* ===== Шрифт (Galmuri, лицензия OFL). Жирного с кириллицей у него нет — жирный текст берёт тот же файл. ===== */
 @font-face{font-family:'Galmuri11';src:url('https://cdn.jsdelivr.net/npm/galmuri@2.39.5/dist/Galmuri11.woff2') format('woff2');font-weight:400;font-display:swap;}
-@font-face{font-family:'Galmuri11';src:url('https://cdn.jsdelivr.net/npm/galmuri@2.39.5/dist/Galmuri11-Bold.woff2') format('woff2');font-weight:700;font-display:swap;}
+@font-face{font-family:'Galmuri11';src:url('https://cdn.jsdelivr.net/npm/galmuri@2.39.5/dist/Galmuri11.woff2') format('woff2');font-weight:600 900;font-display:swap;}
 
 /* ===== Цвета и размеры ===== */
 :root{
@@ -537,3 +537,139 @@ header.has-prestige .hdr-money{flex-direction:column;gap:10px;}
 .price{font-size:var(--fs-s);white-space:nowrap;}
 .ingot-big small{font-family:var(--font);font-size:var(--fs-s);white-space:nowrap;}
 .upg-desc,.amulet-row .am-effect,.modal-desc,.hint,.offline-card .oc-note,.pg-hint,.mg-sub{font-size:var(--fs-xs);}
+
+/* =====================================================================
+   ФАКТУРА И ОБЪЁМ. Все текстуры — крошечные пиксельные картинки (SVG),
+   растянутые так, что один их пиксель = 2px экрана, как и рамки.
+   ===================================================================== */
+:root{
+  --tex-wall:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='16' viewBox='0 0 32 16' shape-rendering='crispEdges'%3E%3Crect width='32' height='16' fill='%2312170d'/%3E%3Crect x='0' y='7' width='32' height='1' fill='%230a0c07'/%3E%3Crect x='15' y='0' width='1' height='7' fill='%230a0c07'/%3E%3Crect x='31' y='0' width='1' height='7' fill='%230a0c07'/%3E%3Crect x='0' y='15' width='32' height='1' fill='%230a0c07'/%3E%3Crect x='7' y='8' width='1' height='7' fill='%230a0c07'/%3E%3Crect x='23' y='8' width='1' height='7' fill='%230a0c07'/%3E%3Crect x='0' y='0' width='15' height='1' fill='%23171d12'/%3E%3Crect x='16' y='0' width='15' height='1' fill='%23171d12'/%3E%3Crect x='0' y='8' width='7' height='1' fill='%23171d12'/%3E%3Crect x='8' y='8' width='15' height='1' fill='%23171d12'/%3E%3Crect x='24' y='8' width='7' height='1' fill='%23171d12'/%3E%3Crect x='4' y='3' width='1' height='1' fill='%230f1309'/%3E%3Crect x='10' y='5' width='1' height='1' fill='%230f1309'/%3E%3Crect x='20' y='2' width='1' height='1' fill='%230f1309'/%3E%3Crect x='27' y='4' width='1' height='1' fill='%230f1309'/%3E%3Crect x='3' y='12' width='1' height='1' fill='%230f1309'/%3E%3Crect x='14' y='10' width='1' height='1' fill='%230f1309'/%3E%3Crect x='19' y='13' width='1' height='1' fill='%230f1309'/%3E%3Crect x='29' y='11' width='1' height='1' fill='%230f1309'/%3E%3Crect x='11' y='2' width='1' height='1' fill='%230f1309'/%3E%3Crect x='25' y='6' width='1' height='1' fill='%230f1309'/%3E%3C/svg%3E");
+  --tex-noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' shape-rendering='crispEdges'%3E%3Crect x='1' y='2' width='1' height='1' fill='rgba(255,255,255,0.035)'/%3E%3Crect x='5' y='6' width='1' height='1' fill='rgba(255,255,255,0.035)'/%3E%3Crect x='6' y='1' width='1' height='1' fill='rgba(255,255,255,0.035)'/%3E%3Crect x='2' y='5' width='1' height='1' fill='rgba(255,255,255,0.035)'/%3E%3Crect x='3' y='3' width='1' height='1' fill='rgba(0,0,0,0.14)'/%3E%3Crect x='7' y='4' width='1' height='1' fill='rgba(0,0,0,0.14)'/%3E%3Crect x='0' y='7' width='1' height='1' fill='rgba(0,0,0,0.14)'/%3E%3Crect x='4' y='0' width='1' height='1' fill='rgba(0,0,0,0.14)'/%3E%3C/svg%3E");
+  --tex-dither:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='2' height='2' viewBox='0 0 2 2' shape-rendering='crispEdges'%3E%3Crect x='0' y='0' width='1' height='1' fill='rgba(0,0,0,0.22)'/%3E%3Crect x='1' y='1' width='1' height='1' fill='rgba(0,0,0,0.22)'/%3E%3C/svg%3E");
+  --tex-dither-light:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='2' height='2' viewBox='0 0 2 2' shape-rendering='crispEdges'%3E%3Crect x='0' y='0' width='1' height='1' fill='rgba(255,255,255,0.07)'/%3E%3Crect x='1' y='1' width='1' height='1' fill='rgba(255,255,255,0.07)'/%3E%3C/svg%3E");
+  --tex-bolt:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='3' height='3' viewBox='0 0 3 3' shape-rendering='crispEdges'%3E%3Crect x='1' y='0' width='1' height='1' fill='%237d8566'/%3E%3Crect x='0' y='1' width='1' height='1' fill='%237d8566'/%3E%3Crect x='1' y='1' width='1' height='1' fill='%234f5640'/%3E%3Crect x='2' y='1' width='1' height='1' fill='%23262c1c'/%3E%3Crect x='1' y='2' width='1' height='1' fill='%23262c1c'/%3E%3C/svg%3E");
+  --tex-plate:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4' shape-rendering='crispEdges'%3E%3Crect x='0' y='1' width='4' height='1' fill='rgba(255,255,255,0.03)'/%3E%3Crect x='0' y='3' width='4' height='1' fill='rgba(0,0,0,0.18)'/%3E%3C/svg%3E");
+}
+
+/* Фон: тёмная кирпичная стена */
+body{background-color:#0d100a;background-image:var(--tex-wall);background-size:64px 32px;}
+
+/* Объём: блик сверху (--hl) и тень снизу (--sh) внутри рамки.
+   Выпуклое — светлый верх, тёмный низ. Утопленное (ячейки, полоски) — наоборот. */
+.panel,.menu-btn,.hdr-plate,.gear-btn,.loc-card,.loc-nav-btn,.dig-btn,.toast,.inv-item,.auto-stage,
+.stage-icon,.stage-btn,.sell-btn,.upg-btn,.inv-line,.subtabs,.prest-status,.prest-btn,.offline-card,
+.offline-claim,.oc-breakdown,.pg-card,.pg-stop,.pg-bar,.forge-frame,.amulet-row-wrap,.am-icon,.am-btn,
+.rec-chip,.craft-status,.modal-card,.modal-btn,.modal-close,.mg-card,.amg-flask,.amg-btn,.fmg-bar,
+.fmg-progress,.fmg-btn,.tab-badge,.error-banner,.bar,.loc-stock-bar,.cap-bar,.as-bar,.cs-bar,
+.switch-slider,.tab-btn.center .tab-ic{
+  --hl:transparent;--sh:transparent;
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--fc),
+    0 var(--px) 0 0 var(--fc),
+    calc(var(--px) * -1) 0 0 0 var(--fc),
+    var(--px) 0 0 0 var(--fc),
+    0 calc(var(--px) * 2) 0 0 var(--fd),
+    inset 0 var(--px) 0 0 var(--hl),
+    inset 0 calc(var(--px) * -1) 0 0 var(--sh);
+}
+/* выпуклые кнопки */
+.menu-btn,.loc-nav-btn,.dig-btn,.stage-btn,.sell-btn,.upg-btn,.prest-btn,.offline-claim,.pg-stop,
+.am-btn,.modal-btn,.modal-close,.amg-btn,.fmg-btn,.gear-btn,.tab-btn.center .tab-ic{
+  --hl:rgba(255,255,255,0.38);--sh:rgba(0,0,0,0.30);
+}
+.menu-btn:active:not(:disabled),.loc-nav-btn:active:not(:disabled),.dig-btn:active:not(:disabled),
+.stage-btn:active:not(:disabled),.sell-btn:active:not(:disabled),.upg-btn:active:not(:disabled),
+.prest-btn:active:not(:disabled),.offline-claim:active,.pg-stop:active:not(:disabled),
+.am-btn:active:not(:disabled),.modal-btn:active,.modal-close:active,.amg-btn:active,.fmg-btn:active{
+  --hl:rgba(0,0,0,0.25);--sh:transparent;
+}
+.dig-btn:disabled,.stage-btn:disabled,.sell-btn:disabled,.upg-btn:disabled,.prest-btn:disabled,
+.pg-stop:disabled,.am-btn:disabled{--hl:rgba(255,255,255,0.05);--sh:rgba(0,0,0,0.2);}
+/* выпуклые плашки и окна */
+.panel,.hdr-plate,.loc-card,.auto-stage,.prest-status,.craft-status,.offline-card,.pg-card,.modal-card,.mg-card,.toast{
+  --hl:rgba(255,255,255,0.07);--sh:rgba(0,0,0,0.35);
+}
+/* утопленные ячейки и полоски */
+.inv-item,.inv-line,.stage-icon,.subtabs,.oc-breakdown,.pg-bar,.bar,.loc-stock-bar,.cap-bar,.as-bar,.cs-bar,
+.fmg-bar,.fmg-progress,.amg-flask,.am-icon,.rec-chip,.switch-slider{
+  --hl:rgba(0,0,0,0.45);--sh:rgba(255,255,255,0.06);
+}
+
+/* Фактура на панелях и карточках */
+.panel,.loc-card,.auto-stage,.prest-status,.craft-status,.offline-card,.pg-card,.modal-card,.mg-card,.amulet-row{
+  background-image:var(--tex-noise);background-size:16px 16px;
+}
+.inv-item,.inv-line{background-color:#151b0f;background-image:var(--tex-noise);background-size:16px 16px;}
+.inv-line.locked{background-color:#140f0c;}
+
+/* Заклёпки по углам панелей */
+.panel::before{
+  content:"";position:absolute;inset:4px;pointer-events:none;z-index:2;
+  background-image:var(--tex-bolt),var(--tex-bolt),var(--tex-bolt),var(--tex-bolt);
+  background-size:6px 6px;background-repeat:no-repeat;
+  background-position:left top,right top,left bottom,right bottom;
+}
+
+/* Цвет раздела: у каждой вкладки свой. Шапка панели — цветная полоса с дизером. */
+.panel{--ac:#8a6a3a;--ac-dark:#3a2a14;--ac-text:#f0d8a8;}
+[data-tab="dig"] .panel{--ac:#b07a3c;--ac-dark:#3d2812;--ac-text:#ffd9a0;}
+[data-tab="acid"] .panel{--ac:var(--acid);--ac-dark:#25360d;--ac-text:var(--acid-bright);}
+[data-tab="fire"] .panel{--ac:var(--fire);--ac-dark:#40220c;--ac-text:#ffc489;}
+[data-tab="fire"] .panel:nth-of-type(2){--ac:var(--gold);--ac-dark:#3d300a;--ac-text:var(--gold-bright);}
+[data-tab="upg"] .panel{--ac:#4fa3b8;--ac-dark:#123038;--ac-text:#9fe3f2;}
+#upgPrestPanel,#autoAcidPanel,#autoFirePanel{--ac:var(--prest);--ac-dark:#2c1a45;--ac-text:var(--prest-bright);}
+[data-tab="forge"] .panel{--ac:#d0703a;--ac-dark:#3d1c0c;--ac-text:#ffb27a;}
+.panel{--fc:var(--ac-dark);}
+
+.panel-title{
+  margin:-14px -14px 14px;padding:10px 16px 9px;
+  background-color:var(--ac-dark);background-image:var(--tex-dither-light);background-size:4px 4px;
+  color:var(--ac-text);text-shadow:2px 2px 0 rgba(0,0,0,0.6);
+  box-shadow:inset 0 -2px 0 0 var(--ac),inset 0 2px 0 0 rgba(255,255,255,0.08);
+  position:relative;z-index:1;
+}
+.panel-title b{color:var(--gold-bright);}
+
+/* Подзаголовки аккордеонов в прокачке — полосы с дизером */
+.acc-head{margin:0 -14px;padding:13px 14px;border-bottom:none;
+  background-image:var(--tex-dither);background-size:4px 4px;
+  box-shadow:inset 0 -2px 0 0 rgba(0,0,0,0.35),inset 0 2px 0 0 rgba(255,255,255,0.04);}
+.acc-head .acc-title{color:var(--ac-text);}
+.acc-head .acc-arrow{color:var(--ac);}
+.acc-head.prest .acc-title{color:var(--prest-bright);}
+.acc-head.prest .acc-arrow{color:var(--prest);}
+.acc-head:first-child{margin-top:-14px;}
+
+/* Полоски: блик сверху и тень снизу на заливке */
+.bar-fill,.loc-stock-fill,.cap-fill,.as-bar-fill,.cs-bar-fill,.fmg-progress-fill,.tab-prog span{
+  background:
+    linear-gradient(180deg,rgba(255,255,255,0.4) 0 2px,transparent 2px calc(100% - 2px),rgba(0,0,0,0.3) calc(100% - 2px)),
+    repeating-linear-gradient(90deg,var(--c1) 0 6px,var(--c2) 6px 8px);
+}
+
+/* Шапка и таббар — тёмная металлическая плита */
+header{background-color:#0a0d07;background-image:var(--tex-plate);background-size:8px 8px;
+  box-shadow:0 2px 0 0 #2a331d,0 4px 0 0 #050604;}
+.tabbar{background-color:#0a0d07;background-image:var(--tex-plate);background-size:8px 8px;
+  box-shadow:0 -2px 0 0 #2a331d,0 -4px 0 0 #050604;}
+.tab-btn.active:not(.center){background:rgba(168,214,74,0.08);
+  box-shadow:inset 0 2px 0 0 rgba(0,0,0,0.5),inset 0 -2px 0 0 var(--acid);}
+
+/* Плашки денег и слитков: выпуклые, с дизером */
+.hdr-plate{background-image:var(--tex-dither-light);background-size:4px 4px;}
+.hdr-plate-cash{background-color:#2a220a;}
+.hdr-plate-ingot{background-color:#1d2a0c;}
+.hdr-plate-prest{background-color:#22163a;}
+
+/* Кнопки: светлая верхняя половина — «глянец» */
+.menu-btn,.dig-btn,.stage-btn.ready,.sell-btn,.upg-btn,.prest-btn,.offline-claim,.pg-stop,.am-btn.craft,.am-btn.equip{
+  background-image:linear-gradient(180deg,rgba(255,255,255,0.12) 0 50%,transparent 50%);
+}
+
+/* Карточки локаций */
+.loc-card.active{background-color:#3a2a14;--fc:#e0a050;}
+.loc-card.locked{background-image:var(--tex-dither);background-size:4px 4px;}
+
+/* Меню: логотип с пиксельной обводкой */
+.menu-logo h1{text-shadow:2px 0 0 #050604,-2px 0 0 #050604,0 2px 0 #050604,0 -2px 0 #050604,4px 4px 0 #3c4a29;}
+.menu-logo h1 span{text-shadow:2px 0 0 #050604,-2px 0 0 #050604,0 2px 0 #050604,0 -2px 0 #050604,4px 4px 0 var(--rust-dark);}

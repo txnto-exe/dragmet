@@ -28,6 +28,11 @@ const ACTIONS = {
   'open-album': () => openAlbum(),
   'close-album': () => el('albumModal').classList.remove('show'),
   'close-cut': () => { if (cut.canClose) closePrestigeCut(); },
+  'dlg-next': () => dialogNext(),
+  'open-camp': () => openCamp(),
+  'close-camp': () => closeCamp(),
+  'order-give': () => giveOrder(),
+  'order-skip': () => skipOrder(),
   'tip-ok': () => dismissTip(),
   'to-menu': () => { saveGame(); closeSettings(); showScreen('menu'); },
   'reset-all': () => {
@@ -89,7 +94,11 @@ const ACTIONS = {
 /** Действия по data-press (срабатывают сразу, с турбо-пальцем повторяются). */
 const PRESS = {
   // Копать можно, только если на экране открытая точка
-  dig: () => { if (G.run.locs[LOCATIONS[G.ui.locView].key].unlocked) dig(); },
+  dig: e => {
+    if (cop.state === 'alert') return hideSack();
+    if (e && e.target && e.target.id === 'digCanvas' && shnyrHit(e.clientX, e.clientY)) return chaseShnyr();
+    if (G.run.locs[LOCATIONS[G.ui.locView].key].unlocked) dig();
+  },
   sell: () => sellIngots(),
 };
 
@@ -107,7 +116,7 @@ function cancelAllPress() {
 }
 
 function overlayOpen() {
-  return isPriceGameOpen() || isMinigameOpen();
+  return isPriceGameOpen() || isMinigameOpen() || isDialogOpen();
 }
 
 function onPointerDown(e) {
@@ -119,7 +128,7 @@ function onPointerDown(e) {
   const pressEl = e.target.closest('[data-press]');
   if (pressEl && !pressEl.disabled && !overlayOpen()) {
     const action = PRESS[pressEl.dataset.press];
-    const fn = () => safely(action);
+    const fn = () => safely(() => action(e));
     press.isPress = true;
     press.pressFn = fn;
     press.fired = false;

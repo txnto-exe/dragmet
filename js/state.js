@@ -32,6 +32,8 @@ function makeRun() {
     locs,
     scavCd: 0,             // сколько мс ещё ждать до следующей копки
     lv: {},                // уровни обычных прокачек (заполняет upgrades.js)
+    order: null,           // заказ Зины: { items: { ключ: штук }, reward }
+    orderNext: 0,          // когда Зина придумает следующий заказ (Date.now)
   };
 }
 
@@ -52,6 +54,8 @@ function makeMeta() {
     crafts: [],            // что сейчас куётся: [{ id, startedAt, duration }]
     found: {},             // альбом: сколько всего найдено каждого предмета { ключ: штук }
     tips: {},              // какие подсказки новичку уже показаны { id: true }; all — все
+    crew: {},              // кто прибился к бочке { id: когда }
+    story: { intro: false, veteran: false, shnyrChases: 0, call: 0, zhora: false },
   };
 }
 

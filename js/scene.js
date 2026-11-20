@@ -568,6 +568,21 @@ function heroSwap(p = G.meta.prestige) {
   return swap;
 }
 const WORKER_SWAP = { h: '#5a3a8a', i: '#8a6ac8', c: '#5a5e66', d: '#3a3e46' };
+// У каждой точки свой работяга: во дворе — Колян, дальше — разные мужики из бригады
+const WORKER_LOOKS = [
+  null,
+  { h: '#6a6a2a', i: '#8a8a3a', c: '#6a3a2a', d: '#4a2618', g: '#3a2a1a', f: '#4a3a2a' },
+  { h: '#2a2a2a', i: '#e8e8e0', c: '#3a5a5a', d: '#243c3c', g: '#7a7a72', f: '#9a9a90' },
+  { h: '#8a2a6a', i: '#b04a8a', c: '#5a5e66', d: '#3a3e46', g: '#5a4030', f: '#6a5040' },
+  { h: '#d89868', i: '#5a4030', c: '#2a4a2a', d: '#1a321a', g: '#5a4030', f: '#6a5040' },
+  { h: '#c87a2a', i: '#e8a050', c: '#4a4a6a', d: '#30304a', g: '#c0c0b8', f: '#e0e0d8' },
+  { h: '#3a6a3a', i: '#5a8a5a', c: '#7a6a5a', d: '#5a4a3a', g: '#3a2a1a', f: '#4a3a2a' },
+  { h: '#1e2a4a', i: '#2e3e6a', c: '#6a6a72', d: '#4a4a52', g: '#9a9a90', f: '#b8b8b0' },
+  { h: '#5a3a8a', i: '#8a6ac8', c: '#5a5e66', d: '#3a3e46' },
+];
+function workerLook(i) {
+  return i === 0 ? CREW_LOOK.kolyan : (WORKER_LOOKS[i] || WORKER_SWAP);
+}
 
 function drawDigScene(ctx, w, h, t, dt, scene) {
   const loc = LOCATIONS[G.ui.locView];
@@ -629,9 +644,10 @@ function drawDigScene(ctx, w, h, t, dt, scene) {
   if (ls.unlocked && G.meta.autoDig[loc.key]) {
     // работяга копает с другой стороны
     const wf = Math.floor(t / 320) % 3;
-    drawSprite(ctx, wf === 0 ? 'heroDig1' : wf === 1 ? 'heroDig2' : 'heroIdle', px + 12, groundY - 26, { swap: WORKER_SWAP }, true);
+    drawSprite(ctx, wf === 0 ? 'heroDig1' : wf === 1 ? 'heroDig2' : 'heroIdle', px + 12, groundY - 26, { swap: workerLook(G.ui.locView) }, true);
   }
   if (!(ls.unlocked && G.run.activeLoc === loc.key)) scene.state.hero = null;
+  if (ls.unlocked) drawStoryActors(ctx, scene, w, groundY, px, dt, t);
   drawCat(ctx, scene, w, groundY + 2, dt);
   if (!ls.unlocked) {
     ctx.fillStyle = 'rgba(6,8,12,0.55)';
@@ -1040,7 +1056,7 @@ function drawMenuScene(ctx, w, h, t, dt, scene) {
     return true;
   });
   // герой греет руки
-  drawSprite(ctx, Math.floor(t / 800) % 2 ? 'heroIdle' : 'heroIdle2', bx - 20, by - 12);
+  drawCampCrew(ctx, bx, by, t, campCrewNow());
   drawWeather(ctx, scene, w, h, dt);
 }
 

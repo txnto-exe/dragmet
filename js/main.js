@@ -29,6 +29,7 @@ function resetGame() {
   session.graceUntil = { acid: 0, fire: 0 };
   stopAllLoops();
   cancelAllPress();
+  resetStory();
   closeAnyMinigame();
   closePriceGame();
   updateBloom();
@@ -50,6 +51,7 @@ function loop(now) {
     if (currentScreen === 'game') {
       tick(dt);
       render();
+      storyTick(dt);
       sinceSave += dt;
       if (sinceSave > AUTOSAVE_MS) {
         sinceSave = 0;
@@ -95,6 +97,8 @@ function boot() {
   const found = findBestSave();   // заодно узнаём, в какой слот писать дальше
 
   lastSaveTs = found ? found.ts : 0;
+  const fm = found && found.game && found.game.meta;
+  menuSaveCrew = fm && fm.crew && typeof fm.crew === 'object' ? fm.crew : {};
 
   buildUi();
   initInput();

@@ -417,7 +417,7 @@ const TIPS = [
   { id: 'upg', when: () => currentTab !== 'upg' && UPGRADES.some(u => u.currency === 'cash' && upgVisible(u) && upgUnlocked(u) && !upgMaxed(u) && G.run.cash >= upgCost(u)),
     text: 'Хватает денег на прокачку — загляни во вкладку «Прокачка».' },
   { id: 'prest', when: () => !isMaxPrestige() && G.run.cash >= F.prestigeThreshold(G.meta.prestige),
-    text: 'Можно сделать престиж: «Прокачка» → «Престиж». Начнёшь заново, но сильнее.' },
+    text: 'Хватает на взнос Хозяину: «Прокачка» → «Престиж». Начнёшь заново, но сильнее.' },
 ];
 let tipShown = null;
 
@@ -425,7 +425,7 @@ function renderTip() {
   const box = el('tipBox');
   const seen = G.meta.tips;
   let tip = null;
-  if (!seen.all && currentScreen === 'game' && !isMinigameOpen() && !isPriceGameOpen() && !cut.open) {
+  if (!seen.all && currentScreen === 'game' && !isMinigameOpen() && !isPriceGameOpen() && !cut.open && !isDialogOpen()) {
     tip = TIPS.find(x => !seen[x.id] && x.when()) || null;
   }
   // Подсказка пропала сама — значит, игрок сделал, что советовали
@@ -455,6 +455,7 @@ function render() {
   else if (currentTab === 'fire') renderFire();
   else if (currentTab === 'upg') renderUpgrades();
   renderBadges();
+  if (currentTab === 'dig') renderOrder();
   renderTip();
 }
 
@@ -539,6 +540,7 @@ function renderDig() {
   setText('capAutoVal', `${Math.floor(G.meta.auto.junk)} / ${autoCap()}`);
   setText('capManVal', `${totalJunk()} / ${capMax()}`);
   setText('albumBtn', `Альбом ${ITEM_KEYS.filter(k => G.meta.found[k]).length}/${ITEM_KEYS.length}`);
+  setText('campBtn', `Лагерь ${CREW.filter(c => crewHas(c.id)).length}/${CREW.length}`);
   for (const k of ITEM_KEYS) {
     setText(ui.invCells[k].n, G.run.junk[k]);
     toggleClass(ui.invCells[k].cell, 'empty', G.run.junk[k] === 0);
@@ -698,12 +700,14 @@ function renderUpgrades() {
   setText('psBonus', '+' + parseFloat(prestigeBonusPct().toFixed(2)) + '%');
   setText('psThreshold', maxed ? '—' : fmt(thr) + ' ₽');
   setText('psReward', maxed ? '—' : F.prestigeReward(G.meta.prestige + 1));
-  setText('prestThresholdInfo', maxed ? 'Максимум достигнут · сбросить нельзя'
-    : `Порог: ${fmt(thr)} ₽ · сбросит всё кроме прокачек Престижа и амулетов`);
+  setText('prestThresholdInfo', maxed ? 'Долг закрыт. Палыч свободен.'
+    : `Взнос: ${fmt(thr)} ₽ · сбросит всё, кроме прокачек Престижа, амулетов и бригады`);
+  setText('psDebt', maxed ? 'выплачен!' : `осталось ${debtLeft()} из ${BAL.prestigeMaxLevel}`);
+  el('psDebtFill').style.width = (G.meta.prestige / BAL.prestigeMaxLevel * 100) + '%';
   setDisabled('prestBtn', maxed || G.run.cash < thr);
-  setText('prestBtn', maxed ? `★ ФИНАЛ — престиж ${BAL.prestigeMaxLevel}`
-    : G.run.cash < thr ? `Нужно ${fmt(thr)} ₽ (сейчас ${fmt(Math.floor(G.run.cash))})`
-    : `Сделать престиж → получить ${F.prestigeReward(G.meta.prestige + 1)} очков`);
+  setText('prestBtn', maxed ? `★ Долг закрыт — ${BAL.prestigeMaxLevel} взносов`
+    : G.run.cash < thr ? `Нужно ${fmt(thr)} ₽ на взнос (сейчас ${fmt(Math.floor(G.run.cash))})`
+    : `Внести взнос Хозяину → +${F.prestigeReward(G.meta.prestige + 1)} очков`);
 }
 
 // --- Кузница ---

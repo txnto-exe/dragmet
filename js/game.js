@@ -63,6 +63,13 @@ function scavengeOnce(loc, byWorker) {
   sceneOnFind(item, isDouble);
   sndFind(item);
   if (isDouble) sndDoubleDrop();
+  // Кот Помойка иногда притаскивает что-нибудь сам
+  if (crewHas('cat') && Math.random() < 0.04 && totalJunk() < capMax()) {
+    const extra = pickLoot(loc);
+    G.run.junk[extra]++;
+    G.meta.found[extra] = (G.meta.found[extra] || 0) + 1;
+    setTimeout(() => flashToast(`Помойка притащил: ${ITEMS[extra].name}`, ITEMS[extra].tier, extra), 900);
+  }
   return true;
 }
 
@@ -210,6 +217,7 @@ function finishSale(price, hit, msg) {
   G.run.ingots = 0;
   sndCoins(); bumpCash(); flashSellBtn();
   sceneOnSale(hit);
+  storyOnSale();
   saveGame();
   flashToast(`${msg} +${fmt(Math.floor(earned))} ₽`, hit ? 'lg' : null);
 }
@@ -228,6 +236,7 @@ function doPrestige() {
   const reward = F.prestigeReward(level);
   G.meta.prestige = level;
   G.meta.points += reward;
+  G.meta.story.call = level;   // после катсцены позвонит Хозяин
   G.meta.forgeUnlocked = true;
   for (const loc of LOCATIONS) G.meta.autoTimers[loc.key] = 0;
 
@@ -367,7 +376,7 @@ function tickRegen(dt) {
 
 /** Работяги за рубли: копают в своей точке, не тратя её запас. */
 function tickWorkers(dt) {
-  const cd = F.workerCd(lv('autoSpeed'));
+  const cd = F.workerCd(lv('autoSpeed')) * crewWorkerMult();
   for (const loc of LOCATIONS) {
     if (!G.meta.autoDig[loc.key] || !G.run.locs[loc.key].unlocked) continue;
     G.meta.autoTimers[loc.key] += dt;
@@ -468,7 +477,7 @@ function tick(dt) {
 /** Сколько ₽ в час приносят работяги за рубли (до коэффициента оффлайна). */
 function workersIncomePerHour() {
   let gold = 0;
-  const digsPerHour = 3600000 / Math.max(F.workerCd(lv('autoSpeed')), 100);
+  const digsPerHour = 3600000 / Math.max(F.workerCd(lv('autoSpeed')) * crewWorkerMult(), 100);
   for (const loc of LOCATIONS) {
     if (!G.meta.autoDig[loc.key] || !G.run.locs[loc.key].unlocked) continue;
     let totalW = 0, avgGold = 0;
@@ -517,8 +526,8 @@ function catchUp() {
 /** Начислить оффлайн-доход за elapsedSec секунд. Возвращает данные для окна или null. */
 function applyOfflineIncome(elapsedSec) {
   const hours = Math.min(elapsedSec / 3600, F.offlineHours(lv('offlineCap')));
-  const manual = Math.floor(workersIncomePerHour() * hours * F.offlineRate(lv('offlineRate')) / 100);
-  const auto = Math.floor(factoryIncomePerHour() * hours * BAL.autoOfflineRate);
+  const manual = Math.floor(workersIncomePerHour() * hours * F.offlineRate(lv('offlineRate')) / 100 * crewOfflineMult());
+  const auto = Math.floor(factoryIncomePerHour() * hours * BAL.autoOfflineRate * crewOfflineMult());
   const total = manual + auto;
   if (total <= 0) return null;
   G.run.cash += total;

@@ -158,6 +158,12 @@ function sanitizeGame(src) {
     }
   }
   if (locDef(run.activeLoc) && g.run.locs[run.activeLoc].unlocked) g.run.activeLoc = run.activeLoc;
+  if (isObj(run.order) && isObj(run.order.items) && isNum(run.order.reward)) {
+    const items = {};
+    for (const k in run.order.items) if (ITEMS[k] && isNum(run.order.items[k]) && run.order.items[k] > 0) items[k] = Math.floor(run.order.items[k]);
+    if (Object.keys(items).length) g.run.order = { items, reward: Math.floor(run.order.reward) };
+  }
+  g.run.orderNext = num(run.orderNext);
 
   // --- Навсегда ---
   g.meta.prestige = clamp(Math.floor(num(meta.prestige)), 0, BAL.prestigeMaxLevel);
@@ -179,6 +185,19 @@ function sanitizeGame(src) {
     g.meta.crafts = meta.crafts
       .filter(c => isObj(c) && amuletDef(c.id) && isNum(c.startedAt) && isNum(c.duration))
       .map(c => ({ id: c.id, startedAt: c.startedAt, duration: c.duration }));
+  }
+  if (isObj(meta.crew)) for (const c of CREW) if (meta.crew[c.id]) g.meta.crew[c.id] = num(meta.crew[c.id], 1);
+  if (isObj(meta.story)) {
+    const s = meta.story, d = g.meta.story;
+    d.intro = !!s.intro;
+    d.veteran = !!s.veteran;
+    d.shnyrChases = Math.max(0, Math.floor(num(s.shnyrChases)));
+    d.call = clamp(Math.floor(num(s.call)), 0, BAL.prestigeMaxLevel);
+    d.zhora = !!s.zhora;
+  } else {
+    // сейв до появления истории: игрок уже в деле, покажем короткую версию завязки
+    g.meta.story.veteran = true;
+    g.meta.story.zhora = true;
   }
   if (isObj(meta.tips)) {
     for (const k in meta.tips) if (meta.tips[k] === true) g.meta.tips[k] = true;

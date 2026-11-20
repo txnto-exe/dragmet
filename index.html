@@ -46,7 +46,7 @@
 })();
 </script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=0.16">
+<link rel="stylesheet" href="css/style.css?v=0.17">
 </head>
 <body>
 
@@ -96,6 +96,26 @@
       <button class="modal-btn danger" data-action="reset-all" type="button">Сбросить</button>
     </div>
     <button class="modal-close" data-action="close-settings" type="button">Закрыть</button>
+  </div>
+</div>
+
+<!-- ===== Диалог (сценки с персонажами) ===== -->
+<div class="dlg-overlay" id="dlgOverlay" data-action="dlg-next">
+  <div class="dlg-box">
+    <img class="dlg-face" id="dlgFace" width="48" height="48" alt="">
+    <div class="dlg-main"><div class="dlg-name" id="dlgName"></div><div class="dlg-text" id="dlgText"></div></div>
+    <div class="dlg-more">▼</div>
+  </div>
+</div>
+
+<!-- ===== Лагерь у бочки ===== -->
+<div class="modal-overlay" id="campModal">
+  <div class="modal-card camp-card">
+    <h2 class="modal-title">Лагерь у бочки</h2>
+    <div class="camp-sub" id="campSub"></div>
+    <div class="camp-scene"><canvas id="campCanvas"></canvas></div>
+    <div class="camp-list" id="campList"></div>
+    <button class="modal-close" data-action="close-camp" type="button">Закрыть</button>
   </div>
 </div>
 
@@ -235,7 +255,7 @@
     <div class="panel">
       <p class="panel-title" id="forgePanelTitle">Кузница</p>
       <div id="craftStatusBox"></div>
-      <div class="empty-note forge-locked-note" id="forgeLockedNote"><div class="lock-big"><img data-icon="lock" data-scale="3" alt=""></div>Откроется после первого престижа</div>
+      <div class="empty-note forge-locked-note" id="forgeLockedNote"><div class="lock-big"><img data-icon="lock" data-scale="3" alt=""></div>Михалыч придёт после первого взноса Хозяину</div>
       <div id="amuletList"></div>
     </div>
   </section>
@@ -257,6 +277,7 @@
         <div class="scene-lock-note" id="locDiscount"></div>
       </div>
       <div class="scene-dots" id="locDots"></div>
+      <div class="cop-alert" id="copAlert">ШУХЕР! Тапай — прячь мешок!<span class="cop-bar"></span></div>
     </div>
     <div class="panel dig-panel">
       <button class="dig-btn" id="digBtn" data-press="dig" type="button"><div class="dig-fill" id="digFill"></div><span class="dig-label" id="digLabel">Порыться</span></button>
@@ -269,8 +290,16 @@
           <span class="cap-cell-k">склад</span><span class="cap-cell-v" id="capManVal">0 / 15</span>
         </div>
         <button class="album-btn" id="albumBtn" data-action="open-album" type="button">Альбом</button>
+        <button class="album-btn camp-btn" id="campBtn" data-action="open-camp" type="button">Лагерь</button>
       </div>
       <div class="inv-row" id="invRow"></div>
+    </div>
+    <div class="panel order-panel hidden" id="orderPanel">
+      <div class="order-head"><img class="order-face" id="orderFace" width="48" height="48" alt=""><div class="order-body"><div class="order-who" id="orderWho">Зина просит:</div><div class="order-items" id="orderItems"></div></div></div>
+      <div class="order-actions" id="orderActions">
+        <button class="order-btn" id="orderBtn" data-action="order-give" type="button">Отдать</button>
+        <button class="order-skip" data-action="order-skip" type="button">Другое</button>
+      </div>
     </div>
   </section>
 
@@ -339,6 +368,7 @@
         <div class="ps-line"><span>Бонус к продаже</span><span id="psBonus">+0%</span></div>
         <div class="ps-line"><span>Порог следующего</span><span id="psThreshold">—</span></div>
         <div class="ps-line"><span>Награда за следующий</span><span id="psReward">—</span></div>
+        <div class="ps-debt"><div class="ps-line"><span>Долг Хозяину</span><span id="psDebt">—</span></div><div class="ps-debt-bar"><span id="psDebtFill"></span></div></div>
         <button class="prest-btn" id="prestBtn" data-action="prestige" type="button">Престиж</button>
         <div class="ps-foot" id="prestThresholdInfo"></div>
       </div>
@@ -360,20 +390,21 @@
   Порядок важен: каждый следующий файл пользуется тем, что объявлено в предыдущих.
   dev.js — DEV-консоль для тестов. Перед релизом просто удалить эту строку (и сам файл).
 -->
-<script src="js/util.js?v=0.16"></script>
-<script src="js/data.js?v=0.16"></script>
-<script src="js/art.js?v=0.16"></script>
-<script src="js/formulas.js?v=0.16"></script>
-<script src="js/state.js?v=0.16"></script>
-<script src="js/upgrades.js?v=0.16"></script>
-<script src="js/save.js?v=0.16"></script>
-<script src="js/audio.js?v=0.16"></script>
-<script src="js/game.js?v=0.16"></script>
-<script src="js/minigames.js?v=0.16"></script>
-<script src="js/scene.js?v=0.16"></script>
-<script src="js/ui.js?v=0.16"></script>
-<script src="js/input.js?v=0.16"></script>
-<script src="js/dev.js?v=0.16"></script>
-<script src="js/main.js?v=0.16"></script>
+<script src="js/util.js?v=0.17"></script>
+<script src="js/data.js?v=0.17"></script>
+<script src="js/art.js?v=0.17"></script>
+<script src="js/formulas.js?v=0.17"></script>
+<script src="js/state.js?v=0.17"></script>
+<script src="js/upgrades.js?v=0.17"></script>
+<script src="js/save.js?v=0.17"></script>
+<script src="js/audio.js?v=0.17"></script>
+<script src="js/game.js?v=0.17"></script>
+<script src="js/minigames.js?v=0.17"></script>
+<script src="js/scene.js?v=0.17"></script>
+<script src="js/story.js?v=0.17"></script>
+<script src="js/ui.js?v=0.17"></script>
+<script src="js/input.js?v=0.17"></script>
+<script src="js/dev.js?v=0.17"></script>
+<script src="js/main.js?v=0.17"></script>
 </body>
 </html>

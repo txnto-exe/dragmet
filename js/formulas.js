@@ -103,7 +103,7 @@ function prestigeBonusPct() {
 
 /** Множитель цены продажи: бонус престижа × репутация. */
 function priceMultiplier() {
-  return (1 + prestigeBonusPct() / 100) * (1 + F.reputation(lv('reputation')) / 100);
+  return (1 + prestigeBonusPct() / 100) * (1 + F.reputation(lv('reputation')) / 100) * crewPriceMult();
 }
 
 function isMaxPrestige() {
@@ -115,7 +115,7 @@ function locUnlockCost(loc) {
 }
 
 function locRegenInterval(loc) {
-  return F.regenInterval(loc, G.run.locs[loc.key].regenLv);
+  return F.regenInterval(loc, G.run.locs[loc.key].regenLv) * crewRegenMult();
 }
 
 function maxForges() {

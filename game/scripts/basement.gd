@@ -14,9 +14,13 @@ const DOOR_W := 0.9
 const DOOR_H := 2.05
 
 const STALL_Z := [-3.6, -2.0, -0.4, 1.2, 2.8]
-const STALL_LEN := 1.1    # длина прилавка вдоль стены
+const STALL_LEN := 1.0    # длина прилавка вдоль стены (между прилавками проход 0.6 м)
 const STALL_X := 4.55     # центр прилавка
-const SEAT_X := 5.18      # где сидит продавец (за прилавком, ноги под столешницей)
+const SEAT_X := 5.35      # где табурет продавца (под тазом)
+const SIT_BACK := 0.34    # в позе сидя таз на столько позади корня персонажа (замерено по анимации)
+const LIFT := Vector3(0, 0, -0.2)     # где стоит бак (центр проёма в полу)
+const HOLE := Vector2(1.5, 1.1)        # размер проёма
+const LIFT_DOWN := -2.1                # насколько опускается платформа
 const DEBT_BOX := Vector3(-1.4, 0, -4.5 + 0.22)
 
 var mats := {}
@@ -29,7 +33,19 @@ var debt_label: Label3D
 var door_pivot: Node3D
 var stall_lights: Array[OmniLight3D] = []
 var acid_block: Node3D
+var lift: Node3D
+var hatch_l: Node3D
+var hatch_r: Node3D
+var beacon: OmniLight3D
+var beacon_mesh: MeshInstance3D
+var _beacon_on := false
 var furnace_block: Node3D
+var acid_mat: StandardMaterial3D
+var acid_glow: OmniLight3D
+var acid_basket: Node3D
+var furnace_light: OmniLight3D
+var bellows: Node3D
+var crucible_mat: StandardMaterial3D
 var env: Environment
 var rat: Node3D
 var _t := 0.0
@@ -44,7 +60,7 @@ func build() -> void:
 	_west_side()
 	_north_side()
 	_east_stalls()
-	_trash_pile()
+	_lift_pit()
 	_door_and_corridor()
 	_clutter()
 	_pipes()
@@ -142,7 +158,20 @@ func wall(x0: float, z0: float, x1: float, z1: float, y0 := 0.0, y1 := H, t := 0
 # ---------- комната ----------
 
 func _room() -> void:
-	box(Vector3(W * 2 + 3, 0.2, D * 2 + 4), Vector3(0, -0.1, 0.8), surf("floor", 0.42, 1.0, Color(0.8, 0.78, 0.72)))
+	# пол с проёмом под подъёмник бака
+	var fm := surf("floor", 0.42, 1.0, Color(0.8, 0.78, 0.72))
+	var x0 := -W - 1.5
+	var x1 := W + 1.5
+	var z0 := -D - 0.7
+	var z1 := D + 2.3
+	var hx := LIFT.x - HOLE.x * 0.5
+	var hx2 := LIFT.x + HOLE.x * 0.5
+	var hz := LIFT.z - HOLE.y * 0.5
+	var hz2 := LIFT.z + HOLE.y * 0.5
+	box(Vector3(hx - x0, 0.2, z1 - z0), Vector3((x0 + hx) * 0.5, -0.1, (z0 + z1) * 0.5), fm)
+	box(Vector3(x1 - hx2, 0.2, z1 - z0), Vector3((hx2 + x1) * 0.5, -0.1, (z0 + z1) * 0.5), fm)
+	box(Vector3(HOLE.x, 0.2, hz - z0), Vector3(LIFT.x, -0.1, (z0 + hz) * 0.5), fm)
+	box(Vector3(HOLE.x, 0.2, z1 - hz2), Vector3(LIFT.x, -0.1, (hz2 + z1) * 0.5), fm)
 	box(Vector3(W * 2 + 3, 0.2, D * 2 + 4), Vector3(0, H + 0.1, 0.8), surf("ceiling", 0.4, 1.0, Color(0.6, 0.58, 0.54)))
 	var t := 0.3
 	# север и восток — глухие
@@ -173,7 +202,7 @@ func _west_side() -> void:
 	Props.place(self, "plastic_bottle_gallon", Vector3(-5.68, 0.46, -2.2), 40, {"height": 0.32, "collide": false})
 	Props.place(self, "plastic_bottle_gallon", Vector3(-5.75, 0.46, -1.85), -30, {"height": 0.3, "collide": false})
 	Props.place(self, "plastic_bottle_gallon", Vector3(-4.75, 0, -4.2), 10, {"height": 0.32})
-	var acid_glow := OmniLight3D.new()
+	acid_glow = OmniLight3D.new()
 	acid_glow.light_color = Color(0.45, 1.0, 0.25)
 	acid_glow.light_energy = 0.6
 	acid_glow.omni_range = 2.4
@@ -193,6 +222,8 @@ func _west_side() -> void:
 	furnace_block = Node3D.new()
 	add_child(furnace_block)
 	_rubble(furnace_block, Vector3(-4.6, 0, 0.0), 1.1, 1.3)
+	_acid_basket()
+	_furnace_parts()
 	# --- ниша скупщика (z 1.5..4.5): окошко в стене, за ним будка с лампой
 	var bars := surf("metal", 1.5, 0.6, Color(0.7, 0.7, 0.7))
 	for i in 5:
@@ -225,6 +256,95 @@ func _west_side() -> void:
 	Props.place(self, "metal_jerrycan", Vector3(-5.65, 0, 4.15), 20, {"height": 0.42})
 
 
+## Корзина-сетка, в которой платы опускают в кислоту (видна только во время травления).
+func _acid_basket() -> void:
+	acid_basket = Node3D.new()
+	acid_basket.position = Vector3(-5.4, 1.15, -3.55)
+	acid_basket.visible = false
+	add_child(acid_basket)
+	var wire := surf("metal", 2.0, 0.5, Color(0.7, 0.7, 0.68))
+	var bw := 0.5
+	var bd := 0.36
+	var bh := 0.2
+	for s in [-1, 1]:
+		box(Vector3(bw, bh, 0.012), Vector3(0, -bh * 0.5, s * bd * 0.5), wire, false, acid_basket)
+		box(Vector3(0.012, bh, bd), Vector3(s * bw * 0.5, -bh * 0.5, 0), wire, false, acid_basket)
+	box(Vector3(bw, 0.012, bd), Vector3(0, -bh, 0), wire, false, acid_basket)
+	cyl(0.008, 0.9, Vector3(0, 0.45, 0), wire, Vector3.ZERO, 6, acid_basket)   # подвес
+	# платы внутри
+	var green := StandardMaterial3D.new()
+	green.albedo_color = Color(0.15, 0.45, 0.2)
+	for i in 5:
+		var b := box(Vector3(0.18, 0.008, 0.12), Vector3(randf_range(-0.12, 0.12), -bh + 0.02 + i * 0.025, randf_range(-0.08, 0.08)), green, false, acid_basket)
+		b.rotation.y = randf() * TAU
+
+
+## Печь: свет огня внутри, тигель сверху, мехи сбоку.
+func _furnace_parts() -> void:
+	furnace_light = OmniLight3D.new()
+	furnace_light.light_color = Color(1.0, 0.45, 0.12)
+	furnace_light.light_energy = 0.0
+	furnace_light.omni_range = 2.6
+	furnace_light.shadow_enabled = true
+	furnace_light.position = Vector3(-5.1, 0.55, 0.0)
+	add_child(furnace_light)
+	var iron := surf("metal", 1.4, 0.7, Color(0.25, 0.23, 0.22))
+	crucible_mat = StandardMaterial3D.new()
+	crucible_mat.albedo_color = Color(0.3, 0.27, 0.25)
+	crucible_mat.roughness = 0.8
+	crucible_mat.emission_enabled = true
+	crucible_mat.emission = Color(1.0, 0.4, 0.05)
+	crucible_mat.emission_energy_multiplier = 0.0
+	var cr := MeshInstance3D.new()
+	var cm := CylinderMesh.new()
+	cm.top_radius = 0.09
+	cm.bottom_radius = 0.065
+	cm.height = 0.13
+	cm.radial_segments = 10
+	cr.mesh = cm
+	cr.material_override = crucible_mat
+	cr.position = Vector3(-5.45, 0.86 + 0.065, 0.22)
+	add_child(cr)
+	# мехи: две доски и «кожа» между ними
+	bellows = Node3D.new()
+	bellows.position = Vector3(-4.95, 0.0, 0.62)
+	bellows.rotation.y = deg_to_rad(-35)
+	add_child(bellows)
+	var wood := surf("planks", 1.0, 1.0, Color(0.55, 0.42, 0.3))
+	box(Vector3(0.32, 0.03, 0.5), Vector3(0, 0.05, 0), wood, false, bellows)
+	var top := box(Vector3(0.32, 0.03, 0.5), Vector3(0, 0.22, 0), wood, false, bellows)
+	top.name = "Top"
+	var leather := StandardMaterial3D.new()
+	leather.albedo_color = Color(0.3, 0.2, 0.13)
+	leather.roughness = 0.9
+	var lb := box(Vector3(0.3, 0.16, 0.46), Vector3(0, 0.135, 0), leather, false, bellows)
+	lb.name = "Leather"
+	cyl(0.025, 0.25, Vector3(0, 0.12, -0.36), iron, Vector3(90, 0, 0), 8, bellows)
+
+
+func pump_bellows(v: float) -> void:
+	## v 0..1 — насколько сжаты мехи
+	var top := bellows.get_node("Top") as Node3D
+	var lb := bellows.get_node("Leather") as Node3D
+	var h := lerpf(0.22, 0.1, v)
+	top.position.y = h
+	lb.scale.y = (h - 0.05) / 0.17
+	lb.position.y = 0.05 + (h - 0.05) * 0.5
+
+
+func open_acid() -> void:
+	if acid_block:
+		acid_block.queue_free()
+		acid_block = null
+
+
+func open_furnace() -> void:
+	if furnace_block:
+		furnace_block.queue_free()
+		furnace_block = null
+	furnace_light.light_energy = 0.25
+
+
 ## Ржавая ванна с кислотой: корпус из досок-стенок, внутри светящаяся зелёная жижа.
 func _bathtub(c: Vector3) -> void:
 	var enamel := StandardMaterial3D.new()
@@ -249,6 +369,7 @@ func _bathtub(c: Vector3) -> void:
 	pm.size = Vector2(Wd - t * 2, L - t * 2)
 	acid.mesh = pm
 	var am := StandardMaterial3D.new()
+	acid_mat = am
 	am.albedo_color = Color(0.3, 0.75, 0.15)
 	am.emission_enabled = true
 	am.emission = Color(0.35, 0.9, 0.12)
@@ -418,9 +539,9 @@ func _east_stalls() -> void:
 		cs.position = Vector3(STALL_X, 0.475, z)
 		body.add_child(cs)
 		add_child(body)
-		# табурет продавца и стеллаж у стены
-		Props.place(self, "folding_wooden_stool", Vector3(SEAT_X, 0, z), 90, {"scale": 1.0, "collide": false})
-		Props.place(self, "worn_metal_rack", Vector3(W - 0.31, 0, z), -90, {"scale": 1.0})
+		# табурет продавца (под тазом сидящего) и полка на стене выше головы
+		Props.place(self, "folding_wooden_stool", Vector3(SEAT_X, 0, z), 90, {"height": 0.44, "collide": false})
+		_wall_shelf(z, L, i)
 		# каркас навеса: две стойки спереди, перекладины до стены, брезент сверху
 		var ph := 2.12
 		for s in [-1, 1]:
@@ -465,6 +586,31 @@ func _east_stalls() -> void:
 	Props.place(self, "wooden_crate_02", Vector3(W - 0.45, 0.35, 4.25), -8, {"height": 0.35})
 
 
+## Две доски-полки на кронштейнах на восточной стене, выше головы сидящего продавца.
+func _wall_shelf(z: float, L: float, i: int) -> void:
+	var planks := surf("planks", 0.9, 0.95, Color(0.7, 0.64, 0.55))
+	var metal := surf("metal", 1.5, 0.6, Color(0.5, 0.48, 0.45))
+	for y in [1.62, 1.98]:
+		box(Vector3(0.3, 0.03, L - 0.1), Vector3(W - 0.15, y, z), planks, false)
+		for s in [-1, 1]:
+			box(Vector3(0.24, 0.025, 0.025), Vector3(W - 0.13, y - 0.05, z + s * (L * 0.5 - 0.15)), metal, false)
+			box(Vector3(0.025, 0.16, 0.025), Vector3(W - 0.012, y - 0.1, z + s * (L * 0.5 - 0.15)), metal, false)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 900 + i
+	var stuff := ["can_rusted", "cardboard_box_01", "plastic_bottle_gallon", "russian_food_cans_01", "metal_jerrycan"]
+	for y in [1.635, 1.995]:
+		var zz := z - L * 0.5 + 0.18
+		while zz < z + L * 0.5 - 0.15:
+			var id: String = stuff[rng.randi() % stuff.size()]
+			var opt := {"collide": false}
+			if id == "russian_food_cans_01":
+				opt["scale"] = 1.0
+			else:
+				opt["height"] = rng.randf_range(0.12, 0.24)
+			Props.place(self, id, Vector3(W - 0.15, y, zz), rng.randf() * 360, opt)
+			zz += rng.randf_range(0.22, 0.34)
+
+
 func _cloth(i: int) -> StandardMaterial3D:
 	var key := "_cloth%d" % (i % 3)
 	if mats.has(key):
@@ -480,72 +626,119 @@ func light_stall(i: int, on: bool) -> void:
 	tw.tween_property(l, "light_energy", 1.1 if on else 0.0, 1.2)
 
 
-# ---------- центр: куча мусора ----------
+# ---------- центр: подъёмник с баком ----------
 
-func _trash_pile() -> void:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 1234
-	var root := Node3D.new()
-	root.name = "TrashPile"
-	add_child(root)
-	var ids := ["trashbag", "trashbag", "trashbag", "trashbag", "trashbag", "cardboard_box_01", "can_rusted", "old_tyre", "compost_bags",
-		"plastic_bottle_gallon", "television_02", "cassette_player", "plastic_crate_01", "trashbag", "can_rusted",
-		"classic_laptop", "industrial_pastic_container", "wooden_crate_02", "circuit_board", "trashbag"]
-	var junk_mats := [surf("planks", 1.2, 1.0, Color(0.6, 0.55, 0.5)), _cardboard(), surf("metal", 1.4, 0.7),
-		surf("carpet", 1.0, 1.0, Color(0.7, 0.6, 0.55))]
-	var bag_mat := StandardMaterial3D.new()
-	bag_mat.albedo_color = Color(0.06, 0.06, 0.07)
-	bag_mat.roughness = 0.35
-	bag_mat.metallic = 0.1
-	# основание: мешки, ошмётки, обломки
-	for i in 140:
-		var a := rng.randf() * TAU
-		var r := sqrt(rng.randf()) * 1.35
-		var hmax := (1.0 - r / 1.4) * 0.95
-		var p := Vector3(cos(a) * r, rng.randf() * hmax, sin(a) * r - 0.2)
-		if rng.randf() < 0.45:
-			# мешки и тряпьё — сплющенные «комки»
-			var lump := MeshInstance3D.new()
-			var sm := SphereMesh.new()
-			sm.radius = rng.randf_range(0.1, 0.24)
-			sm.height = sm.radius * 2.0
-			sm.radial_segments = 7
-			sm.rings = 4
-			lump.mesh = sm
-			lump.material_override = bag_mat if rng.randf() < 0.7 else junk_mats[3]
-			lump.position = p
-			lump.scale = Vector3(1.0, rng.randf_range(0.4, 0.7), rng.randf_range(0.8, 1.2))
-			lump.rotation = Vector3(rng.randf_range(-0.4, 0.4), rng.randf() * TAU, rng.randf_range(-0.4, 0.4))
-			root.add_child(lump)
-		else:
-			var s := Vector3(rng.randf_range(0.08, 0.35), rng.randf_range(0.02, 0.12), rng.randf_range(0.08, 0.3))
-			var mi := box(s, p, junk_mats[rng.randi() % junk_mats.size()], false, root)
-			mi.rotation = Vector3(rng.randf_range(-0.6, 0.6), rng.randf() * TAU, rng.randf_range(-0.6, 0.6))
-	for i in ids.size():
-		var a := rng.randf() * TAU
-		var r := rng.randf_range(0.2, 1.25)
-		var y := (1.0 - r / 1.4) * 0.55 * rng.randf()
-		var p := Vector3(cos(a) * r, y, sin(a) * r - 0.2)
-		var tilt := Vector3(rng.randf_range(-35, 35), 0, rng.randf_range(-35, 35))
-		var opt := {"collide": false, "tilt": tilt}
-		if ids[i] == "trashbag":
-			opt["height"] = rng.randf_range(0.45, 0.7)
-		elif ids[i] in ["television_02", "old_tyre", "plastic_crate_01", "wooden_crate_02", "industrial_pastic_container"]:
-			opt["size"] = rng.randf_range(0.4, 0.55)
-		elif ids[i] in ["circuit_board", "classic_laptop"]:
-			opt["size"] = rng.randf_range(0.18, 0.32)
-		else:
-			opt["size"] = rng.randf_range(0.15, 0.3)
-		Props.place(root, ids[i], p, rng.randf() * 360, opt)
+func _hazard_mat() -> StandardMaterial3D:
+	if mats.has("_hazard"):
+		return mats["_hazard"]
+	var img := Image.create(16, 16, false, Image.FORMAT_RGBA8)
+	for y in 16:
+		for x in 16:
+			img.set_pixel(x, y, Color(0.85, 0.65, 0.1) if ((x + y) / 4) % 2 == 0 else Color(0.06, 0.06, 0.05))
+	var m := StandardMaterial3D.new()
+	m.albedo_texture = ImageTexture.create_from_image(img)
+	m.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST_WITH_MIPMAPS
+	m.uv1_triplanar = true
+	m.uv1_world_triplanar = true
+	m.uv1_scale = Vector3.ONE * 3.0
+	m.roughness = 0.8
+	mats["_hazard"] = m
+	return m
+
+
+func _lift_pit() -> void:
+	var c := LIFT
+	var wall_m := surf("metal", 1.0, 0.8, Color(0.35, 0.33, 0.3))
+	var depth := 2.3
+	# шахта под полом
+	for s in [-1, 1]:
+		box(Vector3(0.06, depth, HOLE.y), c + Vector3(s * (HOLE.x * 0.5 + 0.03), -depth * 0.5, 0), wall_m, false)
+		box(Vector3(HOLE.x, depth, 0.06), c + Vector3(0, -depth * 0.5, s * (HOLE.y * 0.5 + 0.03)), wall_m, false)
+	box(Vector3(HOLE.x, 0.06, HOLE.y), c + Vector3(0, -depth, 0), wall_m, false)
+	# окантовка проёма жёлто-чёрной полосой
+	var hz := _hazard_mat()
+	var t := 0.11
+	box(Vector3(HOLE.x + t * 2, 0.012, t), c + Vector3(0, 0.006, -HOLE.y * 0.5 - t * 0.5), hz, false)
+	box(Vector3(HOLE.x + t * 2, 0.012, t), c + Vector3(0, 0.006, HOLE.y * 0.5 + t * 0.5), hz, false)
+	box(Vector3(t, 0.012, HOLE.y), c + Vector3(-HOLE.x * 0.5 - t * 0.5, 0.006, 0), hz, false)
+	box(Vector3(t, 0.012, HOLE.y), c + Vector3(HOLE.x * 0.5 + t * 0.5, 0.006, 0), hz, false)
+	# невидимый пол над проёмом — чтобы не провалиться, пока бак внизу
 	var body := StaticBody3D.new()
 	var cs := CollisionShape3D.new()
-	var sh := CylinderShape3D.new()
-	sh.radius = 1.3
-	sh.height = 0.9
+	var sh := BoxShape3D.new()
+	sh.size = Vector3(HOLE.x, 0.1, HOLE.y)
 	cs.shape = sh
-	cs.position = Vector3(0, 0.45, -0.2)
+	cs.position = c + Vector3(0, -0.05, 0)
 	body.add_child(cs)
-	root.add_child(body)
+	add_child(body)
+	# створки люка (открыты — висят вниз по бокам шахты)
+	var door_m := surf("metal", 1.4, 0.6, Color(0.45, 0.43, 0.4))
+	hatch_l = Node3D.new()
+	hatch_l.position = c + Vector3(-HOLE.x * 0.5, -0.03, 0)
+	add_child(hatch_l)
+	box(Vector3(HOLE.x * 0.5, 0.04, HOLE.y - 0.02), Vector3(HOLE.x * 0.25, 0, 0), door_m, false, hatch_l)
+	hatch_r = Node3D.new()
+	hatch_r.position = c + Vector3(HOLE.x * 0.5, -0.03, 0)
+	add_child(hatch_r)
+	box(Vector3(HOLE.x * 0.5, 0.04, HOLE.y - 0.02), Vector3(-HOLE.x * 0.25, 0, 0), door_m, false, hatch_r)
+	_set_hatch(1.0)
+	# платформа подъёмника
+	lift = Node3D.new()
+	lift.position = c
+	add_child(lift)
+	box(Vector3(HOLE.x - 0.08, 0.06, HOLE.y - 0.06), Vector3(0, -0.03, 0), surf("grate", 1.6, 0.6, Color(0.6, 0.6, 0.6)), false, lift)
+	box(Vector3(0.3, 2.2, 0.3), Vector3(0, -1.16, 0), wall_m, false, lift)   # поршень
+	# мигалка у края проёма
+	var post := surf("metal", 1.5, 0.6, Color(0.3, 0.3, 0.3))
+	cyl(0.04, 0.12, c + Vector3(HOLE.x * 0.5 + 0.06, 0.06, -HOLE.y * 0.5 - 0.06), post, Vector3.ZERO, 8)
+	beacon_mesh = MeshInstance3D.new()
+	var sm := SphereMesh.new()
+	sm.radius = 0.05
+	sm.height = 0.1
+	beacon_mesh.mesh = sm
+	var bm := StandardMaterial3D.new()
+	bm.albedo_color = Color(1.0, 0.5, 0.1)
+	bm.emission_enabled = true
+	bm.emission = Color(1.0, 0.45, 0.05)
+	bm.emission_energy_multiplier = 0.2
+	beacon_mesh.material_override = bm
+	beacon_mesh.position = c + Vector3(HOLE.x * 0.5 + 0.06, 0.16, -HOLE.y * 0.5 - 0.06)
+	add_child(beacon_mesh)
+	beacon = OmniLight3D.new()
+	beacon.light_color = Color(1.0, 0.5, 0.1)
+	beacon.light_energy = 0.0
+	beacon.omni_range = 3.0
+	beacon.position = beacon_mesh.position + Vector3(0, 0.1, 0)
+	add_child(beacon)
+
+
+## 0 — люк закрыт, 1 — открыт.
+func _set_hatch(v: float) -> void:
+	hatch_l.rotation.z = -deg_to_rad(95.0) * v
+	hatch_r.rotation.z = deg_to_rad(95.0) * v
+
+
+func hatch(open: bool, sec := 0.7) -> void:
+	var from := 0.0 if open else 1.0
+	var tw := create_tween()
+	tw.tween_method(_set_hatch, from, 1.0 - from, sec).set_trans(Tween.TRANS_SINE)
+	await tw.finished
+	Sfx.play3d("clank", LIFT + Vector3(0, 0.1, 0), -4.0, 1.2 if open else 0.9)
+
+
+func lift_move(up: bool, sec := 2.4) -> void:
+	Sfx.play3d("lift", LIFT + Vector3(0, -0.3, 0), 0.0, 1.0 if up else 0.9)
+	var tw := create_tween()
+	tw.tween_property(lift, "position:y", LIFT.y if up else LIFT_DOWN, sec).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	await tw.finished
+	Sfx.play3d("clank", LIFT + Vector3(0, 0.1, 0), -2.0)
+
+
+func set_beacon(on: bool) -> void:
+	_beacon_on = on
+	if not on:
+		beacon.light_energy = 0.0
+		(beacon_mesh.material_override as StandardMaterial3D).emission_energy_multiplier = 0.2
 
 
 # ---------- юг: дверь и коридор за ней ----------
@@ -760,6 +953,10 @@ func _process(dt: float) -> void:
 	(bulb_glass.material_override as StandardMaterial3D).emission_energy_multiplier = e * 2.3
 	if booth_light:
 		booth_light.light_energy = 1.4 if fmod(_t * 7.3, 9.0) > 0.25 else 0.4
+	if _beacon_on:
+		var b := 1.0 if fmod(_t * 3.0, 1.0) < 0.5 else 0.0
+		beacon.light_energy = 1.6 * b
+		(beacon_mesh.material_override as StandardMaterial3D).emission_energy_multiplier = 0.2 + 5.0 * b
 	if debt_light:
 		debt_light.light_energy = 0.45 + 0.15 * sin(_t * 1.7) + rot * 0.6
 	# крыса иногда перебегает

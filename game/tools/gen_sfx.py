@@ -253,3 +253,91 @@ def ring():
 
 
 write('ring', ring(), 0.6)
+
+
+# ---------- бак на подъёмнике, кислота, печь ----------
+
+# Гидравлика подъёмника: гул мотора с подвыванием + шипение
+def lift():
+    sec = 2.6
+    tt = t(sec)
+    f = 62 + 18 * np.clip(tt / 0.4, 0, 1) - 10 * np.clip((tt - 2.1) / 0.5, 0, 1)
+    ph = np.cumsum(2 * np.pi * f / SR)
+    motor = np.sign(np.sin(ph)) * 0.35 + np.sin(ph * 2) * 0.3
+    whine = 0.12 * np.sin(np.cumsum(2 * np.pi * (f * 7.5) / SR))
+    hiss = highpass(noise(sec), 2) * 0.25
+    shape = np.clip(tt / 0.15, 0, 1) * np.clip((sec - tt) / 0.3, 0, 1)
+    return lowpass(motor + whine, 3) * shape + hiss * shape * 0.6
+
+
+# Железный лязг (бак встал / створки)
+def clank():
+    tt = t(0.6)
+    x = np.zeros(len(tt))
+    for f, d in ((180, 9), (433, 12), (791, 16), (1260, 22)):
+        x += np.sin(2 * np.pi * f * tt) * env(len(tt), 0.001, d)
+    x += lowpass(noise(0.6), 3) * env(len(tt), 0.001, 40) * 0.8
+    return x
+
+
+# Бульканье кислоты (петля 4 с)
+def bubbles():
+    sec = 4.0
+    out = highpass(noise(sec), 3) * 0.08
+    for i in range(70):
+        s = int(R.uniform(0, sec - 0.1) * SR)
+        tt = t(0.05)
+        f0 = R.uniform(300, 900)
+        f = f0 * (1 + tt * 18)
+        b = np.sin(np.cumsum(2 * np.pi * f / SR)) * env(len(tt), 0.002, 50)
+        out[s:s + len(b)] += b * R.uniform(0.2, 0.6)
+    return out
+
+
+# Огонь в печи: треск поверх гула (петля 4 с)
+def fire():
+    sec = 4.0
+    tt = t(sec)
+    roar = lowpass(noise(sec), 25) * 4 * (0.8 + 0.2 * np.sin(2 * np.pi * 0.5 * tt))
+    out = roar
+    for i in range(90):
+        s = int(R.uniform(0, sec - 0.05) * SR)
+        c = highpass(R.uniform(-1, 1, int(SR * 0.012)), 2) * R.uniform(0.2, 0.9)
+        out[s:s + len(c)] += c
+    return out
+
+
+# Мехи: вдох-выдох воздуха
+def bellows():
+    tt = t(0.7)
+    x = lowpass(noise(0.7), 6) * np.sin(np.pi * tt / 0.7) ** 1.5
+    return x * 2
+
+
+# Кусачки перекусили замок
+def snip():
+    tt = t(0.3)
+    x = (np.sin(2 * np.pi * 2400 * tt) + np.sin(2 * np.pi * 3700 * tt)) * env(len(tt), 0.001, 30)
+    x += highpass(noise(0.3), 2) * env(len(tt), 0.001, 45)
+    return pad(x, 0.1)
+
+
+# Удачно (находка открылась / хорошее качество): два коротких тона вверх
+def good():
+    out = np.zeros(int(SR * 0.35))
+    for i, f in enumerate((660, 990)):
+        tt = t(0.16)
+        s = int(SR * 0.09 * i)
+        x = (np.sin(2 * np.pi * f * tt) + 0.3 * np.sin(2 * np.pi * f * 2 * tt)) * env(len(tt), 0.002, 14)
+        out[s:s + len(tt)] += x
+    return out
+
+
+write('lift', lift(), 0.7)
+write('clank', clank(), 0.8)
+write('bubbles', bubbles(), 0.5)
+write('fire', fire(), 0.5)
+write('bellows', bellows(), 0.6)
+write('snip', snip(), 0.7)
+write('good', good(), 0.5)
+print('sfx2 ok')

@@ -27,6 +27,17 @@ var bag_lbl: Label
 var debt_lbl: Label
 var left_lbl: Label
 var hud_box: Control
+var gold_lbl: Label
+var goal_lbl: Label
+var top_hint: Label
+var mg: PanelContainer
+var mg_title: Label
+var mg_hint: Label
+var mg_bg: ColorRect
+var mg_zone: ColorRect
+var mg_needle: ColorRect
+var mg_fill: ColorRect
+var mg_info: Label
 var toasts: VBoxContainer
 var subtitle: Label
 var dlg: PanelContainer
@@ -206,6 +217,25 @@ func _build_hud() -> void:
 	tl.add_child(money_lbl)
 	bag_lbl = _label(18, C_DIM)
 	tl.add_child(bag_lbl)
+	gold_lbl = _label(18, C_GOLD)
+	tl.add_child(gold_lbl)
+	var gap := Control.new()
+	gap.custom_minimum_size = Vector2(0, 10)
+	tl.add_child(gap)
+	goal_lbl = _label(17, Color(0.78, 0.74, 0.64))
+	goal_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	goal_lbl.custom_minimum_size = Vector2(380, 0)
+	tl.add_child(goal_lbl)
+
+	top_hint = _label(20, C_TEXT, f_bold)
+	top_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	top_hint.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	top_hint.offset_left = -600
+	top_hint.offset_right = 600
+	top_hint.offset_top = 22
+	top_hint.offset_bottom = 60
+	root.add_child(top_hint)
+	_build_minigame()
 
 	var tr := VBoxContainer.new()
 	tr.set_anchors_preset(Control.PRESET_TOP_RIGHT)
@@ -245,6 +275,13 @@ func _build_hud() -> void:
 func refresh() -> void:
 	money_lbl.text = G.rub(G.money)
 	bag_lbl.text = "Мешок: %d / %d" % [G.bag_count(), G.bag_cap()]
+	var parts: Array[String] = []
+	if G.dust > 0.0001:
+		parts.append("Порошок: " + G.grams(G.dust))
+	if G.ingots > 0.0001:
+		parts.append("Слитки: " + G.grams(G.ingots))
+	gold_lbl.text = "   ·   ".join(parts)
+	gold_lbl.visible = parts.size() > 0
 	if dlg_money and dlg_money.text != "":
 		dlg_money.text = "У тебя: " + G.rub(G.money)
 	refresh_time()
@@ -270,6 +307,92 @@ func _process(dt: float) -> void:
 
 func set_prompt(t: String) -> void:
 	prompt.text = t
+
+
+func set_goal(t: String) -> void:
+	goal_lbl.text = ("Цель: " + t) if t != "" else ""
+
+
+func set_top_hint(t: String) -> void:
+	top_hint.text = t
+
+
+# ---------- полоса мини-игры (кислота, печь) ----------
+
+func _build_minigame() -> void:
+	mg = PanelContainer.new()
+	mg.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	mg.offset_left = -380
+	mg.offset_right = 380
+	mg.offset_top = -210
+	mg.offset_bottom = -40
+	mg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	mg.visible = false
+	root.add_child(mg)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 8)
+	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	mg.add_child(v)
+	var top := HBoxContainer.new()
+	top.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	v.add_child(top)
+	mg_title = _label(26, C_GOLD, f_head)
+	mg_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top.add_child(mg_title)
+	mg_info = _label(20, C_TEXT, f_bold)
+	top.add_child(mg_info)
+	var bar := Control.new()
+	bar.custom_minimum_size = Vector2(700, 34)
+	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	v.add_child(bar)
+	mg_bg = ColorRect.new()
+	mg_bg.color = Color(0.13, 0.12, 0.1)
+	mg_bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	mg_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bar.add_child(mg_bg)
+	mg_zone = ColorRect.new()
+	mg_zone.color = Color(0.35, 0.75, 0.3, 0.85)
+	mg_zone.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bar.add_child(mg_zone)
+	mg_needle = ColorRect.new()
+	mg_needle.color = Color(1, 0.95, 0.85)
+	mg_needle.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bar.add_child(mg_needle)
+	mg_fill = ColorRect.new()
+	mg_fill.color = C_GOLD
+	mg_fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bar.add_child(mg_fill)
+	mg_hint = _label(17, C_DIM)
+	mg_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	mg_hint.custom_minimum_size = Vector2(700, 0)
+	v.add_child(mg_hint)
+
+
+func mg_show(title: String, hint: String) -> void:
+	mg_title.text = title
+	mg_hint.text = hint
+	mg_info.text = ""
+	mg.visible = true
+	show_hud(false)
+
+
+func mg_hide() -> void:
+	mg.visible = false
+
+
+## needle, zone_a, zone_b — доли 0..1 по ширине; fill — тонкая полоска прогресса снизу (−1 — не показывать).
+func mg_set(needle: float, zone_a: float, zone_b: float, zone_col: Color, fill := -1.0, info := "") -> void:
+	var w := 700.0
+	mg_zone.position = Vector2(zone_a * w, 0)
+	mg_zone.size = Vector2(maxf(2.0, (zone_b - zone_a) * w), 34)
+	mg_zone.color = zone_col
+	mg_needle.position = Vector2(clampf(needle, 0.0, 1.0) * w - 3, -5)
+	mg_needle.size = Vector2(6, 44)
+	mg_fill.visible = fill >= 0.0
+	mg_fill.position = Vector2(0, 30)
+	mg_fill.size = Vector2(clampf(fill, 0.0, 1.0) * w, 4)
+	if info != "":
+		mg_info.text = info
 
 
 func show_hud(on: bool) -> void:
@@ -591,7 +714,7 @@ func _fill_shop() -> void:
 		c.queue_free()
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 10)
-	v.custom_minimum_size = Vector2(780, 0)
+	v.custom_minimum_size = Vector2(1060, 0)
 	shop.add_child(v)
 	var top := HBoxContainer.new()
 	v.add_child(top)
@@ -607,21 +730,28 @@ func _fill_shop() -> void:
 	s.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	v.add_child(s)
 	var first: Button = null
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 10)
+	grid.add_theme_constant_override("v_separation", 10)
+	v.add_child(grid)
 	for it in _shop_items.call():
 		var row := PanelContainer.new()
-		row.add_theme_stylebox_override("panel", _box(Color(0.075, 0.068, 0.056), Color(0.22, 0.19, 0.14), 1, 3, 10))
-		v.add_child(row)
+		row.add_theme_stylebox_override("panel", _box(Color(0.075, 0.068, 0.056), Color(0.22, 0.19, 0.14), 1, 3, 8))
+		row.custom_minimum_size = Vector2(525, 0)
+		grid.add_child(row)
 		var h := HBoxContainer.new()
-		h.add_theme_constant_override("separation", 18)
+		h.add_theme_constant_override("separation", 12)
 		row.add_child(h)
 		var info := VBoxContainer.new()
 		info.add_theme_constant_override("separation", 3)
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		h.add_child(info)
-		var n := _label(23, C_TEXT, f_bold)
+		var n := _label(20, C_TEXT, f_bold)
 		n.text = it["name"]
+		n.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		info.add_child(n)
-		var d := _label(18, C_DIM)
+		var d := _label(16, C_DIM)
 		d.text = it["desc"]
 		d.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		info.add_child(d)
@@ -630,16 +760,25 @@ func _fill_shop() -> void:
 		info.add_child(lv)
 		for i in int(it["max"]):
 			var dot := ColorRect.new()
-			dot.custom_minimum_size = Vector2(26, 7)
+			dot.custom_minimum_size = Vector2(22, 6)
 			dot.color = C_GOLD if i < int(it["level"]) else Color(0.22, 0.2, 0.16)
 			dot.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			lv.add_child(dot)
 		var b := Button.new()
-		b.custom_minimum_size = Vector2(240, 56)
+		b.custom_minimum_size = Vector2(178, 54)
+		b.add_theme_font_size_override("font_size", 17)
 		b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		b.focus_mode = Control.FOCUS_ALL
 		var cost: int = int(it["cost"])
-		if int(it["level"]) >= int(it["max"]):
+		if it.has("done"):
+			b.text = it["done"]
+			b.disabled = true
+		elif it.has("locked"):
+			b.text = it["locked"]
+			b.disabled = true
+			b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			b.add_theme_font_size_override("font_size", 16)
+		elif int(it["level"]) >= int(it["max"]):
 			b.text = "Максимум"
 			b.disabled = true
 		elif G.money < cost:
@@ -647,7 +786,8 @@ func _fill_shop() -> void:
 			b.disabled = true
 			b.add_theme_color_override("font_disabled_color", Color(0.75, 0.38, 0.32))
 		else:
-			b.text = "Купить — %s" % G.rub(cost)
+			b.text = "Купить
+%s" % G.rub(cost)
 			b.add_theme_color_override("font_color", C_GREEN)
 		var key: String = it["key"]
 		b.pressed.connect(func():

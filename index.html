@@ -45,8 +45,10 @@
   });
 })();
 </script>
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=0.17">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap&subset=cyrillic">
+<link rel="stylesheet" href="css/style.css?v=0.18">
 </head>
 <body>
 
@@ -189,14 +191,15 @@
 <div class="mg-overlay" id="fireMgOverlay">
   <div class="mg-card fire">
     <div class="mg-title"><img data-icon="fire" alt=""> Выплавка</div>
-    <div class="mg-sub">Держи стрелку жара в рамке, пока тигель не раскалится.</div>
+    <div class="mg-sub">Держи кнопку — жар растёт, отпусти — падает.<br>Держи стрелку в светлой рамке, пока слиток не будет готов.</div>
     <div class="fmg-scene"><canvas id="fmgCanvas"></canvas></div>
-    <div class="fmg-progress-label">Готовность</div>
-    <div class="fmg-progress"><div class="fmg-progress-fill" id="fmgProgress"></div></div>
-    <div class="fmg-controls">
-      <button class="fmg-btn fmg-minus" id="fmgMinus" type="button">−<small>прикрыть</small></button>
-      <button class="fmg-btn fmg-plus" id="fmgPlus" type="button">+<small>поддать</small></button>
+    <div class="fmg-gauge-wrap">
+      <div class="fmg-gauge-labels"><span>холодно</span><span>жар</span><span>перегрев</span></div>
+      <div class="fmg-gauge"><div class="fmg-zone" id="fmgZone"></div><div class="fmg-needle" id="fmgNeedle"></div></div>
     </div>
+    <div class="fmg-progress-label"><span id="fmgState">Раздуй огонь</span><b id="fmgPct">0%</b></div>
+    <div class="fmg-progress"><div class="fmg-progress-fill" id="fmgProgress"></div></div>
+    <button class="fmg-btn fmg-blow" id="fmgBlow" type="button">ДУТЬ МЕХАМИ<small>держи палец</small></button>
     <div class="mg-result" id="fmgResult"></div>
   </div>
 </div>
@@ -307,9 +310,10 @@
   <section class="tab-section" data-tab="acid">
     <div class="panel">
       <p class="panel-title">Кислотная ванна</p>
+      <div class="flow" id="acidFlow"></div>
       <div class="scene-box"><canvas class="scene-cv" id="acidCanvas"></canvas></div>
       <div id="acidStages"></div>
-      <div class="hint">Растворяет лом в кислоте. Общая эффективность переработки лома в слитки — качается «Кислотой почище» и «Печью помощнее».</div>
+      <div class="hint">Шаг 1 из 2. Кислота растворяет лом — получается <b>раствор</b> с золотом. Потом раствор плавят в печи.</div>
     </div>
     <div class="panel">
       <p class="panel-title"><span>Склад под растворение</span><b id="acidStockAu">0.000 г Au</b></p>
@@ -331,9 +335,10 @@
   <section class="tab-section" data-tab="fire">
     <div class="panel">
       <p class="panel-title">Печь</p>
+      <div class="flow" id="fireFlow"></div>
       <div class="scene-box"><canvas class="scene-cv" id="fireCanvas"></canvas></div>
       <div id="fireStages"></div>
-      <div class="hint">Выпаривает раствор, на выходе — слитки.</div>
+      <div class="hint">Шаг 2 из 2. Печь выпаривает раствор из кислоты — остаётся чистое золото. Его продаёшь скупщику ниже.</div>
     </div>
     <div class="panel">
       <p class="panel-title">Скупщик</p>
@@ -390,21 +395,21 @@
   Порядок важен: каждый следующий файл пользуется тем, что объявлено в предыдущих.
   dev.js — DEV-консоль для тестов. Перед релизом просто удалить эту строку (и сам файл).
 -->
-<script src="js/util.js?v=0.17"></script>
-<script src="js/data.js?v=0.17"></script>
-<script src="js/art.js?v=0.17"></script>
-<script src="js/formulas.js?v=0.17"></script>
-<script src="js/state.js?v=0.17"></script>
-<script src="js/upgrades.js?v=0.17"></script>
-<script src="js/save.js?v=0.17"></script>
-<script src="js/audio.js?v=0.17"></script>
-<script src="js/game.js?v=0.17"></script>
-<script src="js/minigames.js?v=0.17"></script>
-<script src="js/scene.js?v=0.17"></script>
-<script src="js/story.js?v=0.17"></script>
-<script src="js/ui.js?v=0.17"></script>
-<script src="js/input.js?v=0.17"></script>
-<script src="js/dev.js?v=0.17"></script>
-<script src="js/main.js?v=0.17"></script>
+<script src="js/util.js?v=0.18"></script>
+<script src="js/data.js?v=0.18"></script>
+<script src="js/art.js?v=0.18"></script>
+<script src="js/formulas.js?v=0.18"></script>
+<script src="js/state.js?v=0.18"></script>
+<script src="js/upgrades.js?v=0.18"></script>
+<script src="js/save.js?v=0.18"></script>
+<script src="js/audio.js?v=0.18"></script>
+<script src="js/game.js?v=0.18"></script>
+<script src="js/minigames.js?v=0.18"></script>
+<script src="js/scene.js?v=0.18"></script>
+<script src="js/story.js?v=0.18"></script>
+<script src="js/ui.js?v=0.18"></script>
+<script src="js/input.js?v=0.18"></script>
+<script src="js/dev.js?v=0.18"></script>
+<script src="js/main.js?v=0.18"></script>
 </body>
 </html>

@@ -130,8 +130,8 @@ function drawFlask(i) {
     }
     // зона поверх жидкости
     if (y >= zTop && y <= zBot) {
-      const zc = ok ? 'rgba(200,238,104,0.6)' : fail ? 'rgba(224,80,80,0.45)' : 'rgba(255,255,240,0.22)';
-      for (let x = x0; x <= x1; x++) if ((x + y) % 2 === 0 || ok) dot(ctx, x, y, zc);
+      const zc = ok ? 'rgba(200,238,104,0.55)' : fail ? 'rgba(224,80,80,0.4)' : 'rgba(255,255,240,0.16)';
+      rect(ctx, x0, y, x1 - x0 + 1, 1, zc);
     }
     // контур стекла
     dot(ctx, x0 - 1, y, edge);
@@ -199,61 +199,74 @@ function acidPourStop(i) {
   }
 }
 
-// ===== «Выплавка»: держи бегунок в движущейся зоне =====
+// ===== «Выплавка»: одна кнопка-мехи. Держишь — жар растёт, отпустил — падает. =====
+// Нужно держать стрелку жара в светлой рамке, пока не наберётся 100% готовности.
+
+const FMG = {
+  heatUp: 90,       // разгон жара, пока держишь (ед./с²)
+  coolDown: 75,     // остывание, когда отпустил
+  maxSpeed: 38,     // предел скорости стрелки (ед./с)
+  zoneHalf: 12,     // полуширина рамки (шкала 0–100)
+  readySec: 3.5,    // сколько секунд в рамке нужно для 100%
+  loseRate: 22,     // сколько % готовности теряется за секунду вне рамки
+  failSec: 7,       // сколько секунд всего можно провести вне рамки
+};
 
 function buildFireMiniGame() {
-  const press = (side, on) => {
+  const blow = on => {
     const st = activeMinigame;
     if (!st || st.kind !== 'fire') return;
     if (on && st.gameOver) return;
-    st.hold[side] = on;
-    if (on) {
-      st.runner = clamp(st.runner + (side === 'right' ? 2 : -2), 0, 100);
-      vibe(8);
-    }
+    st.blowing = on;
+    toggleClass('fmgBlow', 'on', on);
+    if (on) vibe(8);
   };
-  bindHold(el('fmgPlus'), () => press('right', true), () => press('right', false));
-  bindHold(el('fmgMinus'), () => press('left', true), () => press('left', false));
+  bindHold(el('fmgBlow'), () => blow(true), () => blow(false));
 }
 
 function openFireMiniGame(onWin) {
   const st = {
     kind: 'fire', onWin, gameOver: false,
-    zone: 30 + Math.random() * 40, zoneDir: Math.random() < 0.5 ? 1 : -1, zoneHalf: 9, zoneSpeed: 35 + Math.random() * 20,
-    runner: 50, runnerSpeed: 55,
+    zone: 45 + Math.random() * 25, zoneT: Math.random() * 10, zoneHalf: FMG.zoneHalf,
+    heat: 12, vel: 0, blowing: false,
     ready: 0,        // «Готовность», %
-    outsideMs: 0,    // сколько всего пробыл вне зоны (5 секунд — провал)
-    hold: { left: false, right: false },
+    outsideMs: -2500, // сколько всего пробыл вне рамки (первые 2,5 с на разогрев не считаются)
   };
+  st.zoneBase = st.zone;
   setMgResult('fmgResult', '');
+  toggleClass('fmgBlow', 'on', false);
   activeMinigame = st;
   el('fireMgOverlay').classList.add('show');
-  if (!fireMgScene) fireMgScene = new PixelScene(el('fmgCanvas'), 74, drawFurnace);
+  if (!fireMgScene) fireMgScene = new PixelScene(el('fmgCanvas'), 54, drawFurnace);
   fireMgScene.w = 0;
   drawFireMiniGame(st);
   st.stop = frameLoop(dt => {
     if (st.gameOver) return;
-    st.zone += st.zoneDir * st.zoneSpeed * dt;
-    if (st.zone >= 100 - st.zoneHalf) { st.zone = 100 - st.zoneHalf; st.zoneDir = -1; }
-    if (st.zone <= st.zoneHalf) { st.zone = st.zoneHalf; st.zoneDir = 1; }
-    if (st.hold.left !== st.hold.right) st.runner += (st.hold.right ? 1 : -1) * st.runnerSpeed * dt;
-    st.runner = clamp(st.runner, 0, 100);
+    // рамка медленно плавает туда-сюда
+    st.zoneT += dt;
+    st.zone = clamp(st.zoneBase + Math.sin(st.zoneT * 0.9) * 12 + Math.sin(st.zoneT * 2.3) * 4, st.zoneHalf + 4, 100 - st.zoneHalf - 4);
+    // жар: мехи разгоняют, без них остывает
+    st.vel += (st.blowing ? FMG.heatUp : -FMG.coolDown) * dt;
+    st.vel = clamp(st.vel, -FMG.maxSpeed, FMG.maxSpeed);
+    st.heat += st.vel * dt;
+    if (st.heat <= 0) { st.heat = 0; st.vel = Math.max(0, st.vel); }
+    if (st.heat >= 100) { st.heat = 100; st.vel = Math.min(0, st.vel); }
 
-    if (Math.abs(st.runner - st.zone) <= st.zoneHalf) {
-      st.ready = Math.min(100, st.ready + dt * 100 / 3);   // 3 секунды в зоне — 100%
+    if (Math.abs(st.heat - st.zone) <= st.zoneHalf) {
+      st.ready = Math.min(100, st.ready + dt * 100 / FMG.readySec);
     } else {
-      st.ready = Math.max(0, st.ready - dt * 100);          // 1 секунда вне зоны — до нуля
+      st.ready = Math.max(0, st.ready - dt * FMG.loseRate);
       st.outsideMs += dt * 1000;
-      if (st.outsideMs >= 5000) {
+      if (st.outsideMs >= FMG.failSec * 1000) {
         st.gameOver = true;
-        setMgResult('fmgResult', '✕ Прогар — попробуй снова', 'fail');
+        setMgResult('fmgResult', '✕ Металл не взялся — попробуй снова', 'fail');
         sndMgFail(); vibe(60);
-        setTimeout(() => closeMinigame(st), 800);
+        setTimeout(() => closeMinigame(st), 900);
       }
     }
     if (st.ready >= 100 && !st.gameOver) {
       st.gameOver = true;
-      setMgResult('fmgResult', '✓ Готово', 'ok');
+      setMgResult('fmgResult', '✓ Слиток готов!', 'ok');
       sndMgWin(); vibe(50);
       setTimeout(() => { if (closeMinigame(st)) st.onWin(); }, 700);
     }
@@ -266,7 +279,16 @@ let fireMgScene = null;
 function drawFireMiniGame(st) {
   fireMgScene.state.mg = st;
   fireMgScene.frame();
-  el('fmgProgress').style.width = st.ready + '%';
+  const inZone = Math.abs(st.heat - st.zone) <= st.zoneHalf;
+  setWidth('fmgProgress', st.ready);
+  const z = el('fmgZone');
+  z.style.left = (st.zone - st.zoneHalf) + '%';
+  z.style.width = (st.zoneHalf * 2) + '%';
+  toggleClass(z, 'in', inZone);
+  el('fmgNeedle').style.left = st.heat + '%';
+  setText('fmgPct', Math.floor(st.ready) + '%');
+  setText('fmgState', st.gameOver ? (st.ready >= 100 ? 'Готово' : 'Остыло')
+    : inZone ? 'Отлично, держи так!' : st.heat < st.zone ? 'Холодно — держи кнопку' : 'Перегрев — отпусти');
 }
 
 /** Цвет жара: слева холодно (синий), справа белый накал. */
@@ -277,11 +299,11 @@ function heatColor(p) {
   return mixColor(stops[i], stops[i + 1], k - i);
 }
 
-/** Сцена мини-игры «Выплавка»: печь, тигель, пламя и шкала жара снизу. */
+/** Сцена мини-игры «Выплавка»: печь, тигель и пламя (шкала жара — отдельно, под сценой). */
 function drawFurnace(ctx, w, h, t, dt, scene) {
   const st = scene.state.mg;
   if (!st) return;
-  const inZone = Math.abs(st.runner - st.zone) <= st.zoneHalf;
+  const inZone = Math.abs(st.heat - st.zone) <= st.zoneHalf;
   drawBricks(ctx, w, 54, '#3a2418');
   rect(ctx, 0, 52, w, 2, '#1a0e08');
   // печь
@@ -299,7 +321,7 @@ function drawFurnace(ctx, w, h, t, dt, scene) {
   const mx = fx + 10, mw = fw - 20, my = fy + 14, mh = 26;
   rect(ctx, mx - 1, my - 1, mw + 2, mh + 2, '#1a1410');
   rect(ctx, mx, my, mw, mh, '#0a0604');
-  const heat = st.runner;
+  const heat = st.heat;
   const hc = heatColor(heat);
   glow(ctx, mx + mw / 2, my + mh - 2, mw / 2 + 6, 10, hexToRgb(hc).join(','), 0.10 + heat / 500);
   // пламя: выше и светлее от жара
@@ -325,26 +347,6 @@ function drawFurnace(ctx, w, h, t, dt, scene) {
   rect(ctx, mx - 2, my - 4, mw + 4, 3, '#2c2c34');
   rect(ctx, mx - 2, my - 4, mw + 4, 1, '#5c5c64');
 
-  // шкала жара
-  const gx = 4, gw = w - 8, gy = 60, gh = 8;
-  rect(ctx, gx - 1, gy - 1, gw + 2, gh + 2, '#0a0604');
-  for (let x = 0; x < gw; x++) {
-    if (x % 3 === 2) continue;
-    rect(ctx, gx + x, gy, 1, gh, darken(heatColor(x / gw * 100), 0.25));
-  }
-  const zx0 = gx + Math.round((st.zone - st.zoneHalf) / 100 * gw), zx1 = gx + Math.round((st.zone + st.zoneHalf) / 100 * gw);
-  const zc = inZone ? '#c8ee68' : '#f2f4ea';
-  rect(ctx, zx0, gy - 2, zx1 - zx0, 1, zc);
-  rect(ctx, zx0, gy + gh + 1, zx1 - zx0, 1, zc);
-  rect(ctx, zx0, gy - 2, 1, gh + 4, zc);
-  rect(ctx, zx1 - 1, gy - 2, 1, gh + 4, zc);
-  for (let x = zx0 + 1; x < zx1 - 1; x++) if (x % 2) dot(ctx, x, gy + gh / 2, 'rgba(255,255,255,0.25)');
-  // стрелка
-  const rx = gx + Math.round(st.runner / 100 * gw);
-  rect(ctx, rx - 1, gy - 1, 2, gh + 2, '#ffffff');
-  rect(ctx, rx - 2, gy - 5, 4, 2, '#ffffff');
-  dot(ctx, rx - 1, gy - 3, '#ffffff');
-  dot(ctx, rx, gy - 3, '#ffffff');
 }
 
 /** Закрыть мини-игру st. Возвращает false, если она уже закрыта (например, начали новую игру). */

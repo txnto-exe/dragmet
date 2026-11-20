@@ -73,7 +73,7 @@ const ACTIONS = {
   // Навигация
   'tab': name => switchTab(name),
   'subtab': name => switchSub(name),
-  'acc': key => toggleAccordion(key),
+  'upg-cat': key => setUpgCat(key),
   'loc-step': delta => stepLoc(Number(delta)),
 
   // Игра

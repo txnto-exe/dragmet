@@ -2,8 +2,9 @@
 // Живые пиксельные сцены: двор с героем (вкладка «Копать»), кислотная, печь,
 // скупщик и главное меню. Плюс эффекты: полёт находок, искры, вспышки, монеты.
 //
-// Сцена рисуется в canvas маленького разрешения (1 точка = 1 пиксель арта),
-// а CSS растягивает его в PX раз без сглаживания.
+// Сцена рисуется в «пикселях арта» (1 пиксель арта = PX точек CSS), но сам canvas —
+// в полном разрешении экрана. Поэтому спрайты остаются чёткими пиксельными,
+// а свет, небо и свечение — гладкими, без шахматной «каши».
 // Здесь ничего не меняется в игре — только показывается состояние G.
 
 // ===== Время суток и погода (по часам телефона) =====
@@ -58,10 +59,13 @@ class PixelScene {
     const cssW = box ? box.clientWidth : 0;
     if (!cssW) return false;
     const w = Math.max(40, Math.floor(cssW / PX));
-    if (w !== this.w) {
+    const dpr = Math.min(3, Math.max(1, Math.round(window.devicePixelRatio || 1)));
+    if (w !== this.w || this.h !== this._h || dpr !== this.dpr) {
       this.w = w;
-      this.cv.width = w;
-      this.cv.height = this.h;
+      this._h = this.h;
+      this.dpr = dpr;
+      this.cv.width = w * PX * dpr;
+      this.cv.height = this.h * PX * dpr;
       this.cv.style.width = w * PX + 'px';
       this.cv.style.height = this.h * PX + 'px';
     }
@@ -75,6 +79,8 @@ class PixelScene {
     this.t += dt;
     const ctx = this.ctx;
     ctx.save();
+    ctx.setTransform(PX * this.dpr, 0, 0, PX * this.dpr, 0, 0);
+    ctx.imageSmoothingEnabled = false;
     if (this.shake > 0) {
       this.shake -= dt;
       ctx.translate(Math.round(Math.random() * 2 - 1), Math.round(Math.random() * 2 - 1));
@@ -98,23 +104,19 @@ function rect(ctx, x, y, w, h, c) {
 }
 function dot(ctx, x, y, c) { rect(ctx, x, y, 1, 1, c); }
 
-/** Небо полосами с шахматным переходом между ними (дизер). */
+/** Небо: плавный переход от верха к горизонту. */
 function drawSky(ctx, w, horizon, d, seed) {
   const cols = [0, 1, 2].map(i => mixColor(SKY_DAY[i], SKY_NIGHT[i], d));
   // на закате и рассвете — тёплая полоса у горизонта
   const dusk = d > 0.05 && d < 0.95 ? 1 - Math.abs(d - 0.5) * 2 : 0;
   if (dusk > 0) cols[2] = mixColor(cols[2], '#d8784a', dusk * 0.8);
   if (dusk > 0) cols[1] = mixColor(cols[1], '#7a4a6a', dusk * 0.5);
-  const bands = [[0, Math.floor(horizon * 0.45), cols[0]], [Math.floor(horizon * 0.45), Math.floor(horizon * 0.8), cols[1]], [Math.floor(horizon * 0.8), horizon, cols[2]]];
-  for (const [y0, y1, c] of bands) rect(ctx, 0, y0, w, y1 - y0, c);
-  // дизер на стыках полос
-  for (let b = 1; b < bands.length; b++) {
-    const y = bands[b][0];
-    for (let x = 0; x < w; x++) {
-      if ((x + y) % 2 === 0) dot(ctx, x, y - 1, bands[b][2]);
-      if ((x + y) % 2 === 1) dot(ctx, x, y, bands[b - 1][2]);
-    }
-  }
+  const g = ctx.createLinearGradient(0, 0, 0, horizon);
+  g.addColorStop(0, cols[0]);
+  g.addColorStop(0.6, cols[1]);
+  g.addColorStop(1, cols[2]);
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, w, horizon);
   // звёзды и луна ночью
   if (d > 0.5) {
     const rnd = seededRandom(seed + 99);
@@ -137,10 +139,16 @@ function drawGround(ctx, w, y0, h, base, d, seed) {
   const c = nightTint(base, d, 0.6);
   rect(ctx, 0, y0, w, h - y0, c);
   rect(ctx, 0, y0, w, 1, lighten(c, 0.18));
+  // лёгкая тень к низу вместо «песка» из точек
+  const g = ctx.createLinearGradient(0, y0, 0, h);
+  g.addColorStop(0, 'rgba(0,0,0,0)');
+  g.addColorStop(1, 'rgba(0,0,0,0.28)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, y0 + 1, w, h - y0);
   const rnd = seededRandom(seed + 5);
-  for (let i = 0; i < w * 1.2; i++) {
-    const x = Math.floor(rnd() * w), y = y0 + 2 + Math.floor(rnd() * (h - y0 - 2));
-    dot(ctx, x, y, rnd() < 0.5 ? darken(c, 0.25) : lighten(c, 0.1));
+  for (let i = 0; i < w * 0.25; i++) {
+    const x = Math.floor(rnd() * w), y = y0 + 3 + Math.floor(rnd() * (h - y0 - 3));
+    rect(ctx, x, y, 2, 1, darken(c, 0.18));
   }
 }
 
@@ -163,22 +171,21 @@ function drawLamp(ctx, x, groundY, d) {
   rect(ctx, x + 4, groundY - 33, 3, 2, d > 0.4 ? '#ffe9a0' : '#9a9a8a');
   if (d > 0.4) {
     const a = (d - 0.4) / 0.6;
-    // конус света: в середине гуще, к краям — шахматкой
-    for (let yy = 0; yy < 32; yy++) {
-      const half = Math.floor(yy * 0.42) + 1;
-      for (let xx = -half; xx <= half; xx++) {
-        const edge = Math.abs(xx) > half * 0.6;
-        if (edge && (xx + yy) % 2) continue;
-        dot(ctx, x + 5 + xx, groundY - 31 + yy, `rgba(255,214,120,${0.13 * a})`);
-      }
-    }
-    // пятно света на земле
-    for (let xx = -16; xx <= 16; xx++) {
-      for (let yy = -2; yy <= 2; yy++) {
-        if ((xx * xx) / 256 + (yy * yy) / 6 > 1) continue;
-        dot(ctx, x + 5 + xx, groundY + yy, `rgba(255,214,120,${0.16 * a})`);
-      }
-    }
+    // конус света: ярче у лампы, к земле тает
+    const cx = x + 5.5, top = groundY - 31;
+    const g = ctx.createLinearGradient(0, top, 0, groundY);
+    g.addColorStop(0, `rgba(255,214,120,${0.30 * a})`);
+    g.addColorStop(1, `rgba(255,214,120,${0.05 * a})`);
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.moveTo(cx - 1.5, top);
+    ctx.lineTo(cx + 1.5, top);
+    ctx.lineTo(cx + 14, groundY);
+    ctx.lineTo(cx - 14, groundY);
+    ctx.closePath();
+    ctx.fill();
+    glow(ctx, cx, groundY, 18, 3.5, '255,214,120', 0.35 * a);
+    glow(ctx, cx, top, 5, 4, '255,233,160', 0.6 * a);
   }
 }
 
@@ -711,16 +718,19 @@ function drawWindowSmall(ctx, x, y, d) {
   rect(ctx, x, y + 5, 16, 2, '#2a1c10');
 }
 
-/** Мягкое свечение шахматкой вокруг точки. */
+/** Мягкое свечение-овал вокруг точки (гладкий градиент). color — «r,g,b». */
 function glow(ctx, cx, cy, rx, ry, color, alpha) {
-  for (let y = -ry; y <= ry; y++) {
-    for (let x = -rx; x <= rx; x++) {
-      const k = (x * x) / (rx * rx) + (y * y) / (ry * ry);
-      if (k > 1) continue;
-      if (k > 0.5 && (x + y) % 2) continue;
-      dot(ctx, cx + x, cy + y, `rgba(${color},${alpha * (1 - k * 0.6)})`);
-    }
-  }
+  if (rx <= 0 || ry <= 0 || alpha <= 0) return;
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.scale(rx, ry);
+  const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
+  g.addColorStop(0, `rgba(${color},${Math.min(1, alpha * 1.6)})`);
+  g.addColorStop(0.45, `rgba(${color},${alpha * 0.7})`);
+  g.addColorStop(1, `rgba(${color},0)`);
+  ctx.fillStyle = g;
+  ctx.fillRect(-1, -1, 2, 2);
+  ctx.restore();
 }
 
 function drawAcidScene(ctx, w, h, t, dt, scene) {
@@ -1031,10 +1041,7 @@ function drawMenuScene(ctx, w, h, t, dt, scene) {
   drawLamp(ctx, 12, gy + 34, d);
   // бочка с костром
   const bx = Math.floor(w * 0.58), by = gy + 22;
-  for (let k = 0; k < 120; k++) {
-    const a = k / 120 * Math.PI * 2, r = 10 + (k % 6) * 4;
-    dot(ctx, bx + 7 + Math.cos(a) * r, by + Math.sin(a) * r * 0.6, 'rgba(255,140,40,0.10)');
-  }
+  glow(ctx, bx + 7, by + 2, 46, 20, '255,140,40', 0.16 + Math.sin(t / 180) * 0.02);
   rect(ctx, bx - 1, by - 1, 16, 15, '#101010');
   rect(ctx, bx, by, 14, 14, '#4a3a30');
   rect(ctx, bx, by + 4, 14, 1, '#6a5a4a'); rect(ctx, bx, by + 10, 14, 1, '#6a5a4a');

@@ -6,10 +6,29 @@ extends Node
 
 signal finished(emptied: bool)
 
-const LAYER_H := 0.1
-const LAYERS := 5
+const LAYER_H := 0.075
+const LAYERS := 7
+# мелкий хлам-модели (CC0, Poly Haven): [id, наибольший размер в метрах]. Свои — у каждого типа бака.
 const SMALL := [["can_rusted", 0.13], ["cardboard_box_01", 0.2], ["plastic_bottle_gallon", 0.24],
-	["russian_food_cans_01", 0.12], ["trashbag", 0.26], ["cigarette_pack", 0.06]]
+	["russian_food_cans_01", 0.12], ["trashbag", 0.26], ["cigarette_pack", 0.07]]
+const SMALL_BY_TYPE := {
+	"home": [["multi_cleaner_bottle", 0.24], ["all_purpose_cleaner", 0.24], ["drain_cleaner", 0.24], ["bleach_bottle", 0.26],
+		["long_life_food", 0.22], ["wine_bottles_01", 0.3], ["rubber_duck_toy", 0.09], ["dirty_football", 0.2],
+		["gamepad", 0.15], ["alarm_clock_01", 0.12], ["lightbulb_led", 0.11], ["lightbulb_01", 0.11],
+		["plastic_thermos", 0.26], ["garden_gloves_01", 0.22], ["mousetrap", 0.1], ["round_spectacles", 0.13],
+		["postcard_set_01", 0.16]],
+	"office": [["office_notepads", 0.22], ["binder_notebook", 0.24], ["clipboard", 0.3], ["vintage_stapler", 0.16],
+		["stationery_supplies", 0.18], ["postcard_set_01", 0.16], ["digital_wrist_watch", 0.1],
+		["portable_cassette_player", 0.13], ["lightbulb_led", 0.11], ["vintage_lighter", 0.06], ["round_spectacles", 0.13],
+		["gamepad", 0.15]],
+	"repair": [["screwdriver", 0.2], ["pliers", 0.18], ["combination_wrench", 0.2], ["measuring_tape_01", 0.08],
+		["lubricant_spray", 0.22], ["spray_paint_bottles", 0.22], ["small_oil_can_01", 0.18], ["oil_tin", 0.2],
+		["cleaner_tin_01", 0.16], ["leather_cleaner_can", 0.14], ["medical_tape", 0.08], ["small_plastic_torch", 0.17],
+		["lightbulb_01", 0.11]],
+	"military": [["oil_tin", 0.2], ["cleaner_tin_01", 0.16], ["small_plastic_torch", 0.17], ["medical_tape", 0.08],
+		["can_rusted", 0.13], ["vintage_lighter", 0.06], ["garden_gloves_01", 0.22], ["combination_wrench", 0.2],
+		["russian_food_cans_01", 0.12], ["digital_wrist_watch", 0.1]],
+}
 
 var bin: TrashBin
 var cam: Camera3D
@@ -53,13 +72,13 @@ func fill(b: TrashBin, basement: Basement, n_finds: int) -> void:
 			if ok:
 				break
 		spots.append(p)
-		var layer := _rng.randi_range(0, LAYERS - 2)
+		var layer := _rng.randi_range(0, LAYERS - 3)
 		_make_find(G.roll_loot(bin.type), Vector3(p.x, TrashBin.FLOOR_Y + 0.015 + layer * LAYER_H, p.y))
 	# слои хлама
 	var glass_left := 2
 	for L in LAYERS:
 		var y := TrashBin.FLOOR_Y + 0.03 + L * LAYER_H
-		var count := 14 if L < LAYERS - 1 else 12
+		var count := 13 if L < LAYERS - 1 else 11
 		for i in count:
 			var p := Vector3(_rng.randf_range(-TrashBin.IN_X + 0.1, TrashBin.IN_X - 0.1), y + _rng.randf_range(0.0, 0.04),
 				_rng.randf_range(-TrashBin.IN_Z + 0.08, TrashBin.IN_Z - 0.08))
@@ -67,6 +86,7 @@ func fill(b: TrashBin, basement: Basement, n_finds: int) -> void:
 			if glass:
 				glass_left -= 1
 			_make_piece(p, glass)
+	_settle(true)
 	_update_reveal(false)
 
 
@@ -94,40 +114,44 @@ func _make_piece(pos: Vector3, glass: bool) -> void:
 		mi.material_override = m
 		body.add_child(mi)
 		size = Vector3(0.24, 0.03, 0.18)
-	elif kind < 0.22:
+	elif kind < 0.16:
 		size = _flat(body, Vector3(_rng.randf_range(0.26, 0.36), 0.012, _rng.randf_range(0.2, 0.26)),
 			[Color(0.62, 0.6, 0.52), Color(0.7, 0.68, 0.6), Color(0.5, 0.52, 0.55)].pick_random(), 1.0)
-	elif kind < 0.42:
+	elif kind < 0.28:
 		size = _flat(body, Vector3(_rng.randf_range(0.28, 0.38), 0.05, _rng.randf_range(0.22, 0.3)), Color(0.6, 0.46, 0.3), 1.0, base._cardboard())
-	elif kind < 0.56:
-		size = _lump(body, _rng.randf_range(0.13, 0.19), Color(0.06, 0.06, 0.07), 0.35)
-	elif kind < 0.66:
-		size = _lump(body, _rng.randf_range(0.12, 0.17), Color(0.45, 0.38, 0.32), 1.0, base.surf("carpet", 1.0, 1.0, Color(0.6, 0.52, 0.45)))
-	elif kind < 0.74:
+	elif kind < 0.37:
+		size = _model_piece(body, ["trashbag", _rng.randf_range(0.16, 0.24)])
+	elif kind < 0.44:
+		size = _lump(body, _rng.randf_range(0.08, 0.12), Color(0.45, 0.38, 0.32), 1.0, base.surf("carpet", 1.0, 1.0, Color(0.6, 0.52, 0.45)))
+	elif kind < 0.5:
 		size = _flat(body, Vector3(_rng.randf_range(0.4, 0.5), 0.03, 0.08), Color(0.45, 0.35, 0.24), 0.9, base.surf("planks", 1.2, 1.0, Color(0.6, 0.5, 0.4)))
 	else:
-		var pick: Array = SMALL[_rng.randi() % SMALL.size()]
-		var holder := Node3D.new()
-		body.add_child(holder)
-		var opt := {"collide": false}
-		if pick[0] == "cigarette_pack":
-			opt["scale"] = 1.0
-		else:
-			opt["size"] = pick[1]
-		Props.place(holder, pick[0], Vector3.ZERO, _rng.randf() * 360, opt)
-		var b := Props.aabb_of(holder)
-		holder.position = -b.get_center()
-		size = b.size
-		if pick[0] == "plastic_bottle_gallon" or pick[0] == "can_rusted":
-			body.rotation.x = PI * 0.5 * (1 if _rng.randf() < 0.5 else -1)
-			size = Vector3(size.x, size.z, size.y)
+		var pool: Array = SMALL_BY_TYPE.get(bin.type, [])
+		var pick: Array = SMALL[_rng.randi() % SMALL.size()] if pool.is_empty() or _rng.randf() < 0.3 else pool[_rng.randi() % pool.size()]
+		size = _model_piece(body, pick)
 	var cs := CollisionShape3D.new()
 	var sh := BoxShape3D.new()
 	sh.size = size.max(Vector3.ONE * 0.03)
 	cs.shape = sh
 	body.add_child(cs)
-	pieces.append({"body": body, "r": maxf(size.x, size.z) * 0.42, "top": pos.y + size.y * 0.5, "glass": glass})
+	var hh := maxf(size.y, 0.03) * 0.5
+	pieces.append({"body": body, "r": maxf(size.x, size.z) * 0.42, "top": pos.y + hh, "y": pos.y, "hh": hh, "glass": glass})
 
+
+
+## Хлам-модель: настоящий размер вещи, но не больше pick[1] (чтобы влезало в бак)
+func _model_piece(body: Node3D, pick: Array) -> Vector3:
+	var holder := Node3D.new()
+	body.add_child(holder)
+	Props.place(holder, pick[0], Vector3.ZERO, _rng.randf() * 360, {"collide": false, "max_size": pick[1]})
+	var b := Props.aabb_of(holder)
+	holder.position = -b.get_center()
+	var size := b.size
+	# высокие вещи (бутылки, банки, баллончики) в баке лежат на боку
+	if size.y > maxf(size.x, size.z) * 1.15:
+		body.rotation.x = PI * 0.5 * (1 if _rng.randf() < 0.5 else -1)
+		size = Vector3(size.x, size.z, size.y)
+	return size
 
 func _flat(body: Node3D, size: Vector3, col: Color, rough: float, mat: Material = null) -> Vector3:
 	var mi := MeshInstance3D.new()
@@ -212,6 +236,21 @@ func _boxm(parent: Node3D, size: Vector3, pos: Vector3, m: Material) -> MeshInst
 	return mi
 
 
+func _cyl(n: Node3D, r: float, h: float, pos: Vector3, m: Material) -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	var cm := CylinderMesh.new()
+	cm.top_radius = r
+	cm.bottom_radius = r
+	cm.height = h
+	cm.radial_segments = 10
+	cm.rings = 1
+	mi.mesh = cm
+	mi.material_override = m
+	mi.position = pos
+	n.add_child(mi)
+	return mi
+
+
 func _find_visual(key: String) -> Node3D:
 	var n := Node3D.new()
 	var gold := _mat(Color(0.95, 0.75, 0.3), 1.0, 0.25)
@@ -236,6 +275,25 @@ func _find_visual(key: String) -> Node3D:
 		"connect":
 			for i in 3:
 				_boxm(n, Vector3(0.05, 0.012, 0.015), Vector3(-0.02 + i * 0.022, 0.006, -0.02 + i * 0.02), gold)
+		"resist":
+			for i in 5:
+				var r := _cyl(n, 0.006, 0.026, Vector3(-0.03 + i * 0.015, 0.006, 0), _mat(Color(0.78, 0.66, 0.45), 0, 0.6))
+				r.rotation.x = PI * 0.5
+				for k in 3:
+					var band := _cyl(n, 0.0065, 0.003, Vector3(-0.03 + i * 0.015, 0.006, -0.007 + k * 0.006),
+						_mat([Color(0.6, 0.1, 0.1), Color(0.1, 0.1, 0.1), Color(0.9, 0.6, 0.1), Color(0.2, 0.3, 0.7)][(i + k) % 4]))
+					band.rotation.x = PI * 0.5
+				_boxm(n, Vector3(0.0015, 0.0015, 0.07), Vector3(-0.03 + i * 0.015, 0.006, 0), _mat(Color(0.75, 0.75, 0.75), 1.0, 0.3))
+		"caps":
+			var cols := [Color(0.1, 0.2, 0.55), Color(0.08, 0.08, 0.1), Color(0.15, 0.4, 0.2)]
+			for i in 4:
+				_cyl(n, 0.011 + (i % 2) * 0.004, 0.03 + (i % 3) * 0.008, Vector3(-0.03 + i * 0.022, 0.02, (i % 2) * 0.02 - 0.01), _mat(cols[i % 3], 0.2, 0.4))
+				_cyl(n, 0.009, 0.002, Vector3(-0.03 + i * 0.022, 0.037 + (i % 3) * 0.004, (i % 2) * 0.02 - 0.01), _mat(Color(0.7, 0.7, 0.72), 1.0, 0.25))
+		"trans":
+			for i in 4:
+				_boxm(n, Vector3(0.012, 0.014, 0.006), Vector3(-0.024 + i * 0.016, 0.02, 0), _mat(Color(0.06, 0.06, 0.07), 0, 0.5))
+				for k in 3:
+					_boxm(n, Vector3(0.0012, 0.016, 0.0012), Vector3(-0.028 + i * 0.016 + k * 0.004, 0.006, 0), _mat(Color(0.75, 0.75, 0.75), 1.0, 0.3))
 		"silverWire":
 			var t := MeshInstance3D.new()
 			var tm := TorusMesh.new()
@@ -280,7 +338,7 @@ func finds_left() -> int:
 
 func _hint() -> void:
 	if ui:
-		ui.set_top_hint("Находок в баке: %d   ·   клик — откинуть хлам / забрать находку   ·   E — отойти" % finds.size())
+		ui.set_top_hint("Находок: %d" % finds.size())
 
 
 func stop() -> void:
@@ -394,6 +452,8 @@ func _toss(p: Dictionary, chain := true) -> void:
 	if not pieces.has(p):
 		return
 	pieces.erase(p)
+	if p.has("tw") and is_instance_valid(p["tw"]):
+		(p["tw"] as Tween).kill()
 	var body := p["body"] as StaticBody3D
 	body.collision_layer = 0
 	if body == _hover:
@@ -418,11 +478,12 @@ func _toss(p: Dictionary, chain := true) -> void:
 	tw.tween_callback(body.queue_free)
 	Sfx.play("rustle%d" % (randi() % 3), -6.0, _rng.randf_range(0.85, 1.15))
 	if p["glass"]:
-		Sfx.play("hurt", -2.0)
+		Sfx.play("glass", -4.0, _rng.randf_range(0.9, 1.1))
+		Sfx.play("hurt", -6.0)
 		G.time += 25.0
 		if ui:
 			ui.flash(0.45)
-			ui.toast("Порезался о битое стекло — пока перевязал руку, ушло полчаса", Color(1, 0.45, 0.4))
+			ui.toast("Порезался о стекло", Color(1, 0.45, 0.4))
 	elif _rng.randf() < 0.02:
 		_rat_jump(start)
 	# перчатки: заодно откидываются соседние куски
@@ -437,7 +498,61 @@ func _toss(p: Dictionary, chain := true) -> void:
 			near.sort_custom(func(a, b): return (a["body"] as Node3D).position.distance_to(start) < (b["body"] as Node3D).position.distance_to(start))
 			for i in mini(extra, near.size()):
 				_toss(near[i], false)
+		_settle(false)
 	_update_reveal(true)
+
+
+## Оседание: всё, под чем больше ничего нет, падает вниз до опоры (другой хлам, находка или дно бака).
+func _settle(instant: bool) -> void:
+	var items: Array = []
+	for p in pieces:
+		items.append({"d": p, "find": false, "bottom": float(p["y"]) - float(p["hh"]), "h": float(p["hh"]) * 2.0,
+			"r": float(p["r"]), "pos": (p["body"] as Node3D).position})
+	for f in finds:
+		items.append({"d": f, "find": true, "bottom": float(f["y"]), "h": 0.035, "r": float(f["r"]),
+			"pos": (f["area"] as Node3D).position})
+	items.sort_custom(func(a, b): return float(a["bottom"]) < float(b["bottom"]))
+	var done: Array = []
+	for it in items:
+		var support := TrashBin.FLOOR_Y
+		var pa: Vector3 = it["pos"]
+		for o in done:
+			var pb: Vector3 = o["pos"]
+			var dist := Vector2(pa.x - pb.x, pa.z - pb.z).length()
+			if dist < (float(it["r"]) + float(o["r"])) * 0.72:
+				var otop := float(o["bottom"]) + float(o["h"])
+				if otop <= float(it["bottom"]) + 0.02:
+					support = maxf(support, otop)
+		var drop := float(it["bottom"]) - support
+		if drop > 0.004:
+			it["bottom"] = support
+			_drop_to(it, support, instant)
+		done.append(it)
+
+
+func _drop_to(it: Dictionary, bottom: float, instant: bool) -> void:
+	var d: Dictionary = it["d"]
+	var node: Node3D
+	var target_y: float
+	if it["find"]:
+		d["y"] = bottom
+		node = d["area"]
+		target_y = bottom
+	else:
+		d["y"] = bottom + float(d["hh"])
+		d["top"] = bottom + float(d["hh"]) * 2.0
+		node = d["body"]
+		target_y = float(d["y"])
+	if instant or not is_instance_valid(node):
+		if is_instance_valid(node):
+			node.position.y = target_y
+		return
+	if d.has("tw") and is_instance_valid(d["tw"]):
+		(d["tw"] as Tween).kill()
+	var fall := maxf(node.position.y - target_y, 0.0)
+	var tw := create_tween()
+	tw.tween_property(node, "position:y", target_y, maxf(0.08, sqrt(2.0 * fall / 9.8))).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	d["tw"] = tw
 
 
 func _update_reveal(sound: bool) -> void:
@@ -461,7 +576,7 @@ func _collect(f: Dictionary) -> void:
 	if G.bag_full():
 		Sfx.play("thud", -8.0, 1.4)
 		if ui:
-			ui.toast("Мешок полон. Неси скупщику или в кислоту.", Color(1, 0.7, 0.4))
+			ui.toast("Мешок полон", Color(1, 0.7, 0.4))
 		return
 	finds.erase(f)
 	var a := f["area"] as Area3D
@@ -481,6 +596,8 @@ func _collect(f: Dictionary) -> void:
 	tw.tween_property(a, "global_position", cam.global_position + (-cam.global_transform.basis.z) * 0.3, 0.35)
 	tw.tween_property(a, "scale", Vector3.ONE * 0.3, 0.35)
 	tw.chain().tween_callback(a.queue_free)
+	_settle(false)
+	_update_reveal(true)
 	_hint()
 	if finds.is_empty():
 		running = false

@@ -751,6 +751,15 @@ func _door_and_corridor() -> void:
 	var door := box(Vector3(DOOR_W, DOOR_H, 0.06), Vector3(DOOR_W * 0.5, DOOR_H * 0.5, 0), door_mat, true, door_pivot)
 	cyl(0.012, 0.03, Vector3(0, 1.6 - DOOR_H * 0.5, -0.04), surf("metal", 2.0, 0.3, Color(0.5, 0.5, 0.5)), Vector3(90, 0, 0), 8, door)
 	var handle := box(Vector3(0.12, 0.025, 0.03), Vector3(DOOR_W * 0.35, 1.0 - DOOR_H * 0.5, -0.05), surf("metal", 2.0, 0.3), false, door)
+	# невидимая преграда в проёме: игрок не выйдет из подвала, даже когда дверь открыта (гости проходят — они без физики)
+	var block := StaticBody3D.new()
+	var bcs := CollisionShape3D.new()
+	var bsh := BoxShape3D.new()
+	bsh.size = Vector3(DOOR_W + 0.1, DOOR_H, 0.08)
+	bcs.shape = bsh
+	bcs.position = Vector3(DOOR_X, DOOR_H * 0.5, D + 0.02)
+	block.add_child(bcs)
+	add_child(block)
 	# коридор: пол, стены, лестница вверх, тусклая лампа
 	var cz := D + 1.3
 	box(Vector3(1.6, 0.1, 2.2), Vector3(DOOR_X, -0.05, cz), surf("floor"))
@@ -781,6 +790,10 @@ func open_door(open: bool) -> void:
 
 # ---------- хлам по углам ----------
 
+func _top(n: Node3D) -> float:
+	return (n.transform * Props.aabb_of(n)).end.y
+
+
 func _clutter() -> void:
 	# всё стоит у стен и в углах — посреди прохода ничего не валяется
 	Props.place(self, "Barrel_01", Vector3(-3.65, 0, -4.15), 30, {"height": 0.9})
@@ -795,6 +808,19 @@ func _clutter() -> void:
 	Props.place(self, "wooden_bucket_01", Vector3(-2.2, 0, -2.4), 0, {"height": 0.3})
 	# кровать Палыча у южной стены
 	Props.place(self, "old_bed_frame", Vector3(-2.5, 0, D - 0.47), 90, {"scale": 1.0})
+	# ещё барахло по углам (CC0, Poly Haven)
+	Props.place(self, "hand_truck", Vector3(2.5, 0, D - 0.3), 180, {"height": 1.1})
+	Props.place(self, "wooden_broom", Vector3(2.12, 0, D - 0.12), 0, {"height": 1.25, "tilt": Vector3(10, 0, 0), "collide": false})
+	Props.place(self, "dustpan", Vector3(2.15, 0, D - 0.42), 160, {"max_size": 0.32, "collide": false})
+	Props.place(self, "korean_fire_extinguisher_01", Vector3(4.3, 0, D - 0.14), 200, {"height": 0.5})
+	var sc := Props.place(self, "vintage_suitcase", Vector3(-0.85, 0, D - 0.25), 5, {"max_size": 0.65})
+	if sc:
+		Props.place(self, "boombox", Vector3(-0.85, _top(sc), D - 0.25), 170, {"max_size": 0.42, "collide": false})
+	Props.place(self, "portable_generator", Vector3(-2.3, 0, -D + 0.35), 0, {"max_size": 0.65})
+	var cr := Props.place(self, "plastic_crate_02", Vector3(3.95, 0, -D + 0.28), 0, {"max_size": 0.5})
+	if cr:
+		Props.place(self, "Television_01", Vector3(3.95, _top(cr), -D + 0.28), 180, {"max_size": 0.45, "collide": false})
+	Props.place(self, "vintage_radio_transceiver", Vector3(-0.1, 0.79, -4.25), 180, {"max_size": 0.34, "collide": false})
 	# лужи
 	for p in [Vector3(-2.2, 0, -2.4), Vector3(2.4, 0, 1.6), Vector3(-1.2, 0, 2.6), Vector3(0.9, 0, -3.0)]:
 		var pd := MeshInstance3D.new()

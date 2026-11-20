@@ -19,6 +19,16 @@ MODELS = [
     'metal_jerrycan', 'pot_enamel_01', 'russian_food_cans_01', 'cigarette_pack', 'modular_chainlink_fence',
     'rubber_boots', 'wooden_bucket_01', 'korean_public_payphone_01', 'utility_box_01', 'retro_multimeter',
     'vintage_telephone_wall_clock', 'classic_laptop', 'wooden_military_crate', 'industrial_pastic_container',
+    # мелкий хлам в бак и обстановка (добавлено)
+    'multi_cleaner_bottle', 'all_purpose_cleaner', 'drain_cleaner', 'leather_cleaner_can', 'lubricant_spray',
+    'spray_paint_bottles', 'small_oil_can_01', 'oil_tin', 'cleaner_tin_01', 'long_life_food', 'wine_bottles_01',
+    'rubber_duck_toy', 'dirty_football', 'gamepad', 'alarm_clock_01', 'lightbulb_led', 'office_notepads',
+    'postcard_set_01', 'garden_gloves_01', 'mousetrap', 'medical_tape', 'screwdriver', 'pliers',
+    'combination_wrench', 'measuring_tape_01', 'vintage_stapler', 'digital_wrist_watch', 'portable_cassette_player',
+    'small_plastic_torch', 'round_spectacles', 'vintage_lighter', 'binder_notebook', 'plastic_thermos',
+    'stationery_supplies', 'clipboard', 'boombox', 'plastic_crate_02',
+    'wooden_broom', 'dustpan', 'korean_fire_extinguisher_01', 'Television_01', 'hand_truck', 'vintage_suitcase',
+    'portable_generator', 'vintage_radio_transceiver',
 ]
 # поверхность → id текстуры
 TEXTURES = {

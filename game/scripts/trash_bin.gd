@@ -6,7 +6,7 @@ extends Node3D
 const OUT := Vector3(1.3, 0.95, 0.9)    # наружные размеры
 const IN_X := 0.59                      # полуширина внутри
 const IN_Z := 0.4                       # полуглубина внутри
-const FLOOR_Y := 0.3                    # фальш-дно внутри (хлам лежит почти до краёв)
+const FLOOR_Y := 0.34                   # фальш-дно внутри (хлам лежит почти до краёв)
 
 var type := "home"
 var contents: Node3D

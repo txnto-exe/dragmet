@@ -199,7 +199,8 @@ func _build_hud() -> void:
 	crosshair.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hud_box.add_child(crosshair)
 
-	prompt = _label(22, C_TEXT, f_bold)
+	prompt = _label(17, C_TEXT, f_bold)
+	prompt.modulate.a = 0.75
 	prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	prompt.set_anchors_preset(Control.PRESET_CENTER)
 	prompt.offset_left = -400
@@ -529,7 +530,7 @@ func say(who: String, text: String, col := C_GOLD, pitch := 1.0) -> void:
 	dlg_text.text = text
 	dlg_text.visible = text != ""
 	dlg_text.visible_characters = 0
-	dlg_hint.text = "ЛКМ / E / пробел — дальше"
+	dlg_hint.text = ""
 	_clear_choices()
 	_place_dialog()
 	_typing = true
@@ -543,7 +544,9 @@ func say(who: String, text: String, col := C_GOLD, pitch := 1.0) -> void:
 		await get_tree().create_timer(0.018).timeout
 	dlg_text.visible_characters = -1
 	_typing = false
+	dlg_hint.text = "▸"
 	await advanced
+	dlg_hint.text = ""
 
 
 ## Варианты ответа кнопками. Возвращает номер выбранного.
@@ -558,7 +561,7 @@ func choose(options: Array, text := "", who := "", show_money := false, cancel :
 		dlg_text.visible = true
 		dlg_text.visible_characters = -1
 	dlg_money.text = ("У тебя: " + G.rub(G.money)) if show_money else ""
-	dlg_hint.text = "Клик мышью или W/S + E" + ("   ·   Esc — уйти" if cancel >= 0 else "")
+	dlg_hint.text = ""
 	_clear_choices()
 	var first: Button = null
 	for i in options.size():
@@ -798,7 +801,7 @@ func _fill_shop() -> void:
 		if first == null and not b.disabled:
 			first = b
 	var close := Button.new()
-	close.text = "Уйти  (Esc)"
+	close.text = "Уйти"
 	close.custom_minimum_size = Vector2(0, 46)
 	close.pressed.connect(close_shop)
 	_hover_focus(close)
@@ -999,7 +1002,7 @@ func show_settings() -> void:
 	_slider_row(c, "Яркость", "brightness", 0.6, 1.8, 0.02, func(x): return "%d%%" % int(round(x * 100)))
 	_check_row(c, "Вертикальная синхронизация", "vsync")
 
-	var back := _menu_button(v, "Назад  (Esc)", "settings_back")
+	var back := _menu_button(v, "Назад", "settings_back")
 	await get_tree().process_frame
 	if is_instance_valid(back):
 		back.grab_focus()

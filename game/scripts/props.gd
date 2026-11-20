@@ -77,6 +77,10 @@ static func place(parent: Node3D, id: String, pos: Vector3, rot_y := 0.0, opts :
 		s = float(opts["size"]) / maxf(maxf(box.size.x, box.size.y), maxf(box.size.z, 0.001))
 	if opts.has("scale"):
 		s = float(opts["scale"])
+	if opts.has("max_size"):
+		var m := maxf(maxf(box.size.x, box.size.y), box.size.z) * s
+		if m > float(opts["max_size"]):
+			s *= float(opts["max_size"]) / m
 	n.scale = Vector3.ONE * s
 	n.rotation_degrees = Vector3(0, rot_y, 0) + opts.get("tilt", Vector3.ZERO)
 	# ставим дном на pos.y и центром (по X/Z) в pos — с учётом поворота и наклона

@@ -85,7 +85,7 @@ func _setup_input() -> void:
 
 
 func _process(delta: float) -> void:
-	if mode == "pause" or mode == "intro" or paused_time:
+	if mode == "pause" or mode == "intro" or mode == "menu" or paused_time:
 		return
 	time += delta
 	if debt > 0 and time >= deadline:

@@ -1,9 +1,10 @@
 extends Node3D
 ## Главный сценарий: собирает подвал, игрока, интерфейс; связывает станции, гостей и долг.
+## 3D-мир рисуется в отдельном SubViewport в пониженном разрешении (пиксельный вид),
+## а интерфейс — поверх в полном разрешении, чтобы текст был чётким.
 
 const DOOR_POS := Vector3(1.5, 1.4, 4.5)
 const PHONE_POS := Vector3(1.6, 1.3, -4.35)
-const KOLYAN_SEAT := Vector3(Basement.SEAT_X, 0, -3.5)
 
 const SPEAKERS := {
 	"Палыч": [Color(0.95, 0.75, 0.35), 1.05],
@@ -13,11 +14,12 @@ const SPEAKERS := {
 	"": [Color(0.7, 0.68, 0.62), 1.0],
 }
 
+var sub: SubViewport
+var view: TextureRect
 var world: Basement
 var player: CharacterBody3D
 var ui: CanvasLayer
 var cine: Camera3D
-var post: ColorRect
 var dig: DigGame
 var buyer: Npc
 var kolyan: Npc
@@ -36,51 +38,72 @@ var ring_timer := 0.0
 var _board_t := 0.0
 var _prev_mode := "walk"
 var _shot_dir := ""
+var _settings_from := ""
+var _menu_t := 0.0
+
+
+static func kolyan_seat() -> Vector3:
+	return Vector3(Basement.SEAT_X, 0, Basement.STALL_Z[0])
 
 
 func _ready() -> void:
 	randomize()
+	# --- 3D-мир в отдельном вьюпорте
+	var bg := CanvasLayer.new()
+	bg.layer = 0
+	add_child(bg)
+	sub = SubViewport.new()
+	sub.own_world_3d = true
+	sub.audio_listener_enable_3d = true
+	sub.msaa_3d = Viewport.MSAA_DISABLED
+	sub.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	sub.positional_shadow_atlas_size = 4096
+	add_child(sub)
+	view = TextureRect.new()
+	view.set_anchors_preset(Control.PRESET_FULL_RECT)
+	view.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	view.stretch_mode = TextureRect.STRETCH_SCALE
+	view.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	view.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	view.texture = sub.get_texture()
+	var sm := ShaderMaterial.new()
+	sm.shader = load("res://shaders/post.gdshader")
+	view.material = sm
+	bg.add_child(view)
+	Sfx.world_root = sub
+
 	world = Basement.new()
-	add_child(world)
+	sub.add_child(world)
 	world.build()
 
 	player = preload("res://scripts/player.gd").new()
-	add_child(player)
+	sub.add_child(player)
 	player.position = Vector3(1.5, 0, 3.4)
 	player.focus_changed.connect(_on_focus)
 
 	cine = Camera3D.new()
 	cine.near = 0.02
-	add_child(cine)
-
-	var pl := CanvasLayer.new()
-	pl.layer = 5
-	add_child(pl)
-	post = ColorRect.new()
-	post.set_anchors_preset(Control.PRESET_FULL_RECT)
-	post.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var sm := ShaderMaterial.new()
-	sm.shader = load("res://shaders/post.gdshader")
-	post.material = sm
-	pl.add_child(post)
+	sub.add_child(cine)
 
 	ui = preload("res://scripts/ui.gd").new()
 	add_child(ui)
+	ui.menu_action.connect(_on_menu_action)
 
 	dig = DigGame.new()
-	add_child(dig)
+	sub.add_child(dig)
 	dig.finished.connect(_on_dig_done)
 
 	ambience = AudioStreamPlayer.new()
 	ambience.stream = Sfx.looped("ambience")
 	ambience.volume_db = -9.0
+	ambience.bus = "Ambience"
 	add_child(ambience)
 	ambience.play()
 
 	_make_interactables()
 	_spawn_buyer()
 	if G.flags.get("kolyan_in", false):
-		_spawn_kolyan(KOLYAN_SEAT, Vector3(-1, 0, 0))
+		_spawn_kolyan(kolyan_seat(), Vector3(-1, 0, 0))
 		kolyan.play("Sitting_Idle", 0.0)
 		world.stall_lights[0].light_energy = 1.1
 		it_kolyan.active = true
@@ -88,13 +111,51 @@ func _ready() -> void:
 	G.changed.connect(_update_board)
 	_update_board()
 
+	get_window().size_changed.connect(_apply_view)
+	Settings.changed.connect(_apply_view)
+	_apply_view()
+
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--auto="):
 			_shot_dir = a.substr(7)
 	if _shot_dir != "":
 		_auto_test()
+	elif G.has_meta("skip_menu"):
+		G.remove_meta("skip_menu")
+		_start_game()
 	else:
-		_intro()
+		_main_menu()
+
+
+## Размер 3D-картинки: окно / целый множитель (чтобы пиксели были ровные).
+func _apply_view() -> void:
+	var win := Vector2(get_window().size)
+	if win.x < 8 or win.y < 8:
+		return
+	var ph := Settings.pixel_height()
+	var f := 1.0
+	if ph > 0:
+		f = maxf(1.0, round(win.y / ph))
+	var s := Vector2i(maxi(1, int(win.x / f)), maxi(1, int(win.y / f)))
+	sub.size = s
+	var m := view.material as ShaderMaterial
+	m.set_shader_parameter("low_res", Vector2(s))
+	m.set_shader_parameter("brightness", float(Settings.get_v("brightness")))
+	var q := int(Settings.get_v("quality"))
+	sub.positional_shadow_atlas_size = [1024, 2048, 4096][clampi(q, 0, 2)]
+	world.apply_quality(q)
+
+
+# ---------- ввод: пересылаем в 3D-вьюпорт ----------
+
+func _input(e: InputEvent) -> void:
+	var ev := e
+	if e is InputEventMouse:
+		ev = e.duplicate()
+		var vs := get_viewport().get_visible_rect().size
+		(ev as InputEventMouse).position = (e as InputEventMouse).position / vs * Vector2(sub.size)
+		(ev as InputEventMouse).global_position = (ev as InputEventMouse).position
+	sub.push_input(ev, true)
 
 
 # ---------- режимы и камера ----------
@@ -145,34 +206,100 @@ func wait(sec: float) -> void:
 	await get_tree().create_timer(sec).timeout
 
 
+# ---------- главное меню ----------
+
+func _main_menu() -> void:
+	set_mode("menu")
+	cine.global_transform = look_xf(Vector3(3.6, 1.75, 3.7), Vector3(-0.3, 0.6, -0.8))
+	cine.fov = 62.0
+	cine.current = true
+	ui.show_main_menu(G.flags.get("intro_done", false))
+	await ui.fade(0.0, 1.6)
+
+
+func _start_game() -> void:
+	ui.clear_menus()
+	set_mode("intro")
+	await ui.fade(1.0, 0.5)
+	player.cam.current = true
+	_intro()
+
+
+func _on_menu_action(a: String) -> void:
+	match a:
+		"continue":
+			_start_game()
+		"new":
+			if G.flags.get("intro_done", false):
+				ui.show_confirm("Начать заново? Текущее сохранение пропадёт.", "new_yes", "to_main")
+			else:
+				_on_menu_action("new_yes")
+		"new_yes":
+			G.reset_game()
+			G.set_meta("skip_menu", true)
+			ui.clear_menus()
+			await ui.fade(1.0, 0.4)
+			get_tree().paused = false
+			get_tree().reload_current_scene()
+		"to_main":
+			ui.show_main_menu(G.flags.get("intro_done", false))
+		"settings":
+			_settings_from = ui.menu_open
+			ui.show_settings()
+		"settings_back":
+			if _settings_from == "pause":
+				ui.show_pause_menu()
+			else:
+				ui.show_main_menu(G.flags.get("intro_done", false))
+		"back":
+			match ui.menu_open:
+				"settings":
+					_on_menu_action("settings_back")
+				"pause":
+					_pause(false)
+				"confirm":
+					_on_menu_action("to_main")
+		"resume":
+			_pause(false)
+		"to_menu":
+			G.save_game()
+			ui.clear_menus()
+			await ui.fade(1.0, 0.3)
+			get_tree().paused = false
+			get_tree().reload_current_scene()
+		"quit":
+			G.save_game()
+			get_tree().quit()
+
+
 # ---------- вступление ----------
 
 func _intro() -> void:
 	set_mode("intro")
 	if not G.flags.get("intro_done", false):
-		await wait(0.8)
+		await wait(0.6)
 		await ui.big_text("Ты должен Хозяину.", 1.4)
 		await ui.big_text("3 000 ₽. Три дня.", 1.4)
 		await ui.big_text("Из подвала не выпустят,\nпока не отдашь.", 1.8)
 		G.flags["intro_done"] = true
 		G.save_game()
-	await ui.fade(0.0, 2.2)
+	await ui.fade(0.0, 2.0)
 	set_mode("walk")
-	ui.say_sub("", "WASD — ходить · мышь — смотреть · E — действие · Esc — пауза", 7.0)
+	ui.say_sub("", "WASD — ходить   ·   мышь — смотреть   ·   E — действие   ·   Esc — пауза", 7.0)
 
 
 # ---------- точки взаимодействия ----------
 
 func _make_interactables() -> void:
-	Interactable.make(world, Vector3(0, 0.55, -0.2), Vector3(2.5, 1.1, 2.5), "E — порыться в мусоре", _use_trash)
+	Interactable.make(world, Vector3(0, 0.6, -0.2), Vector3(2.8, 1.2, 2.8), "E — порыться в мусоре", _use_trash)
 	Interactable.make(world, Vector3(-Basement.W + 0.1, 1.3, 3.0), Vector3(0.5, 0.8, 1.0), "E — окошко скупщика", _use_buyer)
-	Interactable.make(world, Vector3(0, 1.3, -4.25), Vector3(0.8, 0.9, 0.4), "E — ящик для долга", _use_debt)
+	Interactable.make(world, Basement.DEBT_BOX + Vector3(0, 0.6, 0.05), Vector3(0.75, 1.3, 0.55), "E — ящик для долга", _use_debt)
 	it_phone = Interactable.make(world, PHONE_POS, Vector3(0.5, 0.9, 0.4), "E — снять трубку", _answer_phone)
 	it_phone.active = false
 	it_door = Interactable.make(world, Vector3(1.5, 1.1, 4.42), Vector3(1.0, 2.0, 0.3), "E — дверь", _use_door)
 	Interactable.make(world, Vector3(-4.25, 1.2, -3.05), Vector3(0.35, 2.0, 2.9), "E — сетка", _use_acid)
-	Interactable.make(world, Vector3(-4.45, 0.8, 0.0), Vector3(1.0, 1.6, 2.8), "E — завал", _use_furnace)
-	it_kolyan = Interactable.make(world, Vector3(Basement.STALL_X, 1.1, -3.5), Vector3(0.9, 1.4, 1.1), "E — Колян", _use_kolyan)
+	Interactable.make(world, Vector3(-4.45, 0.8, 0.0), Vector3(1.0, 1.6, 2.6), "E — завал", _use_furnace)
+	it_kolyan = Interactable.make(world, Vector3(Basement.STALL_X, 1.1, Basement.STALL_Z[0]), Vector3(0.9, 1.4, 1.1), "E — Колян", _use_kolyan)
 	it_kolyan.active = false
 
 
@@ -184,14 +311,11 @@ func _on_focus(target) -> void:
 
 func _unhandled_input(e: InputEvent) -> void:
 	if e.is_action_pressed("fullscreen"):
-		var full := DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
-		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED if full else DisplayServer.WINDOW_MODE_FULLSCREEN)
+		Settings.set_v("window", 2 if int(Settings.get_v("window")) == 0 else 0)
 		return
 	if e.is_action_pressed("pause"):
 		if G.mode == "walk":
 			_pause(true)
-		elif G.mode == "pause":
-			_pause(false)
 		return
 	if G.mode == "walk":
 		if e.is_action_pressed("use") and player.focus:
@@ -200,19 +324,23 @@ func _unhandled_input(e: InputEvent) -> void:
 			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 
+func _notification(what: int) -> void:
+	# свернул игру / переключился на другое окно — ставим на паузу
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT and G.mode == "walk" and not G.auto_test:
+		_pause(true)
+
+
 func _pause(on: bool) -> void:
 	if on:
 		_prev_mode = G.mode
 		set_mode("pause")
 		get_tree().paused = true
-		ui.show_pause(true, func(): _pause(false), func():
-			get_tree().paused = false
-			G.reset_game()
-			get_tree().reload_current_scene(), func(): get_tree().quit())
+		ui.show_pause_menu()
 	else:
+		ui.clear_menus()
 		get_tree().paused = false
-		ui.show_pause(false, Callable(), Callable(), Callable())
 		set_mode(_prev_mode)
+		G.save_game()
 
 
 # ---------- мусорка ----------
@@ -223,7 +351,7 @@ func _use_trash() -> void:
 		return
 	set_mode("dig")
 	await cine_to(look_xf(DigGame.SPOT + Vector3(0, 0.62, 0.52), DigGame.SPOT), 52.0, 0.6)
-	ui.say_sub("", "Кликай по хламу — раскидать. Под ним что-то блестит. E — отойти.", 3.5)
+	ui.say_sub("", "Кликай по хламу — он отлетит. Под ним что-то блестит. E — отойти.", 3.5)
 	dig.start(cine, G.roll_loot(), ui)
 
 
@@ -265,8 +393,7 @@ func _use_buyer() -> void:
 	else:
 		var v := G.bag_value()
 		await talk("Скупщик", "Так-так… %s. Даю %s." % [_bag_summary(), G.rub(v)])
-		ui.dlg_name.text = "Скупщик"
-		var c: int = await ui.choose(["Отдать за %s" % G.rub(v), "Не, пока оставлю"])
+		var c: int = await ui.choose(["Отдать за %s" % G.rub(v), "Не, пока оставлю"], "", "Скупщик", true, 1)
 		if c == 0:
 			G.sell_all()
 			Sfx.play("coins", -4.0)
@@ -288,7 +415,7 @@ func _update_board() -> void:
 	if G.debt > 0:
 		world.set_debt_text("ДОЛГ\n%s\n%s" % [G.rub(G.debt), G.left_text()])
 	else:
-		world.set_debt_text("ДОЛГ\nзакрыт")
+		world.set_debt_text("ДОЛГ\nЗАКРЫТ")
 
 
 func _use_debt() -> void:
@@ -296,11 +423,12 @@ func _use_debt() -> void:
 		ui.toast("Долг закрыт. Пока.")
 		return
 	set_mode("dialog")
-	await cine_to(look_xf(Vector3(0, 1.5, -3.4), Vector3(0, 1.4, -4.4)), 55.0, 0.6)
-	await talk("", "Железный ящик с прорезью. Над ним красной краской: ДОЛГ %s. Осталось %s." % [G.rub(G.debt), G.left_text()])
+	var b := Basement.DEBT_BOX
+	await cine_to(look_xf(Vector3(b.x + 0.2, 1.55, -3.3), Vector3(b.x, 1.15, -4.4)), 55.0, 0.6)
+	await talk("", "Железный шкаф с прорезью. Над ним красной краской: ДОЛГ %s. Осталось %s." % [G.rub(G.debt), G.left_text()])
 	var give := mini(G.money, G.debt)
-	ui.dlg_name.text = ""
-	var c: int = await ui.choose(["Сунуть в щель %s" % G.rub(give) if give > 0 else "Совать нечего", "Отойти"])
+	var opts := ["Сунуть в щель %s" % G.rub(give) if give > 0 else "Совать нечего", "Отойти"]
+	var c: int = await ui.choose(opts, "", "", true, 1, [] if give > 0 else [0])
 	if c == 0 and give > 0:
 		G.pay_debt()
 		Sfx.play("slot", -2.0)
@@ -358,9 +486,13 @@ func _start_knocking() -> void:
 
 
 func _process(dt: float) -> void:
-	var m := post.material as ShaderMaterial
+	var m := view.material as ShaderMaterial
 	m.set_shader_parameter("rot", G.rot())
 	m.set_shader_parameter("time", Time.get_ticks_msec() / 1000.0)
+	if G.mode == "menu" and cine.current:
+		_menu_t += dt
+		cine.global_transform = look_xf(Vector3(3.6 + sin(_menu_t * 0.12) * 0.4, 1.75 + sin(_menu_t * 0.2) * 0.05, 3.7),
+			Vector3(-0.3 + sin(_menu_t * 0.09) * 0.8, 0.6, -0.8))
 	_board_t -= dt
 	if _board_t <= 0.0:
 		_board_t = 2.0
@@ -409,8 +541,7 @@ func _peephole() -> void:
 	await talk("Палыч", "Колян? Ты как меня нашёл?")
 	await talk("Колян", "Да весь район знает, что ты Хозяину должен. А у меня завод закрыли — денег ноль.")
 	await talk("Колян", "Пусти к себе, а? Руки у меня золотые: перчатки, мешок, фонарь — всё сделаю.")
-	ui.dlg_name.text = "Колян"
-	var c: int = await ui.choose(["Открыть дверь", "Не сейчас"])
+	var c: int = await ui.choose(["Открыть дверь", "Не сейчас"], "", "Колян", false, 1)
 	ui.set_peep(false)
 	ui.close_dialog()
 	if c == 1:
@@ -433,7 +564,9 @@ func _kolyan_enters() -> void:
 	kolyan.play("Walk")
 	await kolyan.walk_path([Vector3(1.5, 0, 3.9)])
 	world.open_door(false)
-	await kolyan.walk_path([Vector3(3.3, 0, 2.4), Vector3(4.15, 0, -2.75), Vector3(Basement.SEAT_X, 0, -2.75), KOLYAN_SEAT])
+	var seat := kolyan_seat()
+	var gap_z: float = (Basement.STALL_Z[0] + Basement.STALL_Z[1]) * 0.5
+	await kolyan.walk_path([Vector3(3.4, 0, 2.0), Vector3(3.85, 0, gap_z), Vector3(seat.x, 0, gap_z), seat])
 	kolyan.face(Vector3(-1, 0, 0))
 	kolyan.sit()
 	world.light_stall(0, true)
@@ -443,39 +576,43 @@ func _kolyan_enters() -> void:
 	ui.say_sub("Колян", "Ну, обживусь. Подходи, если что надо.", 4.0)
 
 
+func _upgrade_items() -> Array:
+	var out: Array = []
+	for k in G.UPGRADES:
+		var u: Dictionary = G.UPGRADES[k]
+		out.append({"key": k, "name": u["name"], "desc": String(u["desc"]).substr(0, 1).to_upper() + String(u["desc"]).substr(1),
+			"level": G.upgrades[k], "max": u["max"], "cost": G.upgrade_cost(k)})
+	return out
+
+
+func _buy_upgrade(k: String) -> bool:
+	if G.upgrade_maxed(k):
+		ui.shop_say("Лучше уже не сделаю, Палыч.")
+		return false
+	if G.buy_upgrade(k):
+		Sfx.play("coins", -6.0, 0.8)
+		ui.toast("%s — уровень %d" % [G.UPGRADES[k]["name"], G.upgrades[k]], Color(0.6, 0.85, 1.0))
+		ui.shop_say(["Сделаем! Держи.", "Во, как новое.", "Готово. С тебя пузырь… шучу."].pick_random())
+		return true
+	ui.shop_say("Денег не хватает, Палыч.")
+	return false
+
+
 func _use_kolyan() -> void:
 	set_mode("dialog")
 	kolyan.play("Sitting_Talking")
-	await cine_to(look_xf(Vector3(3.95, 1.4, -3.5), Vector3(Basement.SEAT_X, 1.05, -3.5)), 55.0, 0.6)
-	var lines := ["Чем подсобить, Палыч?", "Говори, чего надо.", "Руки чешутся — давай работу."]
-	var intro_line: String = lines.pick_random()
+	var z: float = Basement.STALL_Z[0]
+	await cine_to(look_xf(Vector3(3.7, 1.45, z + 0.15), Vector3(Basement.SEAT_X, 1.0, z)), 55.0, 0.6)
+	var line: String = ["Чем подсобить, Палыч?", "Говори, чего надо.", "Руки чешутся — давай работу."].pick_random()
 	while true:
-		var keys := G.UPGRADES.keys()
-		var opts: Array = []
-		for k in keys:
-			var u: Dictionary = G.UPGRADES[k]
-			if G.upgrade_maxed(k):
-				opts.append("%s — уже лучше некуда" % u["name"])
-			else:
-				opts.append("%s (%s) — %s" % [u["name"], u["desc"], G.rub(G.upgrade_cost(k))])
-		opts.append("Поболтать")
-		opts.append("Пока")
-		ui.dlg_name.text = "Колян"
-		ui.dlg_name.add_theme_color_override("font_color", SPEAKERS["Колян"][0])
-		var c: int = await ui.choose(opts, intro_line)
-		if c < keys.size():
-			var k: String = keys[c]
-			if G.upgrade_maxed(k):
-				intro_line = "Лучше уже не сделаю, Палыч."
-			elif G.buy_upgrade(k):
-				Sfx.play("coins", -6.0, 0.8)
-				ui.toast("%s — уровень %d" % [G.UPGRADES[k]["name"], G.upgrades[k]], Color(0.6, 0.85, 1.0))
-				intro_line = ["Сделаем! Держи.", "Во, как новое.", "Готово. С тебя пузырь… шучу."].pick_random()
-			else:
-				intro_line = "Денег не хватает, Палыч. Тут %s надо." % G.rub(G.upgrade_cost(k))
-		elif c == keys.size():
+		var c: int = await ui.choose(["Что можешь сделать?", "Как жизнь?", "Пока"], line, "Колян", true, 2)
+		if c == 0:
+			await ui.open_shop("Точка Коляна", "Выбирай, что улучшить. Деньги вперёд.", _upgrade_items, _buy_upgrade)
+			line = ["Ещё чего?", "Заходи, если что.", "Ну, работаем."].pick_random()
+		elif c == 1:
 			await talk("Колян", ["Ещё по одной… плате.", "Спина болит, но держусь.", "На заводе хоть обед был.",
 				"Хозяин этот… ты его видел вообще?", "Слышишь, как трубы гудят? Как живые."].pick_random())
+			line = "Ну так что?"
 		else:
 			break
 	ui.close_dialog()
@@ -488,7 +625,7 @@ func _use_kolyan() -> void:
 
 func _use_acid() -> void:
 	set_mode("dialog")
-	await talk("", "За сеткой — ржавая ванна, бутыли с кислотой, противогаз. Тут бы платы травить… Сетка на замке.")
+	await talk("", "За сеткой — ржавая ванна с кислотой и бутыли. Тут бы платы травить… Сетка на замке.")
 	ui.close_dialog()
 	set_mode("walk")
 
@@ -508,37 +645,70 @@ func _shot(name: String) -> void:
 	img.save_png(_shot_dir.path_join(name + ".png"))
 
 
+func _adv() -> void:
+	for i in 400:
+		if ui.dlg.visible and not ui._typing and not ui._choosing:
+			break
+		await get_tree().process_frame
+	await wait(0.2)
+	ui.advanced.emit()
+
+
+func _pick(i: int) -> void:
+	for k in 600:
+		if ui._choosing:
+			break
+		await get_tree().process_frame
+	await wait(0.3)
+	ui.chosen.emit(i)
+
+
 func _auto_test() -> void:
 	DirAccess.make_dir_recursive_absolute(_shot_dir)
+	_main_menu()
+	await wait(2.2)
+	await _shot("00_menu")
+	_on_menu_action("settings")
+	await wait(0.5)
+	await _shot("00b_settings")
+	_on_menu_action("settings_back")
+	ui.clear_menus()
 	ui.fade_rect.color.a = 0.0
+	player.cam.current = true
 	set_mode("walk")
 	player.look_at_point(Vector3(0, 0.6, -0.2))
-	await wait(2.0)
+	await wait(1.5)
 	await _shot("01_start")
 	# проверка мыши: движение в центре экрана должно поворачивать камеру
 	var yaw0: float = player.yaw
 	var mm := InputEventMouseMotion.new()
-	mm.position = Vector2(320, 180)
+	mm.position = Vector2(640, 360)
 	mm.relative = Vector2(120, 0)
 	mm.screen_relative = Vector2(120, 0)
 	Input.parse_input_event(mm)
 	await wait(0.2)
 	print("MOUSE_TEST yaw_change=%.3f %s" % [player.yaw - yaw0, "OK" if absf(player.yaw - yaw0) > 0.2 else "FAIL"])
-	player.look_at_point(Vector3(0, 0.6, -0.2))
 	player.position = Vector3(1.0, 0, 1.7)
 	player.look_at_point(Vector3(0, 0.5, -0.2))
 	await wait(0.6)
+	print("FOCUS_TEST pile=%s" % [player.focus.prompt if player.focus else "NONE"])
 	await _shot("02_pile")
 	_use_trash()
 	await wait(1.6)
 	await _shot("03_dig")
-	for i in 5:
+	for i in 6:
+		if dig.revealed:
+			break
 		dig.toss_next()
-		await wait(0.3)
-	await wait(0.4)
+		await wait(0.5)
+	await wait(1.0)
+	print("DIG_TEST revealed=%s" % dig.revealed)
 	await _shot("04_dig_found")
-	dig.toss_next()
+	# клик рядом с находкой (не точно по ней) должен её забрать
+	var sp := cine.unproject_position(dig.find_node.global_position) + Vector2(20, 12)
+	dig.click(sp)
 	await wait(1.4)
+	print("DIG_PICK bag=%d" % G.bag_count())
 	G.bag["chips"] = 3
 	G.bag["phones"] = 1
 	G.changed.emit()
@@ -548,25 +718,31 @@ func _auto_test() -> void:
 	await _shot("05_buyer_view")
 	_use_buyer()
 	await wait(2.8)
+	await _adv()
+	await wait(0.8)
 	await _shot("06_buyer_dialog")
-	ui.advanced.emit()
-	await wait(0.6)
-	ui.chosen.emit(0)
+	await _pick(0)
 	await wait(2.0)
-	ui.advanced.emit()
+	await _adv()
 	await wait(1.2)
+	G.money = 900
+	G.changed.emit()
 	player.position = Vector3(2.2, 0, 0.2)
 	player.look_at_point(Vector3(5.0, 1.0, -1.5))
 	await wait(0.5)
 	await _shot("07_stalls")
-	player.position = Vector3(0.6, 0, -2.0)
-	player.look_at_point(Vector3(0, 1.4, -4.4))
+	player.position = Vector3(0.3, 0, -2.0)
+	player.look_at_point(Vector3(-0.6, 1.2, -4.4))
 	await wait(0.5)
 	await _shot("08_debt")
 	player.position = Vector3(-2.5, 0, -0.5)
 	player.look_at_point(Vector3(-5.0, 1.0, -1.5))
 	await wait(0.5)
 	await _shot("08b_west")
+	player.position = Vector3(-1.0, 0, 2.0)
+	player.look_at_point(Vector3(-2.5, 0.4, 4.2))
+	await wait(0.5)
+	await _shot("08c_south")
 	player.position = Vector3(1.5, 0, 3.3)
 	player.look_at_point(Vector3(1.5, 1.4, 4.5))
 	_start_knocking()
@@ -574,12 +750,10 @@ func _auto_test() -> void:
 	_peephole()
 	await wait(2.6)
 	await _shot("09_peephole")
-	for i in 3:
-		ui.advanced.emit()
+	for i in 4:
+		await _adv()
 		await wait(3.8)
-	ui.advanced.emit()
-	await wait(0.8)
-	ui.chosen.emit(0)
+	await _pick(0)
 	await wait(4.5)
 	player.position = Vector3(2.0, 0, 0.5)
 	player.look_at_point(kolyan.global_position + Vector3(0, 1.0, 0))
@@ -587,10 +761,18 @@ func _auto_test() -> void:
 	await _shot("10_kolyan_walk")
 	await wait(9.0)
 	player.position = Vector3(3.3, 0, -2.6)
-	player.look_at_point(KOLYAN_SEAT + Vector3(0, 1.0, 0))
+	player.look_at_point(kolyan_seat() + Vector3(0, 1.0, 0))
 	await wait(1.5)
 	await _shot("11_kolyan_seated")
 	_use_kolyan()
-	await wait(1.2)
-	await _shot("12_kolyan_menu")
+	await wait(1.4)
+	await _shot("12_kolyan_dialog")
+	await _pick(0)
+	await wait(0.6)
+	await _shot("13_kolyan_shop")
+	ui.close_shop()
+	await wait(0.4)
+	_pause(true)
+	await wait(0.4)
+	await _shot("14_pause")
 	get_tree().quit()

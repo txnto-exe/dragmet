@@ -3,12 +3,13 @@ extends CharacterBody3D
 
 signal focus_changed(target)
 
+const BASE_SENS := 0.0022
+const REACH := 2.0
+
 var head: Node3D
 var cam: Camera3D
-var ray: RayCast3D
 var yaw := 0.0
 var pitch := 0.0
-var sens := 0.0022
 var enabled := true
 var focus: Interactable = null
 var _bob := 0.0
@@ -29,16 +30,12 @@ func _ready() -> void:
 	head.position.y = 1.6
 	add_child(head)
 	cam = Camera3D.new()
-	cam.fov = 72
+	cam.fov = float(Settings.get_v("fov"))
 	cam.near = 0.03
 	cam.far = 50
 	head.add_child(cam)
 	cam.current = true
-	ray = RayCast3D.new()
-	ray.target_position = Vector3(0, 0, -1.9)
-	ray.collision_mask = 3
-	ray.collide_with_areas = true
-	cam.add_child(ray)
+	Settings.changed.connect(func(): cam.fov = float(Settings.get_v("fov")))
 
 
 func look_at_point(p: Vector3) -> void:
@@ -54,8 +51,10 @@ func _input(e: InputEvent) -> void:
 	if e is InputEventMouseMotion and (Input.mouse_mode == Input.MOUSE_MODE_CAPTURED or G.auto_test):
 		var mm := e as InputEventMouseMotion
 		# screen_relative — в настоящих пикселях экрана, не зависит от растяжения картинки
-		yaw -= mm.screen_relative.x * sens
-		pitch = clampf(pitch - mm.screen_relative.y * sens, -1.4, 1.4)
+		var s := BASE_SENS * float(Settings.get_v("sens"))
+		var inv := -1.0 if bool(Settings.get_v("invert_y")) else 1.0
+		yaw -= mm.screen_relative.x * s
+		pitch = clampf(pitch - mm.screen_relative.y * s * inv, -1.4, 1.4)
 
 
 func _physics_process(dt: float) -> void:
@@ -85,14 +84,37 @@ func _physics_process(dt: float) -> void:
 			Sfx.play("step%d" % (randi() % 4), -13.0, randf_range(0.85, 1.1))
 	else:
 		_bob = lerpf(_bob, round(_bob / PI) * PI, k)
-	cam.position.y = sin(_bob * 2.0) * 0.03
-	cam.position.x = cos(_bob) * 0.018
+	var bob_k := 1.0 if bool(Settings.get_v("head_bob")) else 0.0
+	cam.position.y = sin(_bob * 2.0) * 0.03 * bob_k
+	cam.position.x = cos(_bob) * 0.018 * bob_k
 
-	var f: Interactable = null
-	if enabled and ray.is_colliding():
-		var c := ray.get_collider()
-		if c is Interactable and (c as Interactable).active:
-			f = c
+	var f: Interactable = _find_focus() if enabled else null
 	if f != focus:
 		focus = f
 		focus_changed.emit(f)
+
+
+## Что под прицелом. Отдельно ищем точку взаимодействия (зоны) и стену/предмет (тела):
+## зона считается, если тело не загораживает её заметно ближе. Так куча мусора своей
+## коллизией больше не «съедает» подсказку «порыться».
+func _find_focus() -> Interactable:
+	var space := get_world_3d().direct_space_state
+	var from := cam.global_position
+	var to := from - cam.global_transform.basis.z * REACH
+	var qa := PhysicsRayQueryParameters3D.create(from, to, 2)
+	qa.collide_with_areas = true
+	qa.collide_with_bodies = false
+	var ha := space.intersect_ray(qa)
+	if ha.is_empty():
+		return null
+	var it := ha["collider"] as Interactable
+	if it == null or not it.active:
+		return null
+	var qb := PhysicsRayQueryParameters3D.create(from, to, 1, [get_rid()])
+	var hb := space.intersect_ray(qb)
+	if not hb.is_empty():
+		var da := from.distance_to(ha["position"])
+		var db := from.distance_to(hb["position"])
+		if db < da - 0.6:
+			return null
+	return it

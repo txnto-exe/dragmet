@@ -79,7 +79,10 @@ static func place(parent: Node3D, id: String, pos: Vector3, rot_y := 0.0, opts :
 		s = float(opts["scale"])
 	n.scale = Vector3.ONE * s
 	n.rotation_degrees = Vector3(0, rot_y, 0) + opts.get("tilt", Vector3.ZERO)
-	n.position = pos - Vector3(0, box.position.y * s, 0)
+	# ставим дном на pos.y и центром (по X/Z) в pos — с учётом поворота и наклона
+	var world_box := Transform3D(n.transform.basis, Vector3.ZERO) * box
+	var c := world_box.get_center()
+	n.position = pos - Vector3(c.x, world_box.position.y, c.z)
 	pixelate(n)
 	if opts.get("collide", true):
 		var body := StaticBody3D.new()

@@ -28,6 +28,7 @@ func start(camera: Camera3D, item_key: String, ui_ref: Node) -> void:
 	item = item_key
 	running = true
 	revealed = false
+	_t = 0.0
 	pieces.clear()
 	_floor = StaticBody3D.new()
 	_floor.collision_layer = 4
@@ -46,7 +47,7 @@ func start(camera: Camera3D, item_key: String, ui_ref: Node) -> void:
 		var off := Vector3(randf_range(-0.05, 0.05), 0.04 + i * 0.07, randf_range(-0.05, 0.05))
 		_spawn_piece(SPOT + off, true, i == need - 1 and randf() < 0.18)
 	for i in 2:
-		var side := Vector3(randf_range(0.18, 0.3) * (1 if i == 0 else -1), 0.05, randf_range(-0.15, 0.15))
+		var side := Vector3(randf_range(0.3, 0.38) * (1 if i == 0 else -1), 0.05, randf_range(-0.12, 0.12))
 		_spawn_piece(SPOT + side, false, false)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
@@ -204,6 +205,15 @@ func _unhandled_input(e: InputEvent) -> void:
 
 
 func click(screen_pos: Vector2) -> void:
+	if not running:
+		return
+	# находка открыта — достаточно кликнуть рядом с ней (не надо попадать пиксель в пиксель)
+	if revealed:
+		var sp := cam.unproject_position(find_node.global_position)
+		var vh := float(get_viewport().get_visible_rect().size.y)
+		if sp.distance_to(screen_pos) < vh * 0.14:
+			_collect()
+			return
 	var from := cam.project_ray_origin(screen_pos)
 	var to := from + cam.project_ray_normal(screen_pos) * 4.0
 	var q := PhysicsRayQueryParameters3D.create(from, to, 4 | 8)
@@ -220,12 +230,18 @@ func click(screen_pos: Vector2) -> void:
 
 func toss_next() -> void:
 	## для автотеста: убрать верхний кусок
-	for rb in pieces:
-		if rb.get_meta("cover"):
-			_toss(rb)
-			return
 	if revealed:
 		_collect()
+		return
+	var best: RigidBody3D = null
+	var bd := 1e9
+	for rb in pieces:
+		var d := rb.global_position.distance_to(SPOT)
+		if d < bd:
+			bd = d
+			best = rb
+	if best:
+		_toss(best)
 
 
 func _toss(rb: RigidBody3D) -> void:
@@ -250,11 +266,26 @@ func _toss(rb: RigidBody3D) -> void:
 			ui.toast("Порезался о битое стекло", Color(1, 0.4, 0.35))
 	if rb.get_meta("cover"):
 		covers_left -= 1
-		if covers_left <= 0 and not revealed:
-			revealed = true
-			Sfx.play("pickup", -10.0, 1.4)
-			var g := create_tween()
-			g.tween_property(glint, "light_energy", 0.9, 0.3)
+
+
+## Находка открыта, когда над ней не лежит ни один кусок хлама (куски могут скатываться сами).
+func _check_reveal() -> void:
+	if revealed or not running or find_node == null:
+		return
+	var fp := find_node.global_position
+	for rb in pieces:
+		if not is_instance_valid(rb):
+			continue
+		var d := Vector2(rb.global_position.x - fp.x, rb.global_position.z - fp.z).length()
+		if d < 0.15 and rb.global_position.y > fp.y - 0.02:
+			return
+	revealed = true
+	covers_left = 0
+	Sfx.play("pickup", -10.0, 1.4)
+	if ui:
+		ui.say_sub("", "Есть! Кликни по находке, чтобы забрать.", 3.0)
+	var g := create_tween()
+	g.tween_property(glint, "light_energy", 0.9, 0.3)
 
 
 func _collect() -> void:
@@ -270,6 +301,15 @@ func _collect() -> void:
 
 func _process(dt: float) -> void:
 	_t += dt
+	if running:
+		# куски, упавшие с кучи, убираем
+		for rb in pieces.duplicate():
+			if not is_instance_valid(rb) or rb.global_position.y < SPOT.y - 0.4:
+				pieces.erase(rb)
+				if is_instance_valid(rb):
+					rb.queue_free()
+		if _t > 0.6:
+			_check_reveal()
 	if revealed and running and glint:
 		glint.light_energy = 0.7 + 0.3 * sin(_t * 9.0)
 

@@ -47,13 +47,15 @@ func look_at_point(p: Vector3) -> void:
 	pitch = atan2(d.y, Vector2(d.x, d.z).length())
 
 
-func _unhandled_input(e: InputEvent) -> void:
+## Мышь читаем в _input (до интерфейса), чтобы никакой элемент экрана не съел движение.
+func _input(e: InputEvent) -> void:
 	if not enabled:
 		return
-	if e is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+	if e is InputEventMouseMotion and (Input.mouse_mode == Input.MOUSE_MODE_CAPTURED or G.auto_test):
 		var mm := e as InputEventMouseMotion
-		yaw -= mm.relative.x * sens
-		pitch = clampf(pitch - mm.relative.y * sens, -1.4, 1.4)
+		# screen_relative — в настоящих пикселях экрана, не зависит от растяжения картинки
+		yaw -= mm.screen_relative.x * sens
+		pitch = clampf(pitch - mm.screen_relative.y * sens, -1.4, 1.4)
 
 
 func _physics_process(dt: float) -> void:

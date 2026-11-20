@@ -515,6 +515,16 @@ func _auto_test() -> void:
 	player.look_at_point(Vector3(0, 0.6, -0.2))
 	await wait(2.0)
 	await _shot("01_start")
+	# проверка мыши: движение в центре экрана должно поворачивать камеру
+	var yaw0: float = player.yaw
+	var mm := InputEventMouseMotion.new()
+	mm.position = Vector2(320, 180)
+	mm.relative = Vector2(120, 0)
+	mm.screen_relative = Vector2(120, 0)
+	Input.parse_input_event(mm)
+	await wait(0.2)
+	print("MOUSE_TEST yaw_change=%.3f %s" % [player.yaw - yaw0, "OK" if absf(player.yaw - yaw0) > 0.2 else "FAIL"])
+	player.look_at_point(Vector3(0, 0.6, -0.2))
 	player.position = Vector3(1.0, 0, 1.7)
 	player.look_at_point(Vector3(0, 0.5, -0.2))
 	await wait(0.6)

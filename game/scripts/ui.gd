@@ -61,6 +61,7 @@ func _ready() -> void:
 	crosshair.color = Color(0.9, 0.88, 0.8, 0.7)
 	crosshair.size = Vector2(2, 2)
 	crosshair.position = Vector2(319, 179)
+	crosshair.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(crosshair)
 
 	prompt = _label(13, Color(0.95, 0.92, 0.82))

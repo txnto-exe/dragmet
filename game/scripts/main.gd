@@ -453,6 +453,8 @@ func _use_buyer() -> void:
 		var c: int = await ui.choose(["Отдать за %s" % G.rub(v), "Не, пока оставлю"], "", "Скупщик", true, 1)
 		if c == 0:
 			G.sell_all()
+			G.flags["sales"] = G.sales() + 1
+			G.save_game()
 			Sfx.play("coins", -4.0)
 			ui.toast("+%s" % G.rub(v), Color(0.95, 0.85, 0.4))
 			await talk("Скупщик", ["Приятно иметь дело.", "Тащи ещё. Мне всё сгодится.", "Хозяину привет."].pick_random())
@@ -641,6 +643,8 @@ func _upgrade_items() -> Array:
 	var out: Array = []
 	for k in G.UPGRADES:
 		var u: Dictionary = G.UPGRADES[k]
+		if u.get("quest", false):
+			continue
 		var it := {"key": k, "name": u["name"], "desc": String(u["desc"]).substr(0, 1).to_upper() + String(u["desc"]).substr(1),
 			"level": G.upgrades[k], "max": u["max"], "cost": G.upgrade_cost(k)}
 		if G.upgrade_locked(k):
@@ -683,8 +687,23 @@ func _use_kolyan() -> void:
 	var z: float = Basement.STALL_Z[0]
 	await cine_to(look_xf(Vector3(3.75, 1.45, z + 0.15), Vector3(Basement.SEAT_X - 0.15, 1.0, z)), 55.0, 0.6)
 	var line: String = ["Чем подсобить, Палыч?", "Говори, чего надо.", "Руки чешутся — давай работу."].pick_random()
+	await _kolyan_offer_quest()
 	while true:
-		var c: int = await ui.choose(["Что можешь сделать?", "Как жизнь?", "Пока"], line, "Колян", true, 2)
+		var q := _active_quest()
+		var opts: Array = []
+		var disabled: Array = []
+		if q != "":
+			opts.append(_quest_option(q))
+			if not _quest_ready(q):
+				disabled.append(0)
+		var off := opts.size()
+		opts.append_array(["Что можешь сделать?", "Как жизнь?", "Пока"])
+		var c: int = await ui.choose(opts, line, "Колян", true, opts.size() - 1, disabled)
+		if q != "" and c == 0:
+			await _complete_quest(q)
+			line = "Ну, чем ещё помочь?"
+			continue
+		c -= off
 		if c == 0:
 			await ui.open_shop("Точка Коляна", "Выбирай, что улучшить. Деньги вперёд.", _upgrade_items, _buy_upgrade)
 			line = ["Ещё чего?", "Заходи, если что.", "Ну, работаем."].pick_random()
@@ -700,6 +719,80 @@ func _use_kolyan() -> void:
 	set_mode("walk")
 
 
+# ---------- поручения Коляна: ключ от сетки и лом для завала ----------
+
+func _kolyan_offer_quest() -> void:
+	if G.upgrades["acid"] == 0 and G.quest_stage("acid") == 0 and G.sales() >= 5:
+		G.flags["q_acid"] = 1
+		G.save_game()
+		await talk("Колян", "Слышь, Палыч… Я тут под прилавком ключ нашёл. Похоже, от замка на сетке, где кислота.")
+		await talk("Колян", "Отдам, не жалко. Только подгони мне старый телефон и пару микросхем — радио себе соберу.")
+	elif G.upgrades["acid"] > 0 and G.upgrades["furnace"] == 0 and G.quest_stage("furnace") == 0 and G.sales() >= 10:
+		G.flags["q_furnace"] = 1
+		G.save_game()
+		await talk("Колян", "За буржуйкой лом валялся, я припрятал. Им завал у печи за пять минут разгребёшь.")
+		await talk("Колян", "Уважь только: принеси щепоть золотого порошка, грамм 0,1. Коронку себе отолью.")
+
+
+func _active_quest() -> String:
+	if G.upgrades["acid"] == 0 and G.quest_stage("acid") == 1:
+		return "acid"
+	if G.upgrades["furnace"] == 0 and G.quest_stage("furnace") == 1:
+		return "furnace"
+	return ""
+
+
+func _quest_ready(q: String) -> bool:
+	if q == "acid":
+		return int(G.bag.get("phones", 0)) >= 1 and int(G.bag.get("chips", 0)) >= 2
+	return G.dust >= 0.0999
+
+
+func _quest_option(q: String) -> String:
+	if q == "acid":
+		var ph := mini(int(G.bag.get("phones", 0)), 1)
+		var ch := mini(int(G.bag.get("chips", 0)), 2)
+		return "Отдать телефон (%d/1) и микросхемы (%d/2) — за ключ от сетки" % [ph, ch]
+	return "Отдать 0,10 г золотого порошка (есть %s) — за лом" % G.grams(G.dust)
+
+
+func _take_item(k: String, n: int) -> void:
+	G.bag[k] = int(G.bag.get(k, 0)) - n
+	if G.bag[k] <= 0:
+		G.bag.erase(k)
+
+
+func _complete_quest(q: String) -> void:
+	if q == "acid":
+		_take_item("phones", 1)
+		_take_item("chips", 2)
+		G.flags["q_acid"] = 2
+		G.upgrades["acid"] = 1
+		G.changed.emit()
+		G.save_game()
+		await talk("Колян", "Во, то что надо. Держи ключ. Только руки в ванну не суй.")
+		ui.close_dialog()
+		Sfx.play3d("snip", Vector3(-4.25, 1.2, -3.0), 2.0)
+		world.open_acid()
+		ui.toast("Ключ от сетки у тебя — кислота открыта. Травленое золото скупщик берёт дороже.", Color(0.6, 0.95, 0.5))
+	else:
+		G.dust = maxf(0.0, G.dust - 0.1)
+		G.flags["q_furnace"] = 2
+		G.upgrades["furnace"] = 1
+		G.changed.emit()
+		G.save_game()
+		await talk("Колян", "Блестит… Красота. Лом за печкой, бери. Завал сам разгребёшь — я спину берегу.")
+		ui.close_dialog()
+		await ui.fade(1.0, 0.4)
+		for i in 3:
+			Sfx.play3d("thud", Vector3(-4.6, 0.6, 0.0), 2.0, randf_range(0.8, 1.1))
+			await wait(0.35)
+		world.open_furnace()
+		await ui.fade(0.0, 0.5)
+		ui.toast("Ты разгрёб завал ломом. Печь свободна — плавь порошок в слитки.", Color(1.0, 0.7, 0.4))
+	_refresh_station_prompts()
+
+
 # ---------- кислота и печь ----------
 
 func _refresh_station_prompts() -> void:
@@ -710,7 +803,7 @@ func _refresh_station_prompts() -> void:
 func _use_acid() -> void:
 	if G.upgrades["acid"] <= 0:
 		set_mode("dialog")
-		var extra := " Колян бы перекусил замок." if G.flags.get("kolyan_in", false) else ""
+		var extra := " Ключ у Коляна — просил телефон и пару микросхем." if G.quest_stage("acid") == 1 else ""
 		await talk("", "За сеткой — ржавая ванна с кислотой. Тут бы платы травить… Сетка на замке." + extra)
 		ui.close_dialog()
 		set_mode("walk")
@@ -785,7 +878,8 @@ func _use_acid() -> void:
 func _use_furnace() -> void:
 	if G.upgrades["furnace"] <= 0:
 		set_mode("dialog")
-		await talk("", "Старая буржуйка, заваленная кирпичом и досками. Расчистить бы — будет где плавить.")
+		var extra := " Колян говорил про лом — за щепоть порошка." if G.quest_stage("furnace") == 1 else ""
+		await talk("", "Старая буржуйка, заваленная кирпичом и досками. Расчистить бы — будет где плавить." + extra)
 		ui.close_dialog()
 		set_mode("walk")
 		return
@@ -864,12 +958,16 @@ func _goal_text() -> String:
 		return "отнеси находки скупщику — окошко у левой стены"
 	if G.debt > 0 and G.money >= G.debt:
 		return "отдай долг — железный шкаф у дальней стены"
-	if G.flags.get("kolyan_in", false) and G.upgrades["acid"] == 0:
-		return "накопи %s — Колян вскроет сетку с кислотой" % G.rub(G.upgrade_cost("acid"))
+	if _active_quest() == "acid":
+		return "Колян отдаст ключ от сетки за старый телефон и 2 микросхемы"
+	if _active_quest() == "furnace":
+		return "Колян отдаст лом за 0,10 г золотого порошка"
+	if G.flags.get("kolyan_in", false) and G.upgrades["acid"] == 0 and G.sales() >= 5 and G.quest_stage("acid") == 0:
+		return "Колян хотел что-то сказать — загляни к нему"
+	if G.upgrades["furnace"] == 0 and G.upgrades["acid"] > 0 and G.sales() >= 10 and G.quest_stage("furnace") == 0:
+		return "Колян хотел что-то сказать — загляни к нему"
 	if G.upgrades["acid"] > 0 and G.bag_count() >= 3:
 		return "протрави находки в кислоте — золото дороже сырья"
-	if G.dust > 0.0001 and G.upgrades["furnace"] == 0 and G.flags.get("kolyan_in", false):
-		return "Колян может разобрать завал у печи (%s)" % G.rub(G.upgrade_cost("furnace"))
 	if G.dust > 0.0001 and G.upgrades["furnace"] > 0:
 		return "переплавь порошок в печи — слиток ещё дороже"
 	if G.has_goods() and (G.bag_full() or G.dust > 0.0001 or G.ingots > 0.0001):
@@ -981,21 +1079,28 @@ func _auto_test() -> void:
 	await wait(0.5)
 	await _shot("07b_kolyan_side")
 	G.money = 3000
+	G.flags["sales"] = 5
+	G.bag = {"phones": 1, "chips": 2}
 	G.changed.emit()
 	_use_kolyan()
+	await _adv()
+	await _adv()
+	for k in 300:
+		if ui._choosing:
+			break
+		await get_tree().process_frame
+	await wait(0.4)
+	await _shot("08_kolyan_quest")
+	await _pick(0)
+	await _adv()
+	await wait(1.0)
 	await _pick(0)
 	await wait(0.6)
-	await _shot("08_kolyan_shop")
-	ui._shop_buy.call("acid")
-	ui._fill_shop()
-	await wait(0.4)
-	ui._shop_buy.call("furnace")
-	ui._fill_shop()
-	await wait(0.6)
-	await _shot("09_shop_bought")
+	await _shot("09_kolyan_shop")
 	ui.close_shop()
 	await _pick(2)
 	await wait(1.5)
+	print("QUEST_ACID acid=%d bag=%d" % [G.upgrades["acid"], G.bag_count()])
 	# кислота
 	G.bag = {"chips": 4, "ram": 2, "phones": 2}
 	G.changed.emit()
@@ -1010,6 +1115,16 @@ func _auto_test() -> void:
 		await wait(0.2)
 	await wait(1.0)
 	print("ACID_TEST dust=%.3f" % G.dust)
+	G.flags["sales"] = 10
+	_use_kolyan()
+	await _adv()
+	await _adv()
+	await _pick(0)
+	await _adv()
+	await wait(2.5)
+	await _pick(2)
+	await wait(1.5)
+	print("QUEST_FURNACE furnace=%d dust=%.3f" % [G.upgrades["furnace"], G.dust])
 	# печь
 	player.position = Vector3(-3.4, 0, 0.6)
 	player.look_at_point(Vector3(-5.4, 0.6, 0.0))

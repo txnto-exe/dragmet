@@ -47,8 +47,8 @@ const UPGRADES := {
 	"bag": {"name": "Мешок побольше", "desc": "+6 мест в мешке", "base": 300, "mult": 1.7, "max": 4},
 	"lamp": {"name": "Фонарик на лоб", "desc": "чаще ценное и редкие баки", "base": 500, "mult": 2.0, "max": 3},
 	"deep": {"name": "Глубокий совок", "desc": "+1 находка в каждом баке", "base": 450, "mult": 2.1, "max": 3},
-	"acid": {"name": "Вскрыть сетку с кислотой", "desc": "травить платы: золото дороже в 1.6 раза", "base": 700, "mult": 1.0, "max": 1},
-	"furnace": {"name": "Разобрать завал у печи", "desc": "плавить порошок в слитки: ещё дороже", "base": 1600, "mult": 1.0, "max": 1, "needs": "acid"},
+	"acid": {"name": "Вскрыть сетку с кислотой", "desc": "травить платы: золото дороже в 1.6 раза", "base": 700, "mult": 1.0, "max": 1, "quest": true},
+	"furnace": {"name": "Разобрать завал у печи", "desc": "плавить порошок в слитки: ещё дороже", "base": 1600, "mult": 1.0, "max": 1, "needs": "acid", "quest": true},
 }
 
 # ---------- Состояние ----------
@@ -197,6 +197,15 @@ func melt_dust(eff: float) -> float:
 	return g
 
 
+func sales() -> int:
+	return int(flags.get("sales", 0))
+
+
+func quest_stage(q: String) -> int:
+	## 0 — Колян ещё не предлагал, 1 — предложил, 2 — выполнено
+	return int(flags.get("q_" + q, 0))
+
+
 static func grams(g: float) -> String:
 	return ("%.2f г" % g).replace(".", ",")
 
@@ -263,7 +272,7 @@ func upgrade_locked(key: String) -> bool:
 
 
 func buy_upgrade(key: String) -> bool:
-	if upgrade_maxed(key) or upgrade_locked(key):
+	if upgrade_maxed(key) or upgrade_locked(key) or UPGRADES[key].get("quest", false):
 		return false
 	var c := upgrade_cost(key)
 	if money < c:

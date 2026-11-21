@@ -46,7 +46,7 @@ const BAG_START := 12
 
 # ---------- Прокачки у Коляна ----------
 const UPGRADES := {
-	"gloves": {"name": "Рабочие перчатки", "desc": "разгребать хлам быстрее", "base": 250, "mult": 1.8, "max": 3},
+	"gloves": {"name": "Рабочие перчатки", "desc": "стекло не режет, хлам разгребается быстрее", "base": 250, "mult": 1.8, "max": 3},
 	"bag": {"name": "Мешок побольше", "desc": "+6 мест в мешке", "base": 300, "mult": 1.7, "max": 4},
 	"lamp": {"name": "Мощный фонарь", "desc": "фонарик (T) ярче, чаще ценное и редкие баки", "base": 500, "mult": 2.0, "max": 3},
 	"deep": {"name": "Глубокий совок", "desc": "+1 находка в каждом баке", "base": 450, "mult": 2.1, "max": 3},
@@ -105,7 +105,8 @@ func _setup_input() -> void:
 
 
 func _process(delta: float) -> void:
-	if mode == "pause" or mode == "intro" or mode == "menu" or paused_time:
+	# в разговорах, у глазка и в мешке время не идёт — нечестно тратить срок на чтение
+	if mode in ["pause", "intro", "menu", "dialog", "peep", "inv"] or paused_time:
 		return
 	time += delta
 	if debt > 0 and time >= deadline:

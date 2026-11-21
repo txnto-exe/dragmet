@@ -22,6 +22,7 @@
 | Шорох пакета в баке | Freesound: [«plastic bag.wav»](https://freesound.org/s/655630/), автор Hankof | CC0 |
 | Мехи у печи | Freesound: [«Hand Pump»](https://freesound.org/s/361771/), автор Jofae | CC0 |
 | Шрифт Fira Sans (интерфейс) | [Google Fonts](https://fonts.google.com/specimen/Fira+Sans) | SIL OFL 1.1 (файл `assets/fonts/OFL_Fira.txt`) |
+| Шрифт Press Start 2P (табло долга) | [Google Fonts](https://fonts.google.com/specimen/Press+Start+2P) | SIL OFL 1.1 (файл `assets/fonts/OFL_PressStart2P.txt`) |
 | Шрифт Oswald (заголовки, надписи) | [Google Fonts](https://fonts.google.com/specimen/Oswald) | SIL OFL 1.1 (файл `assets/fonts/OFL_Oswald.txt`) |
 
 Одежда персонажей нарисована скриптом `tools/paint_clothes.py`, звуки нарезаны из записей выше скриптом `tools/make_sfx.py` (обрезка, мягкие края, петли, громкость).

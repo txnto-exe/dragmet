@@ -48,6 +48,9 @@ var dlg_text: Label
 var dlg_choices: VBoxContainer
 var dlg_hint: Label
 var inv: PanelContainer
+var legend: HBoxContainer
+var ring: Control
+var _ring_v := -1.0
 var prompt_box: HBoxContainer
 var prompt_key: Label
 var shop: PanelContainer
@@ -220,22 +223,19 @@ func _build_hud() -> void:
 	prompt_key = kp.get_child(0)
 	prompt_box.add_child(kp)
 	# в углу — две клавиши, которые не видны на предметах
-	var legend := HBoxContainer.new()
+	# клавиши в углу — меняются по ситуации (ходьба, бак, мини-игры, мешок)
+	legend = HBoxContainer.new()
 	legend.add_theme_constant_override("separation", 6)
 	legend.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	legend.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	legend.offset_left = -300
+	legend.offset_left = -700
 	legend.offset_top = -48
 	legend.offset_right = -24
 	legend.offset_bottom = -18
 	legend.alignment = BoxContainer.ALIGNMENT_END
-	legend.modulate.a = 0.55
-	hud_box.add_child(legend)
-	for pair in [["Tab", "Мешок"], ["T", "Фонарь"]]:
-		legend.add_child(_key_badge(pair[0]))
-		var ll := _label(16, C_TEXT)
-		ll.text = pair[1] + "   "
-		legend.add_child(ll)
+	legend.modulate.a = 0.6
+	root.add_child(legend)
+	set_legend([["Tab", "Мешок"], ["T", "Фонарь"]])
 	prompt = _label(17, C_TEXT, f_bold)
 	prompt.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
 	prompt.add_theme_constant_override("outline_size", 4)
@@ -299,12 +299,13 @@ func _build_hud() -> void:
 	left_lbl = _label(18, Color(0.85, 0.62, 0.52))
 	left_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	tr.add_child(left_lbl)
+	tr.visible = false   # долг и срок смотрят на табло над ящиком, не в углу экрана
 
 	toasts = VBoxContainer.new()
 	toasts.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	toasts.offset_left = -486
 	toasts.offset_right = -26
-	toasts.offset_top = 104
+	toasts.offset_top = 22
 	toasts.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(toasts)
 
@@ -371,6 +372,20 @@ func _key_badge(key: String) -> PanelContainer:
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	kp.add_child(l)
 	return kp
+
+
+func set_legend(pairs: Array) -> void:
+	for c in legend.get_children():
+		legend.remove_child(c)
+		c.queue_free()
+	for pair in pairs:
+		legend.add_child(_key_badge(pair[0]))
+		var ll := _label(16, C_TEXT)
+		ll.text = pair[1] + "   "
+		ll.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
+		ll.add_theme_constant_override("outline_size", 4)
+		legend.add_child(ll)
+	legend.visible = not pairs.is_empty()
 
 
 func set_prompt(t: String, key := "E") -> void:
@@ -514,6 +529,17 @@ func _build_overlays() -> void:
 	shop.visible = false
 	root.add_child(shop)
 
+	# кольцо «вынимаю осколок» у курсора
+	ring = Control.new()
+	ring.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ring.size = Vector2(1280, 720)
+	ring.visible = false
+	ring.draw.connect(func():
+		var c := ring.get_local_mouse_position() + Vector2(26, -22)
+		ring.draw_arc(c, 13.0, 0.0, TAU, 32, Color(0, 0, 0, 0.55), 6.0, true)
+		ring.draw_arc(c, 13.0, -PI * 0.5, -PI * 0.5 + TAU * clampf(_ring_v, 0.0, 1.0), 32, Color(0.75, 0.95, 1.0, 0.95), 4.0, true))
+	root.add_child(ring)
+
 	inv = PanelContainer.new()
 	inv.visible = false
 	inv.add_theme_stylebox_override("panel", _box(Color(0.05, 0.045, 0.038, 0.94), Color(0.32, 0.27, 0.19), 2, 4, 16))
@@ -649,6 +675,9 @@ func choose(options: Array, text := "", who := "", show_money := false, cancel :
 	if who != "":
 		dlg_name.text = who
 		dlg_name.visible = true
+	elif text != "":
+		# новый вопрос без говорящего — имя прошлого собеседника не оставляем
+		dlg_name.visible = false
 	if text != "":
 		dlg_text.text = text
 		dlg_text.visible = true
@@ -801,6 +830,12 @@ func open_shop(title: String, sub: String, items_fn: Callable, buy_fn: Callable)
 
 
 # ---------- инвентарь (Tab) ----------
+
+func hold_ring(v: float) -> void:
+	_ring_v = v
+	ring.visible = v >= 0.0
+	ring.queue_redraw()
+
 
 func toggle_inventory(on: bool) -> void:
 	inv.visible = on

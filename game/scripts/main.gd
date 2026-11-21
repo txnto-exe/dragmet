@@ -108,6 +108,10 @@ func _ready() -> void:
 	add_child(ambience)
 	ambience.play()
 
+	# старые сохранения: долги уже отдавались, а отметки «когда» ещё не было
+	for r in [1, 2]:
+		if G.debt_round > r and not G.flags.has("debt%d_paid_at" % r):
+			G.flags["debt%d_paid_at" % r] = 0.0
 	_make_interactables()
 	_new_bin()
 	if G.upgrades["acid"] > 0:
@@ -190,8 +194,16 @@ func _input(e: InputEvent) -> void:
 
 # ---------- режимы и камера ----------
 
+const LEGENDS := {
+	"walk": [["Tab", "Мешок"], ["T", "Фонарь"]],
+	"dig": [["ЛКМ", "Откинуть / взять"], ["Зажать ЛКМ", "Стекло"], ["E", "Отойти"]],
+	"inv": [["Tab", "Закрыть"]],
+}
+
+
 func set_mode(m: String) -> void:
 	G.mode = m
+	ui.set_legend(LEGENDS.get(m, []))
 	player.enabled = m == "walk"
 	ui.show_hud(m == "walk")
 	if m != "walk":
@@ -499,10 +511,7 @@ func _use_buyer() -> void:
 # ---------- долг и таксофон ----------
 
 func _update_board() -> void:
-	if G.debt > 0:
-		world.set_debt_text("ДОЛГ\n%s\n%s" % [G.rub(G.debt), G.left_text()])
-	else:
-		world.set_debt_text("ДОЛГ\nЗАКРЫТ")
+	world.show_debt(G.debt, G.time_left(), G.round_len)
 
 
 func _use_debt() -> void:
@@ -512,7 +521,7 @@ func _use_debt() -> void:
 	set_mode("dialog")
 	var b := Basement.DEBT_BOX
 	await cine_to(look_xf(Vector3(b.x + 0.2, 1.55, -3.3), Vector3(b.x, 1.15, -4.4)), 55.0, 0.6)
-	await talk("", "Железный шкаф с прорезью. Над ним красной краской: ДОЛГ %s. Осталось %s." % [G.rub(G.debt), G.left_text()])
+	await talk("", "Железный шкаф с прорезью. Табло над ним: %s, осталось %s." % [G.rub(G.debt), G.left_text()])
 	var give := mini(G.money, G.debt)
 	var opts := ["Сунуть в щель %s" % G.rub(give) if give > 0 else "Совать нечего", "Отойти"]
 	var c: int = await ui.choose(opts, "", "", true, 1, [] if give > 0 else [0])
@@ -521,11 +530,32 @@ func _use_debt() -> void:
 		Sfx.play("slot", -2.0)
 		ui.toast("−%s в ящик" % G.rub(give), Color(0.95, 0.5, 0.4))
 		if G.debt == 0:
+			G.flags["debt%d_paid_at" % G.debt_round] = G.time
+			G.save_game()
 			await talk("", "Последняя купюра провалилась в щель. Где-то наверху хлопнула дверь.")
 			get_tree().create_timer(5.0).timeout.connect(_start_ring)
 	ui.close_dialog()
 	await cine_back()
 	set_mode("walk")
+
+
+## Без цифр в углу экрана: когда срок поджимает, табло пищит и Палыч это замечает.
+func _deadline_warnings() -> void:
+	if G.debt <= 0 or G.mode == "menu" or G.mode == "intro":
+		return
+	var left := G.time_left()
+	var key := "warn_%d_%d" % [G.debt_round, int(G.deadline)]
+	var stage := int(G.flags.get(key, 0))
+	var b := Basement.DEBT_BOX + Vector3(0, 1.78, 0.1)
+	if stage < 1 and left < G.DAY_SEC:
+		G.flags[key] = 1
+		Sfx.play3d("blip", b, 6.0, 0.6)
+		ui.say_sub("Палыч", "Табло пищит… До срока меньше суток.", 4.0)
+	elif stage < 2 and left < G.DAY_SEC * 0.25:
+		G.flags[key] = 2
+		for i in 3:
+			get_tree().create_timer(i * 0.35).timeout.connect(func(): Sfx.play3d("blip", b, 8.0, 0.55))
+		ui.say_sub("Палыч", "Табло мигает. Часы остались — надо нести деньги.", 4.0)
 
 
 func _start_ring() -> void:
@@ -591,8 +621,10 @@ func _process(dt: float) -> void:
 		_update_quest_hud()
 	_board_t -= dt
 	if _board_t <= 0.0:
-		_board_t = 2.0
+		_board_t = 0.5
 		_update_board()
+		_deadline_warnings()
+		_kolyan_call_check()
 	if visitor_cooldown > 0.0:
 		visitor_cooldown -= dt
 	if not G.flags.get("kolyan_in", false) and not knocking and visitor_cooldown <= 0.0 and kolyan == null \
@@ -755,19 +787,43 @@ func _use_kolyan() -> void:
 # ---------- поручения Коляна: ключ от сетки и лом для завала ----------
 
 func _kolyan_offer_quest() -> void:
-	if G.upgrades["acid"] == 0 and G.quest_stage("acid") == 0 and G.sales() >= 5:
+	if _quest_due("acid"):
 		G.flags["q_acid"] = 1
 		G.set_locked("phones", true)
 		G.set_locked("chips", true)
 		await talk("Колян", "Слышь, Палыч… Я тут под прилавком ключ нашёл. Похоже, от замка на сетке, где кислота.")
 		await talk("Колян", "Отдам, не жалко. Только подгони мне старый телефон и пару микросхем — радио себе соберу.")
 		ui.toast("Телефоны и микросхемы отложены для Коляна (Tab)", Color(0.6, 0.85, 1.0))
-	elif G.upgrades["acid"] > 0 and G.upgrades["furnace"] == 0 and G.quest_stage("furnace") == 0 and G.sales() >= 10:
+	elif _quest_due("furnace"):
 		G.flags["q_furnace"] = 1
 		G.set_locked("dust", true)
 		await talk("Колян", "За буржуйкой лом валялся, я припрятал. Им завал у печи за пять минут разгребёшь.")
 		await talk("Колян", "Уважь только: принеси щепоть золотого порошка, грамм 0,1. Коронку себе отолью.")
 		ui.toast("Порошок отложен для Коляна (Tab)", Color(0.6, 0.85, 1.0))
+
+
+## Колян заводит разговор про ключ после первого отданного долга, про лом — после второго. Не сразу.
+const QUEST_DELAY := 90.0
+func _quest_due(q: String) -> bool:
+	if not G.flags.get("kolyan_in", false) or G.quest_stage(q) != 0 or G.upgrades[q] > 0:
+		return false
+	if q == "furnace" and G.upgrades["acid"] == 0:
+		return false
+	var key := "debt1_paid_at" if q == "acid" else "debt2_paid_at"
+	if not G.flags.has(key):
+		return false
+	return G.time - float(G.flags[key]) >= QUEST_DELAY
+
+
+func _kolyan_call_check() -> void:
+	for q in ["acid", "furnace"]:
+		if _quest_due(q) and not G.flags.get("called_" + q, false) and G.mode == "walk" and kolyan:
+			G.flags["called_" + q] = true
+			G.save_game()
+			kolyan.play("Sitting_Talking")
+			get_tree().create_timer(3.0).timeout.connect(func(): if kolyan and G.mode != "dialog": kolyan.play("Sitting_Idle"))
+			Sfx.play3d("knock", kolyan.global_position + Vector3(0, 0.9, 0), -10.0, 1.6)
+			ui.say_sub("Колян", "Палыч! Подойди-ка, разговор есть.", 4.5)
 
 
 func _active_quest() -> String:
@@ -871,6 +927,7 @@ func _use_acid() -> void:
 	Sfx.play3d("sizzle", tub, 2.0)
 	var loop := _loop3d("bubbles", tub, -6.0)
 	ui.mg_show("Травление", "Вытащи, пока стрелка в зелёном.")
+	ui.set_legend([["ЛКМ", "Вытащить"]])
 	var total := 0.0
 	var rounds := 3
 	for r in rounds:
@@ -960,6 +1017,7 @@ func _use_furnace() -> void:
 	await cine_to(look_xf(Vector3(-4.2, 1.35, 0.95), Vector3(-5.3, 0.6, 0.1)), 58.0, 0.6)
 	var fire := _loop3d("fire", Vector3(-5.3, 0.5, 0.0), -10.0)
 	ui.mg_show("Плавка", "Держи жар в жёлтом.")
+	ui.set_legend([["Зажать ЛКМ", "Мехи"]])
 	var temp := 0.15
 	var prog := 0.0
 	var loss := 0.0
@@ -1048,10 +1106,8 @@ func _goal_text() -> String:
 		return "принеси Коляну телефон и 2 микросхемы"
 	if _active_quest() == "furnace":
 		return "принеси Коляну 0,10 г порошка"
-	if G.flags.get("kolyan_in", false) and G.upgrades["acid"] == 0 and G.sales() >= 5 and G.quest_stage("acid") == 0:
-		return "Колян хотел что-то сказать — загляни к нему"
-	if G.upgrades["furnace"] == 0 and G.upgrades["acid"] > 0 and G.sales() >= 10 and G.quest_stage("furnace") == 0:
-		return "Колян хотел что-то сказать — загляни к нему"
+	if _quest_due("acid") or _quest_due("furnace"):
+		return "Колян звал — подойди к нему"
 	if G.upgrades["acid"] > 0 and G.bag_count() >= 3:
 		return "протрави находки в кислоте — золото дороже сырья"
 	if G.dust > 0.0001 and G.upgrades["furnace"] > 0:
@@ -1059,7 +1115,7 @@ func _goal_text() -> String:
 	if G.has_goods() and (G.bag_full() or G.dust > 0.0001 or G.ingots > 0.0001):
 		return "продай всё скупщику"
 	if G.debt > 0:
-		return "собери %s к сроку" % G.rub(G.debt)
+		return "копи на долг — сумма и срок на табло над ящиком"
 	return "копи и вкладывайся в точку Коляна"
 
 
@@ -1115,6 +1171,19 @@ func _auto_test() -> void:
 	_use_bin()
 	await wait(1.4)
 	await _shot("02_bin_inside")
+	# стекло: зажал — вынул без пореза
+	var top_p: Dictionary = search.pieces[0]
+	for pp in search.pieces:
+		if float(pp["top"]) > float(top_p["top"]):
+			top_p = pp
+	top_p["glass"] = true
+	var t0 := G.time
+	search._hold = top_p
+	search._hold_t = 0.0
+	await wait(0.35)
+	await _shot("02b_glass_hold")
+	await wait(0.6)
+	print("GLASS_TEST removed=%s time_spent=%.1f %s" % [not search.pieces.has(top_p), G.time - t0, "OK" if G.time - t0 < 5.0 and not search.pieces.has(top_p) else "FAIL"])
 	var steps := 0
 	while search.running and steps < 120:
 		search.auto_step()
@@ -1185,6 +1254,8 @@ func _auto_test() -> void:
 	await _shot("07b_kolyan_side")
 	G.money = 3000
 	G.flags["sales"] = 5
+	G.flags["debt1_paid_at"] = G.time - 200.0
+	G.flags["called_acid"] = true
 	G.bag = {"phones": 1, "chips": 2}
 	G.changed.emit()
 	_use_kolyan()
@@ -1248,6 +1319,8 @@ func _auto_test() -> void:
 	G.flags["q_furnace"] = 0
 	G.dust = dust_keep
 	G.flags["sales"] = 10
+	G.flags["debt2_paid_at"] = G.time - 200.0
+	G.flags["called_furnace"] = true
 	_use_kolyan()
 	await _adv()
 	await _adv()
@@ -1297,6 +1370,33 @@ func _auto_test() -> void:
 	player.look_at_point(Vector3(0, 0.5, -0.5))
 	await wait(0.6)
 	await _shot("15_hud_goal")
+	# табло долга и выплата
+	var db := Basement.DEBT_BOX
+	player.position = Vector3(db.x + 0.1, 0, -3.1)
+	player.look_at_point(Vector3(db.x, 1.6, -Basement.D))
+	await wait(0.6)
+	await _shot("15b_debt_screen")
+	_use_debt()
+	await _adv()
+	await _pick(0)
+	await wait(0.6)
+	await _adv()
+	for i in 60:
+		if G.mode == "walk":
+			break
+		await wait(0.1)
+	await wait(0.5)
+	await _shot("15c_debt_paid")
+	print("DEBT_TEST debt=%d paid_flag=%s" % [G.debt, G.flags.has("debt1_paid_at")])
+	await wait(5.5)
+	_answer_phone()
+	for i in 3:
+		await _adv()
+	for i in 60:
+		if G.mode == "walk":
+			break
+		await wait(0.1)
+	print("PHONE_TEST round=%d debt=%d" % [G.debt_round, G.debt])
 	# обстановка: южная стена и северо-восточный угол
 	player.position = Vector3(0.6, 0, 1.6)
 	player.look_at_point(Vector3(0.6, 0.5, Basement.D))

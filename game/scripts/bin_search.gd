@@ -40,6 +40,13 @@ var finds: Array = []         # [{area, key, r, y, revealed, glint, vis}]
 var _hover: Node3D = null
 var _overlay: StandardMaterial3D
 var _t := 0.0
+# стекло: зажал — вынимаешь аккуратно, без пореза; быстрый клик — может порезать
+const GLASS_HOLD := 0.65
+const GLASS_CUT_CHANCE := 0.5
+var _hold: Dictionary = {}
+var _hold_t := 0.0
+var _hold_pos := Vector2.ZERO
+var _danger: StandardMaterial3D
 var _rng := RandomNumberGenerator.new()
 
 
@@ -49,6 +56,11 @@ func _ready() -> void:
 	_overlay.albedo_color = Color(1.0, 0.92, 0.7, 0.22)
 	_overlay.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	_overlay.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	_danger = StandardMaterial3D.new()
+	_danger.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	_danger.albedo_color = Color(1.0, 0.25, 0.2, 0.35)
+	_danger.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	_danger.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
 
 
 # ---------- наполнение бака ----------
@@ -343,6 +355,7 @@ func _hint() -> void:
 
 func stop() -> void:
 	running = false
+	_hold_cancel()
 	_set_hover(null)
 	Input.set_default_cursor_shape(Input.CURSOR_ARROW)
 	if ui:
@@ -360,9 +373,41 @@ func _unhandled_input(e: InputEvent) -> void:
 	if e is InputEventMouseMotion:
 		var hit := _pick((e as InputEventMouseMotion).position)
 		_set_hover(hit)
-	elif e is InputEventMouseButton and e.pressed and (e as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
+		# увёл мышь со стекла — аккуратное вынимание сбрасывается
+		if not _hold.is_empty() and hit != _hold.get("body"):
+			_hold_cancel()
+	elif e is InputEventMouseButton and (e as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
 		get_viewport().set_input_as_handled()
-		click((e as InputEventMouseButton).position)
+		var pos := (e as InputEventMouseButton).position
+		if e.pressed:
+			var g := _glass_at(pos)
+			if not g.is_empty() and G.upgrades["gloves"] == 0:
+				_hold = g
+				_hold_t = 0.0
+				_hold_pos = pos
+				Sfx.play("glass", -16.0, 1.6)
+			else:
+				click(pos)
+		elif not _hold.is_empty():
+			# отпустил раньше времени — дёрнул осколок рукой
+			var p := _hold
+			_hold_cancel()
+			_toss(p, true, _rng.randf() < GLASS_CUT_CHANCE)
+
+
+func _glass_at(pos: Vector2) -> Dictionary:
+	var n := _pick(pos)
+	for p in pieces:
+		if p["body"] == n and p["glass"]:
+			return p
+	return {}
+
+
+func _hold_cancel() -> void:
+	_hold = {}
+	_hold_t = 0.0
+	if ui:
+		ui.hold_ring(-1.0)
 
 
 func _ray(screen_pos: Vector2) -> Dictionary:
@@ -397,13 +442,17 @@ func _set_hover(n: Node3D) -> void:
 		return
 	if is_instance_valid(_hover):
 		for mi in _hover.find_children("*", "MeshInstance3D", true, false):
-			if (mi as MeshInstance3D).material_overlay == _overlay:
+			if (mi as MeshInstance3D).material_overlay == _overlay or (mi as MeshInstance3D).material_overlay == _danger:
 				(mi as MeshInstance3D).material_overlay = null
 	_hover = n
 	if is_instance_valid(n):
+		var glass := false
+		for p in pieces:
+			if p["body"] == n and p["glass"]:
+				glass = true
 		for mi in n.find_children("*", "MeshInstance3D", true, false):
 			if (mi as MeshInstance3D).material_overlay == null:
-				(mi as MeshInstance3D).material_overlay = _overlay
+				(mi as MeshInstance3D).material_overlay = _danger if glass else _overlay
 	Input.set_default_cursor_shape(Input.CURSOR_POINTING_HAND if is_instance_valid(n) else Input.CURSOR_ARROW)
 
 
@@ -421,11 +470,11 @@ func click(screen_pos: Vector2) -> void:
 				# находку видно краешком — откидываем то, что на ней лежит
 				var c := _top_cover(f)
 				if c.size() > 0:
-					_toss(c)
+					_toss(c, true, c["glass"] and G.upgrades["gloves"] == 0 and _rng.randf() < GLASS_CUT_CHANCE)
 			return
 	for p in pieces:
 		if p["body"] == n:
-			_toss(p)
+			_toss(p, true, p["glass"] and G.upgrades["gloves"] == 0 and _rng.randf() < GLASS_CUT_CHANCE)
 			return
 
 
@@ -448,7 +497,7 @@ func _top_cover(f: Dictionary) -> Dictionary:
 	return best
 
 
-func _toss(p: Dictionary, chain := true) -> void:
+func _toss(p: Dictionary, chain := true, cut := false) -> void:
 	if not pieces.has(p):
 		return
 	pieces.erase(p)
@@ -478,12 +527,17 @@ func _toss(p: Dictionary, chain := true) -> void:
 	tw.tween_callback(body.queue_free)
 	Sfx.play("rustle%d" % (randi() % 3), -6.0, _rng.randf_range(0.85, 1.15))
 	if p["glass"]:
-		Sfx.play("glass", -4.0, _rng.randf_range(0.9, 1.1))
-		Sfx.play("hurt", -6.0)
-		G.time += 25.0
-		if ui:
-			ui.flash(0.45)
-			ui.toast("Порезался о стекло", Color(1, 0.45, 0.4))
+		Sfx.play("glass", -4.0 if cut else -9.0, _rng.randf_range(0.9, 1.1))
+		if cut:
+			Sfx.play("hurt", -6.0)
+			G.time += 25.0
+			if ui:
+				ui.flash(0.45)
+				if not G.flags.get("glass_tip", false):
+					G.flags["glass_tip"] = true
+					ui.toast("Порезался. Осколок лучше вынимать медленно — зажми", Color(1, 0.45, 0.4))
+				else:
+					ui.toast("Порезался о стекло", Color(1, 0.45, 0.4))
 	elif _rng.randf() < 0.02:
 		_rat_jump(start)
 	# перчатки: заодно откидываются соседние куски
@@ -624,6 +678,17 @@ func _rat_jump(from_local: Vector3) -> void:
 
 func _process(dt: float) -> void:
 	_t += dt
+	if running and not _hold.is_empty():
+		if not pieces.has(_hold):
+			_hold_cancel()
+		else:
+			_hold_t += dt
+			if ui:
+				ui.hold_ring(_hold_t / GLASS_HOLD)
+			if _hold_t >= GLASS_HOLD:
+				var p := _hold
+				_hold_cancel()
+				_toss(p, true, false)
 	for f in finds:
 		if f["revealed"]:
 			(f["glint"] as OmniLight3D).light_energy = 0.75 + 0.35 * sin(_t * 8.0 + float(f["y"]) * 40.0)
@@ -639,5 +704,5 @@ func auto_step() -> void:
 	for f in finds:
 		var c := _top_cover(f)
 		if c.size() > 0:
-			_toss(c)
+			_toss(c, true, false)
 			return

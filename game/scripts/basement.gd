@@ -29,7 +29,7 @@ var bulb_light: OmniLight3D
 var bulb_glass: MeshInstance3D
 var booth_light: OmniLight3D
 var debt_light: OmniLight3D
-var debt_label: Label3D
+var debt_screen: DebtScreen
 var door_pivot: Node3D
 var stall_lights: Array[OmniLight3D] = []
 var acid_block: Node3D
@@ -491,24 +491,12 @@ func _north_side() -> void:
 	Props.place(self, "folding_wooden_stool", Vector3(0.25, 0, -3.3), 15, {"scale": 1.0})
 	Props.place(self, "russian_food_cans_01", Vector3(0.45, 0.79, -4.15), 30, {"scale": 1.0, "collide": false})
 	Props.place(self, "cigarette_pack", Vector3(-0.3, 0.79, -4.0), 70, {"scale": 1.0, "collide": false})
-	# ящик для долга — железный шкаф на полу у стены, надпись краской на стене над ним
+	# ящик для долга — железный шкаф на полу у стены, над ним электронное табло долга
 	Props.place(self, "utility_box_01", DEBT_BOX + Vector3(0, 0, 0), 0, {"scale": 1.0})
-	debt_label = Label3D.new()
-	debt_label.font = load("res://assets/fonts/Oswald.ttf")
-	debt_label.font_size = 72
-	debt_label.pixel_size = 0.0034
-	debt_label.line_spacing = -10
-	debt_label.modulate = Color(0.72, 0.08, 0.06)
-	debt_label.outline_size = 0
-	debt_label.position = Vector3(DEBT_BOX.x, 1.72, -D + 0.012)
-	debt_label.text = "ДОЛГ"
-	add_child(debt_label)
-	debt_light = OmniLight3D.new()
-	debt_light.light_color = Color(1.0, 0.25, 0.15)
-	debt_light.light_energy = 0.6
-	debt_light.omni_range = 2.6
-	debt_light.position = Vector3(DEBT_BOX.x + 0.2, 2.35, -3.9)
-	add_child(debt_light)
+	debt_screen = DebtScreen.new()
+	debt_screen.position = Vector3(DEBT_BOX.x, 1.78, -D)
+	add_child(debt_screen)
+	debt_screen.build(self)
 	# таксофон висит на стене
 	Props.place(self, "korean_public_payphone_01", Vector3(1.6, 0.95, -D + 0.15), 0, {"scale": 1.0, "collide": false})
 
@@ -983,8 +971,7 @@ func _process(dt: float) -> void:
 		var b := 1.0 if fmod(_t * 3.0, 1.0) < 0.5 else 0.0
 		beacon.light_energy = 1.6 * b
 		(beacon_mesh.material_override as StandardMaterial3D).emission_energy_multiplier = 0.2 + 5.0 * b
-	if debt_light:
-		debt_light.light_energy = 0.45 + 0.15 * sin(_t * 1.7) + rot * 0.6
+	pass
 	# крыса иногда перебегает
 	_rat_timer -= dt
 	if _rat_timer <= 0.0 and rat:
@@ -1010,9 +997,9 @@ func _run_rat() -> void:
 	Sfx.play3d("squeak", a, -6.0, randf_range(0.9, 1.2))
 
 
-func set_debt_text(t: String) -> void:
-	if debt_label:
-		debt_label.text = t
+func show_debt(debt: int, left_sec: float, round_len: float) -> void:
+	if debt_screen:
+		debt_screen.show_debt(debt, left_sec, round_len)
 
 
 # ---------- класс капли ----------

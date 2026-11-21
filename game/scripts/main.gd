@@ -1145,6 +1145,10 @@ func _station_shots(st: Station, names: Dictionary) -> void:
 			last = st.step
 			since = 0.0
 		since += get_process_delta_time()
+		if st.has_meta("shot"):
+			var extra_name: String = st.get_meta("shot")
+			st.remove_meta("shot")
+			await _shot(extra_name)
 		if names.has(last) and not taken.has(last) and since > 1.1:
 			taken[last] = true
 			await _shot(names[last])

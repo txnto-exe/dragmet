@@ -19,6 +19,10 @@ var auto := false
 var step := ""
 var _hover: Node3D = null
 var _overlay: StandardMaterial3D
+var marker: Node3D                 # жёлтая стрелка: что брать / куда нести
+var _mark_at := Vector3.INF
+var _mt := 0.0
+var _leg_key := ""
 
 
 func _init() -> void:
@@ -46,6 +50,8 @@ func begin(c: Camera3D, u: Node, b: Basement) -> void:
 
 func end() -> void:
 	running = false
+	mark(Vector3.INF)
+	_leg_key = ""
 	set_hover(null)
 	Input.set_default_cursor_shape(Input.CURSOR_ARROW)
 	ui.station_step("")
@@ -68,6 +74,55 @@ func _unhandled_input(e: InputEvent) -> void:
 	elif e.is_action_pressed("use") or e.is_action_pressed("pause"):
 		leave = true
 		get_viewport().set_input_as_handled()
+
+
+## Стрелка над точкой (Vector3.INF — убрать).
+func mark(p: Vector3) -> void:
+	if marker == null:
+		marker = Node3D.new()
+		var m := StandardMaterial3D.new()
+		m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		m.albedo_color = Color(1.0, 0.82, 0.25)
+		m.no_depth_test = true
+		m.render_priority = 10
+		var dark := StandardMaterial3D.new()
+		dark.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		dark.albedo_color = Color(0.12, 0.07, 0.02)
+		dark.no_depth_test = true
+		dark.render_priority = 9
+		cylm(marker, 0.05, 0.0, 0.085, Vector3(0, 0.0425, 0), dark, 4)
+		cylm(marker, 0.038, 0.0, 0.065, Vector3(0, 0.045, 0), m, 4)
+		boxm(marker, Vector3(0.034, 0.075, 0.034), Vector3(0, 0.12, 0), dark)
+		boxm(marker, Vector3(0.022, 0.07, 0.022), Vector3(0, 0.12, 0), m)
+		marker.scale = Vector3.ONE * 1.6
+		add_child(marker)
+	_mark_at = p
+	marker.visible = p != Vector3.INF
+
+
+func _process(dt: float) -> void:
+	if marker and marker.visible:
+		_mt += dt
+		marker.global_position = _mark_at + Vector3(0, 0.03 + absf(sin(_mt * 4.0)) * 0.05, 0)
+		marker.rotation.y += dt * 2.5
+
+
+## Подсказка клавиш внизу — меняем, только когда она правда другая.
+func legend(key: String, items: Array) -> void:
+	if key != _leg_key:
+		_leg_key = key
+		ui.set_legend(items)
+
+
+## Предмет плавно идёт за мышью по горизонтальной плоскости.
+func follow(n: Node3D, y: float, dt: float, k := 16.0) -> void:
+	var p := on_y(y)
+	if p != Vector3.INF:
+		n.global_position = n.global_position.lerp(p, minf(1.0, dt * k))
+
+
+func xz_dist(a: Vector3, b: Vector3) -> float:
+	return Vector2(a.x - b.x, a.z - b.z).length()
 
 
 ## Ждать кадр. Флаги «нажал/отпустил» живут ровно один кадр.

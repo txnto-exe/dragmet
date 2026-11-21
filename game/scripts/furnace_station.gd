@@ -1,10 +1,10 @@
 class_name FurnaceStation
 extends Station
-## Плавка руками:
-## 1) засыпь порошок из банки в тигель  2) поставь тигель на печь  3) качай мехи — держи жар в зелёной зоне градусника
-## 4) перелей золото в форму, не мимо  5) дай остыть и выбей слиток.
+## Плавка руками, жёлтая стрелка показывает, что брать и куда нести:
+## 1) поднеси банку к тиглю — порошок сыплется сам  2) поставь тигель на печь
+## 3) держи ЛКМ на мехах — стрелка градусника в зелёном  4) поднеси тигель к форме — золото льётся само  5) выбей слиток.
 
-const STOVE_TOP := Vector3(-5.45, 0.862, 0.05)
+const STOVE_TOP := Vector3(-5.45, 0.862, -0.2)   # сбоку от трубы, ближе к столу
 const TABLE := Vector3(-5.0, 0.0, -0.78)
 const TABLE_Y := 0.56
 const JAR_HOME := Vector3(-5.12, TABLE_Y, -0.95)
@@ -119,241 +119,256 @@ func run(c: Camera3D, u: Node, b: Basement) -> Dictionary:
 	jar.global_position = JAR_HOME
 	jar.rotation = Vector3.ZERO
 	jar_fill.scale.y = 1.0
+	jar_fill.visible = true
 	cruc.global_position = CRUC_HOME
 	cruc.rotation = Vector3.ZERO
 	cruc_fill.visible = false
+	(cruc_fill.material_override as StandardMaterial3D).emission_energy_multiplier = 0.2
+	cruc_mat.emission_energy_multiplier = 0.0
 	mold_fill.scale.y = 0.001
 	mold_fill.visible = false
 	mold_mat.emission_energy_multiplier = 3.0
 	mold.rotation = Vector3.ZERO
 	lamp.light_energy = 1.0
 	ingot.visible = false
+	_thermo(0.12)
 	if auto:
 		_auto_drive()
-	var res := {"done": false}
 	var fire := _loop("fire", Vector3(-5.3, 0.5, 0.0), -14.0)
-	# 1. порошок в тигель
-	step = "fill"
-	ui.set_legend([["Тащить ЛКМ", "Сыпать над тиглем"], ["E", "Отойти"]])
-	var in_cruc := 0.0
 	var holding := false
+
+	# 1. порошок в тигель: поднеси банку к тиглю — дальше сыплется сам
+	step = "fill"
 	while true:
 		var dt := await tick()
-		if leave and not holding and in_cruc <= 0.0:
+		if holding:
+			follow(jar, TABLE_Y + 0.22, dt)
+			mark(CRUC_HOME + Vector3(0, 0.14, 0))
+			if xz_dist(jar.global_position, CRUC_HOME) < 0.15:
+				break
+			if released:
+				holding = false
+				dragging_cursor(false)
+				var back := create_tween()
+				back.tween_property(jar, "global_position", JAR_HOME, 0.3)
+			continue
+		if leave:
 			fire.queue_free()
 			_restore()
 			lamp.light_energy = 0.0
 			end()
-			return res
-		if holding:
-			var p := on_y(0.8)
-			if p != Vector3.INF:
-				jar.global_position = jar.global_position.lerp(p, minf(1.0, dt * 16.0))
-			var over := Vector2(jar.global_position.x - cruc.global_position.x, jar.global_position.z - cruc.global_position.z).length() < 0.09
-			jar.rotation.z = lerpf(jar.rotation.z, deg_to_rad(120.0) if over else 0.0, minf(1.0, dt * 8.0))
-			var pouring := over and jar.rotation.z > deg_to_rad(85.0) and in_cruc < have
-			if pouring:
-				in_cruc = minf(have, in_cruc + have * dt / 1.6)
-				var mouth := jar.global_position + Vector3(-0.07, 0.0, 0.0)
-				stream_set(stream, mouth, cruc.global_position + Vector3(0, 0.1, 0))
-				cruc_fill.visible = true
-				cruc_fill.scale = Vector3.ONE * clampf(in_cruc / maxf(have, 0.0001), 0.2, 1.0)
-				jar_fill.scale.y = maxf(0.01, 1.0 - in_cruc / maxf(have, 0.0001))
-				if randf() < dt * 8.0:
-					Sfx.play3d("rustle0", mouth, -16.0, 1.8)
-			stream.visible = pouring
-			if released or in_cruc >= have:
-				holding = false
-				stream.visible = false
-				dragging_cursor(false)
-				var back := create_tween()
-				back.tween_property(jar, "global_position", JAR_HOME, 0.3)
-				back.parallel().tween_property(jar, "rotation:z", 0.0, 0.3)
-				if in_cruc >= have:
-					break
-		else:
-			var h := pick()
-			var ok := h == jar or (h == cruc and in_cruc > 0.0)
-			set_hover(h if ok else null)
-			if pressed and h == jar:
-				holding = true
-				set_hover(null)
-				dragging_cursor(true)
-			elif pressed and h == cruc and in_cruc > 0.0:
-				break
-		ui.station_step("Засыпь порошок в тигель", in_cruc / maxf(have, 0.0001))
-	await get_tree().create_timer(0.2).timeout
+			return {"done": false}
+		ui.station_step("Поднеси банку с порошком к тиглю")
+		legend("fill", [["ЛКМ", "Тащить банку к тиглю"], ["E", "Отойти"]])
+		mark(JAR_HOME + Vector3(0, 0.16, 0))
+		var h := pick()
+		set_hover(h if h == jar else null)
+		if pressed and h == jar:
+			holding = true
+			set_hover(null)
+			dragging_cursor(true)
+	set_hover(null)
+	mark(Vector3.INF)
+	dragging_cursor(false)
+	legend("none", [])
+	var tilt := create_tween()
+	tilt.tween_property(jar, "global_position", CRUC_HOME + Vector3(0.1, 0.17, 0), 0.25)
+	tilt.parallel().tween_property(jar, "rotation:z", deg_to_rad(120.0), 0.35)
+	await tilt.finished
+	var k := 0.0
+	while k < 1.0:
+		var dt := await tick()
+		k = minf(1.0, k + dt / 1.3)
+		var mouth := jar.global_transform * Vector3(0, 0.12, 0)
+		stream_set(stream, mouth, CRUC_HOME + Vector3(0, 0.1, 0))
+		stream.visible = true
+		cruc_fill.visible = true
+		cruc_fill.scale = Vector3.ONE * clampf(k, 0.2, 1.0)
+		jar_fill.scale.y = maxf(0.01, 1.0 - k)
+		jar_fill.visible = k < 0.97
+		if randf() < dt * 8.0:
+			Sfx.play3d("rustle0", mouth, -16.0, 1.8)
+		ui.station_step("Сыплется…", k)
+	stream.visible = false
+	var back_j := create_tween()
+	back_j.tween_property(jar, "global_position", JAR_HOME, 0.3)
+	back_j.parallel().tween_property(jar, "rotation:z", 0.0, 0.3)
+
 	# 2. тигель на печь
 	step = "place"
-	ui.station_step("Поставь тигель на печь")
-	ui.set_legend([["Тащить ЛКМ", "На печь"]])
 	holding = false
 	while true:
 		var dt := await tick()
 		if holding:
-			var p := on_y(1.05)
-			if p != Vector3.INF:
-				cruc.global_position = cruc.global_position.lerp(p, minf(1.0, dt * 14.0))
+			follow(cruc, 0.98, dt, 14.0)
+			mark(STOVE_TOP + Vector3(0, 0.16, 0))
+			if xz_dist(cruc.global_position, STOVE_TOP) < 0.2:
+				break
 			if released:
 				holding = false
 				dragging_cursor(false)
-				if Vector2(cruc.global_position.x - STOVE_TOP.x, cruc.global_position.z - STOVE_TOP.z).length() < 0.3:
-					var tw := create_tween()
-					tw.tween_property(cruc, "global_position", STOVE_TOP, 0.25)
-					await tw.finished
-					Sfx.play3d("clank", STOVE_TOP, -8.0, 1.4)
-					break
 				var back := create_tween()
 				back.tween_property(cruc, "global_position", CRUC_HOME, 0.3)
-		else:
-			var h := pick()
-			set_hover(h if h == cruc else null)
-			if pressed and h == cruc:
-				holding = true
-				set_hover(null)
-				dragging_cursor(true)
-	# 3. мехи
+			continue
+		ui.station_step("Поставь тигель на печь")
+		legend("place", [["ЛКМ", "Тащить тигель на печь"]])
+		mark(CRUC_HOME + Vector3(0, 0.15, 0))
+		var h := pick()
+		set_hover(h if h == cruc else null)
+		if pressed and h == cruc:
+			holding = true
+			set_hover(null)
+			dragging_cursor(true)
+	set_hover(null)
+	mark(Vector3.INF)
+	dragging_cursor(false)
+	var put := create_tween()
+	put.tween_property(cruc, "global_position", STOVE_TOP, 0.25)
+	await put.finished
+	Sfx.play3d("clank", STOVE_TOP, -8.0, 1.4)
+
+	# 3. мехи: держи ЛКМ на мехах — жар растёт; отпусти — падает. Держи стрелку в зелёном.
 	step = "heat"
-	ui.set_legend([["Зажать ЛКМ на мехах", "Качать вверх-вниз"]])
+	legend("heat", [["Держать ЛКМ на мехах", "Раздувать"], ["Отпустить", "Остудить"]])
 	var bel := base.bellows
-	var bel_area := grabbable(bel, Vector3(0.4, 0.3, 0.6), Vector3(0, 0.15, 0))
-	var t := 0.15
+	var bel_area := grabbable(bel, Vector3(0.45, 0.35, 0.65), Vector3(0, 0.15, 0))
+	var t := 0.12
 	var prog := 0.0
 	var loss := 0.0
-	var v := 0.0
 	var pumping := false
-	var anchor_y := 0.0
-	var v_prev := 0.0
+	var phase := 0.0
+	var v := 0.0
 	var spark_cd := 0.0
+	var ever := false
 	while prog < 1.0:
 		var dt := await tick()
-		if pumping:
-			var p := on_vertical(bel.global_position)
-			if p != Vector3.INF:
-				v = clampf((anchor_y - p.y) / 0.16, 0.0, 1.0)
-			if released:
-				pumping = false
-				dragging_cursor(false)
-		else:
-			v = maxf(0.0, v - dt * 3.0)
+		if not pumping:
 			var h := pick()
 			set_hover(h if h == bel else null)
 			if pressed and h == bel:
 				pumping = true
-				var p := on_vertical(bel.global_position)
-				anchor_y = (p.y if p != Vector3.INF else 0.3) + v * 0.16
+				ever = true
 				set_hover(null)
-				dragging_cursor(true)
-		var dv := v - v_prev
-		if dv > 0.0:
-			t += dv * 0.16
-			if v_prev < 0.15 and v >= 0.15:
+		elif not down:
+			pumping = false
+		if pumping:
+			var was := v
+			phase += dt * 6.0
+			v = 0.5 - 0.5 * cos(phase)
+			if was < 0.5 and v >= 0.5:
 				Sfx.play("bellows", -6.0, randf_range(0.9, 1.1))
-		v_prev = v
-		t = clampf(t - dt * 0.07, 0.12, 1.0)
+			t += dt * 0.16
+		else:
+			v = maxf(0.0, v - dt * 3.0)
+			t -= dt * 0.07
+		t = clampf(t, 0.12, 1.0)
 		base.pump_bellows(v)
-		if t >= T_LO and t <= T_HI:
-			prog = minf(1.0, prog + dt / 6.5)
-		var hot := t > T_HI + 0.04
+		var hot := t > T_HI
+		if t >= T_LO and not hot:
+			prog = minf(1.0, prog + dt / 5.0)
 		if hot:
-			loss = minf(0.5, loss + dt * 0.12)
+			loss = minf(0.4, loss + dt * 0.08)
 			spark_cd -= dt
 			if spark_cd <= 0.0:
 				spark_cd = 0.15
 				_spark()
+		mark(Vector3.INF if pumping or t >= T_LO else bel.global_position + Vector3(0, 0.36, 0))
 		_thermo(t)
 		base.furnace_light.light_energy = 0.3 + t * 3.2
 		cruc_mat.emission_energy_multiplier = t * 4.0
 		cruc_mat.emission = Color(1.0, 0.35, 0.05).lerp(Color(1.0, 0.95, 0.75), clampf((t - 0.6) * 2.5, 0.0, 1.0))
 		fire.volume_db = -16.0 + t * 12.0
-		var txt := "Перегрев — золото кипит!" if hot else ("Плавится — держи жар" if t >= T_LO else "Раздувай мехи")
-		ui.station_step(txt, prog, Color(1.0, 0.45, 0.35) if hot else Color(0.95, 0.8, 0.4))
+		var txt := "Держи ЛКМ на мехах — раздуй огонь"
+		var col := Color(0.95, 0.8, 0.4)
+		if hot:
+			txt = "Перегрев! Отпусти мехи — золото горит"
+			col = Color(1.0, 0.45, 0.35)
+		elif t >= T_LO:
+			txt = "Плавится! Держи стрелку в зелёном"
+			col = Color(0.55, 0.95, 0.45)
+		elif ever and not pumping:
+			txt = "Остывает — раздувай ещё"
+		ui.station_step(txt, prog, col)
 	if is_instance_valid(bel_area):
 		bel_area.queue_free()
 	base.pump_bellows(0.0)
 	set_hover(null)
-	dragging_cursor(false)
 	Sfx.play("good", -6.0)
 	(cruc_fill.material_override as StandardMaterial3D).emission_energy_multiplier = 3.0
-	# 4. разлив
+
+	# 4. разлив: поднеси тигель к форме — золото льётся само
 	step = "cast"
-	ui.station_step("Перелей в форму")
-	ui.set_legend([["Тащить ЛКМ", "Лить над формой"]])
-	var left := 1.0
-	var spilled := 0.0
 	holding = false
-	var wob := 0.0
-	while left > 0.0:
+	while true:
 		var dt := await tick()
-		wob += dt
 		if holding:
-			var p := on_y(0.82)
-			if p != Vector3.INF:
-				# тяжёлый тигель в клещах чуть гуляет
-				var sway := Vector3(sin(wob * 2.3) * 0.018, 0, cos(wob * 1.7) * 0.014)
-				cruc.global_position = cruc.global_position.lerp(p + sway, minf(1.0, dt * 9.0))
-			var near := Vector2(cruc.global_position.x - MOLD.x, cruc.global_position.z - MOLD.z).length() < 0.16
-			cruc.rotation.z = lerpf(cruc.rotation.z, deg_to_rad(105.0) if near else 0.0, minf(1.0, dt * 6.0))
-			var pouring := near and cruc.rotation.z > deg_to_rad(70.0)
-			if pouring:
-				var mouth := cruc.global_position + Vector3(-0.08, 0.0, 0.0)
-				var land := Vector3(mouth.x, MOLD.y + 0.04, mouth.z)
-				stream_set(stream, mouth, land)
-				var d := dt / 2.4
-				left = maxf(0.0, left - d)
-				if absf(land.x - MOLD.x) < 0.08 and absf(land.z - MOLD.z) < 0.04:
-					mold_fill.visible = true
-					mold_fill.scale.y = clampf(1.0 - left, 0.001, 1.0)
-				else:
-					spilled += d
-					if randf() < dt * 6.0:
-						_spill(land)
-				if randf() < dt * 5.0:
-					Sfx.play3d("sizzle", land, -10.0, randf_range(1.3, 1.7))
-			stream.visible = pouring
-			cruc_fill.scale = Vector3.ONE * maxf(0.05, left)
+			follow(cruc, 0.85, dt, 12.0)
+			mark(MOLD + Vector3(0, 0.12, 0))
+			if xz_dist(cruc.global_position, MOLD) < 0.15:
+				break
 			if released:
 				holding = false
-				stream.visible = false
 				dragging_cursor(false)
 				var back := create_tween()
 				back.tween_property(cruc, "global_position", STOVE_TOP, 0.3)
-				back.parallel().tween_property(cruc, "rotation:z", 0.0, 0.3)
-		else:
-			var h := pick()
-			set_hover(h if h == cruc else null)
-			if pressed and h == cruc:
-				holding = true
-				set_hover(null)
-				dragging_cursor(true)
-		ui.station_step("Перелей в форму — мимо не лей" if spilled < 0.02 else "Мимо! Держи над формой", 1.0 - left,
-			Color(0.95, 0.8, 0.4) if spilled < 0.02 else Color(1.0, 0.45, 0.35))
-	stream.visible = false
-	holding = false
+			continue
+		ui.station_step("Золото готово — неси тигель к форме")
+		legend("cast", [["ЛКМ", "Тащить тигель к форме"]])
+		mark(STOVE_TOP + Vector3(0, 0.17, 0))
+		var h := pick()
+		set_hover(h if h == cruc else null)
+		if pressed and h == cruc:
+			holding = true
+			set_hover(null)
+			dragging_cursor(true)
+	set_hover(null)
+	mark(Vector3.INF)
 	dragging_cursor(false)
-	var put := create_tween()
-	put.tween_property(cruc, "global_position", CRUC_HOME, 0.4)
-	put.parallel().tween_property(cruc, "rotation:z", 0.0, 0.3)
+	legend("none", [])
+	var over := create_tween()
+	over.tween_property(cruc, "global_position", MOLD + Vector3(0.11, 0.17, 0), 0.3)
+	over.parallel().tween_property(cruc, "rotation:z", deg_to_rad(105.0), 0.4)
+	await over.finished
+	var left := 1.0
+	while left > 0.0:
+		var dt := await tick()
+		left = maxf(0.0, left - dt / 1.8)
+		var mouth := cruc.global_transform * Vector3(0, 0.11, 0)
+		stream_set(stream, mouth, Vector3(mouth.x, MOLD.y + 0.04, mouth.z))
+		stream.visible = true
+		mold_fill.visible = true
+		mold_fill.scale.y = clampf(1.0 - left, 0.001, 1.0)
+		cruc_fill.scale = Vector3.ONE * maxf(0.05, left)
+		if randf() < dt * 5.0:
+			Sfx.play3d("sizzle", MOLD + Vector3(0, 0.05, 0), -10.0, randf_range(1.3, 1.7))
+		ui.station_step("Льётся…", 1.0 - left)
+	stream.visible = false
 	cruc_fill.visible = false
-	# 5. остывает, выбить
+	var home := create_tween()
+	home.tween_property(cruc, "global_position", CRUC_HOME, 0.4)
+	home.parallel().tween_property(cruc, "rotation:z", 0.0, 0.3)
+
+	# 5. остывает, потом выбить
 	step = "cool"
-	ui.set_legend([])
 	var cool := 0.0
-	while cool < 2.6:
+	while cool < 2.0:
 		var dt := await tick()
 		cool += dt
-		mold_mat.emission_energy_multiplier = lerpf(3.0, 0.1, cool / 2.6)
-		ui.station_step("Остывает…", cool / 2.6)
+		mold_mat.emission_energy_multiplier = lerpf(3.0, 0.1, cool / 2.0)
+		cruc_mat.emission_energy_multiplier = lerpf(cruc_mat.emission_energy_multiplier, 0.0, minf(1.0, dt * 2.0))
+		ui.station_step("Остывает…", cool / 2.0)
 	step = "knock"
-	ui.station_step("Выбей слиток")
-	ui.set_legend([["ЛКМ", "По форме"]])
+	ui.station_step("Нажми на форму — выбей слиток")
+	legend("knock", [["ЛКМ на форме", "Выбить слиток"]])
 	while true:
 		await tick()
+		mark(MOLD + Vector3(0, 0.1, 0))
 		var h := pick()
 		set_hover(h if h == mold else null)
 		if pressed and h == mold:
 			break
 	set_hover(null)
+	mark(Vector3.INF)
 	var flip := create_tween()
 	flip.tween_property(mold, "rotation:x", PI, 0.3)
 	await flip.finished
@@ -364,15 +379,15 @@ func run(c: Camera3D, u: Node, b: Basement) -> Dictionary:
 	ingot.visible = true
 	var back_m := create_tween()
 	back_m.tween_property(mold, "rotation:x", 0.0, 0.3)
+	ui.station_step("Слиток готов", 1.0)
 	await get_tree().create_timer(0.7).timeout
 	fire.queue_free()
 	base.furnace_light.light_energy = 0.25
 	cruc_mat.emission_energy_multiplier = 0.0
 	_thermo(0.0)
-	var eff := (1.0 - loss) * (1.0 - clampf(spilled, 0.0, 1.0))
 	lamp.light_energy = 0.0
 	end()
-	return {"done": true, "grams": in_cruc, "eff": eff, "loss": loss, "spilled": spilled}
+	return {"done": true, "grams": have, "eff": 1.0 - loss, "loss": loss}
 
 
 func _restore() -> void:
@@ -435,40 +450,37 @@ func _auto_drive() -> void:
 	await a_wait(0.5)
 	await a_move(JAR_HOME + Vector3(0, 0.07, 0), 0.3)
 	await a_press()
-	await a_move(CRUC_HOME + Vector3(0.02, 0.8 - CRUC_HOME.y, 0), 0.4)
-	while step == "fill":
-		await get_tree().process_frame
+	await a_move(CRUC_HOME + Vector3(0.02, 0.22, 0), 0.4)
 	await a_release()
+	while step != "place":
+		await get_tree().process_frame
 	await a_wait(0.5)
 	await a_move(CRUC_HOME + Vector3(0, 0.06, 0), 0.3)
 	await a_press()
-	await a_move(Vector3(STOVE_TOP.x, 1.05, STOVE_TOP.z), 0.5)
-	await a_wait(0.2)
+	await a_move(Vector3(STOVE_TOP.x, 0.98, STOVE_TOP.z), 0.5)
 	await a_release()
-	while step == "place":
+	while step != "heat":
 		await get_tree().process_frame
 	await a_wait(0.3)
-	# мехи: качаем, когда градусник ниже середины зелёной зоны
-	var bel := base.bellows.global_position
-	await a_move(bel + Vector3(0, 0.22, 0), 0.3)
-	await a_press()
-	var phase := 0.0
+	# мехи: держим, пока градусник ниже середины зелёной зоны
+	await a_move(base.bellows.global_position + Vector3(0, 0.22, 0), 0.3)
 	while step == "heat":
-		var dt := get_process_delta_time()
 		var need := thermo.scale.y < (T_LO + T_HI) * 0.5
-		phase += dt * (5.0 if need else 0.0)
-		ptr = cam.unproject_position(bel + Vector3(0, 0.22 - (0.5 - 0.5 * cos(phase)) * 0.15, 0))
+		if need and not down:
+			await a_press()
+		elif not need and down:
+			await a_release()
 		await get_tree().process_frame
-	await a_release()
+	if down:
+		await a_release()
 	await a_wait(0.4)
 	await a_move(STOVE_TOP + Vector3(0, 0.06, 0), 0.3)
 	await a_press()
-	await a_move(MOLD + Vector3(0.06, 0.82 - MOLD.y, 0), 0.6)
-	while step == "cast":
-		await get_tree().process_frame
+	await a_move(MOLD + Vector3(0.02, 0.85 - MOLD.y, 0), 0.6)
 	await a_release()
-	while step == "cool":
+	while step != "knock":
 		await get_tree().process_frame
+	await a_wait(0.3)
 	await a_move(MOLD + Vector3(0, 0.03, 0), 0.3)
 	await a_press()
 	await a_release()

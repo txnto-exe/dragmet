@@ -1012,21 +1012,44 @@ func _inv_row(parent: Control, name: String, count: String, value: String, col: 
 	val.custom_minimum_size = Vector2(110, 0)
 	val.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	h.add_child(val)
-	if lock_key != "":
-		var b := CheckButton.new()
-		b.text = "Отложить"
-		b.button_pressed = locked
-		b.focus_mode = Control.FOCUS_NONE
-		b.add_theme_font_override("font", f_text)
-		b.add_theme_font_size_override("font_size", _fs(16))
-		b.toggled.connect(func(on: bool):
-			Sfx.play("blip", -6.0)
-			G.set_locked(lock_key, on))
-		h.add_child(b)
-	else:
-		var sp := Control.new()
-		sp.custom_minimum_size = Vector2(128, 0)
-		h.add_child(sp)
+	# замок справа: открытый тусклый — предмет свободен, закрытый латунный — отложен
+	var lk := HBoxContainer.new()
+	lk.custom_minimum_size = Vector2(128, 0)
+	lk.alignment = BoxContainer.ALIGNMENT_END
+	lk.add_theme_constant_override("separation", 8)
+	lk.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	h.add_child(lk)
+	if lock_key == "":
+		return
+	var tag := _label(16, Color(0.95, 0.78, 0.4), f_bold)
+	tag.text = "отложено" if locked else ""
+	lk.add_child(tag)
+	var ic := TextureRect.new()
+	ic.texture = load("res://assets/ui/lock_closed.png" if locked else "res://assets/ui/lock_open.png")
+	ic.custom_minimum_size = Vector2(22, 26)
+	ic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	ic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	ic.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	ic.modulate = Color(1, 1, 1, 1.0 if locked else 0.55)
+	ic.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	lk.add_child(ic)
+	# вся строка — кнопка: клик по ней защёлкивает/открывает замок
+	var hit := Button.new()
+	hit.focus_mode = Control.FOCUS_NONE
+	hit.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	for st in ["normal", "hover", "pressed", "hover_pressed", "focus", "disabled"]:
+		hit.add_theme_stylebox_override(st, StyleBoxEmpty.new())
+	hit.mouse_entered.connect(func():
+		row.self_modulate = Color(1.35, 1.28, 1.15)
+		ic.modulate.a = 1.0)
+	hit.mouse_exited.connect(func():
+		row.self_modulate = Color.WHITE
+		ic.modulate.a = 1.0 if locked else 0.55)
+	hit.pressed.connect(func():
+		Sfx.play("switch", -4.0)
+		G.set_locked(lock_key, not locked)
+		call_deferred("_fill_inventory"))
+	row.add_child(hit)
 
 
 func shop_say(text: String) -> void:

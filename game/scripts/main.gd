@@ -197,7 +197,7 @@ func _input(e: InputEvent) -> void:
 const LEGENDS := {
 	"walk": [["Tab", "Мешок"], ["T", "Фонарь"]],
 	"dig": [["ЛКМ", "Откинуть / взять"], ["Зажать ЛКМ", "Стекло"], ["E", "Отойти"]],
-	"inv": [["Tab", "Закрыть"]],
+	"inv": [["ЛКМ", "Отложить"], ["Tab", "Закрыть"]],
 }
 
 
@@ -1305,6 +1305,19 @@ func _auto_test() -> void:
 	_open_inventory(true)
 	await wait(0.5)
 	await _shot("10a_inventory")
+	# клик по строке «Планка ОЗУ» защёлкивает замок, второй клик — открывает
+	var hits: Array = ui.inv.find_children("*", "Button", true, false)
+	var before := G.is_locked("ram")
+	if hits.size() > 0:
+		hits[0].pressed.emit()
+		await wait(0.3)
+	var mid := G.is_locked("ram")
+	await _shot("10b_inventory_lock")
+	hits = ui.inv.find_children("*", "Button", true, false)
+	if hits.size() > 0:
+		hits[0].pressed.emit()
+		await wait(0.3)
+	print("LOCK_TEST rows=%d before=%s click=%s again=%s" % [hits.size(), before, mid, G.is_locked("ram")])
 	_open_inventory(false)
 	player.position = Vector3(-3.6, 0, -3.0)
 	player.look_at_point(Vector3(-5.4, 0.6, -3.5))

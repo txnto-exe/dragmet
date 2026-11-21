@@ -120,6 +120,44 @@ def btn(w, h, base, rng, top_glow=None, pressed=False):
     return im
 
 
+def padlock(closed):
+    """Пиксельный навесной замок 11x13: закрытый — латунный, открытый — серый, дужка поднята."""
+    w, h = 11, 13
+    im = Image.new('RGBA', (w, h), (0, 0, 0, 0))
+    px = im.load()
+    body = (196, 150, 60) if closed else (120, 116, 108)
+    dark = (90, 62, 22) if closed else (55, 53, 50)
+    shackle = (210, 205, 190) if closed else (150, 146, 138)
+    # дужка: у закрытого обе ножки в корпусе, у открытого правая поднята
+    lift = 0 if closed else 2
+    for y in range(0, 6):
+        for x in (2, 8):
+            yy = y - (lift if x == 8 else 0)
+            if 0 <= yy < h and (y >= 1 or x == 2):
+                px[x, max(0, yy)] = shackle
+    for x in range(3, 8):
+        px[x, 0] = shackle
+    if not closed:
+        for x in range(3, 8):
+            px[x, 0] = (0, 0, 0, 0)
+        for x in range(3, 8):
+            px[x, 0] = shackle
+    # корпус
+    for y in range(6, 13):
+        for x in range(0, 11):
+            c = body
+            if y == 6 or x == 0:
+                c = tuple(min(255, v + 45) for v in body)
+            if y == 12 or x == 10:
+                c = dark
+            px[x, y] = c
+    # скважина
+    px[5, 8] = (20, 15, 8)
+    px[5, 9] = (20, 15, 8)
+    px[5, 10] = (20, 15, 8)
+    return im
+
+
 def main():
     rng = random.Random(7)
     # большая панель (диалоги, меню, мини-игры)
@@ -140,6 +178,8 @@ def main():
                 c = (70, 64, 56, 255)
             sp[x, y] = c
     save(s, 'slot.png')
+    save(padlock(True), 'lock_closed.png')
+    save(padlock(False), 'lock_open.png')
     # ячейка отложенная: синеватая
     s2 = s.copy()
     sp = s2.load()

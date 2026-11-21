@@ -10,9 +10,11 @@ const FLOOR_Y := 0.34                   # фальш-дно внутри (хла
 
 var type := "home"
 var contents: Node3D
+var lid: Node3D
+const LID_OPEN := -104.0
 
 
-func build(t: String, base: Basement) -> void:
+func build(t: String, base: Basement, lid_open := true) -> void:
 	type = t
 	var info: Dictionary = G.BIN_TYPES[t]
 	var col: Color = info["color"]
@@ -44,10 +46,11 @@ func build(t: String, base: Basement) -> void:
 			base.cyl(0.055, 0.05, Vector3(sx * (OUT.x * 0.5 - 0.12), 0.055, sz * (OUT.z * 0.5 - 0.1)), rubber, Vector3(0, 0, 90), 10, self)
 	# крышка откинута назад
 	var hinge := Node3D.new()
+	lid = hinge
 	hinge.position = Vector3(0, OUT.y, -OUT.z * 0.5 - 0.02)
 	add_child(hinge)
 	base.box(Vector3(OUT.x + 0.04, 0.035, OUT.z + 0.04), Vector3(0, 0, OUT.z * 0.5), dark, false, hinge)
-	hinge.rotation.x = deg_to_rad(-104)
+	hinge.rotation.x = deg_to_rad(LID_OPEN if lid_open else 0.0)
 	# табличка с типом
 	var plate := base.box(Vector3(0.62, 0.15, 0.012), Vector3(0, 0.62, OUT.z * 0.5 + 0.026), _plate_mat(), false, self)
 	var l := Label3D.new()
@@ -80,6 +83,14 @@ func build(t: String, base: Basement) -> void:
 	contents = Node3D.new()
 	contents.name = "Contents"
 	add_child(contents)
+
+
+## Открыть/закрыть крышку (закрытая лежит на баке и не торчит за его габариты).
+func set_lid(open: bool, sec := 0.55) -> void:
+	var tw := create_tween()
+	tw.tween_property(lid, "rotation:x", deg_to_rad(LID_OPEN if open else 0.0), sec) 		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN if not open else Tween.EASE_OUT)
+	await tw.finished
+	Sfx.play3d("clank", global_position + Vector3(0, OUT.y, 0), -8.0 if open else -3.0, 1.3 if open else 1.0)
 
 
 func _plate_mat() -> StandardMaterial3D:

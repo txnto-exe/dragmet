@@ -38,6 +38,9 @@ const BIN_TYPES := {
 const PRICE_PER_G := 6000.0     # сырьё (платы, телефоны) — цена за грамм золота внутри
 const DUST_K := 1.6             # вытравленный золотой порошок — во столько раз дороже сырья
 const INGOT_K := 2.3            # переплавленный слиток
+# Даже плохая работа не уводит в минус: порошок всегда дороже сырья, слиток — дороже порошка.
+const ETCH_MIN := 0.75          # худшее травление сохраняет 75% золота → порошок ≥ 1,2× сырья
+const MELT_MIN := 0.8           # худшая плавка сохраняет 80% → слиток ≥ 1,15× порошка
 const DAY_SEC := 240.0          # сколько реальных секунд длится игровой день
 const BAG_START := 12
 
@@ -45,7 +48,7 @@ const BAG_START := 12
 const UPGRADES := {
 	"gloves": {"name": "Рабочие перчатки", "desc": "разгребать хлам быстрее", "base": 250, "mult": 1.8, "max": 3},
 	"bag": {"name": "Мешок побольше", "desc": "+6 мест в мешке", "base": 300, "mult": 1.7, "max": 4},
-	"lamp": {"name": "Фонарик на лоб", "desc": "чаще ценное и редкие баки", "base": 500, "mult": 2.0, "max": 3},
+	"lamp": {"name": "Мощный фонарь", "desc": "фонарик (T) ярче, чаще ценное и редкие баки", "base": 500, "mult": 2.0, "max": 3},
 	"deep": {"name": "Глубокий совок", "desc": "+1 находка в каждом баке", "base": 450, "mult": 2.1, "max": 3},
 	"acid": {"name": "Вскрыть сетку с кислотой", "desc": "травить платы: золото дороже в 1.6 раза", "base": 700, "mult": 1.0, "max": 1, "quest": true},
 	"furnace": {"name": "Разобрать завал у печи", "desc": "плавить порошок в слитки: ещё дороже", "base": 1600, "mult": 1.0, "max": 1, "needs": "acid", "quest": true},
@@ -54,6 +57,7 @@ const UPGRADES := {
 # ---------- Состояние ----------
 var money := 0
 var bag := {}
+var locked := {}          # типы находок, отложенные (не продаются и не травятся)
 var debt := 3000
 var debt_round := 1
 var time := 0.0                 # секунд с начала
@@ -89,7 +93,7 @@ func _setup_input() -> void:
 		"move_left": [KEY_A, KEY_LEFT], "move_right": [KEY_D, KEY_RIGHT],
 		"sprint": [KEY_SHIFT], "use": [KEY_E], "pause": [KEY_ESCAPE], "fullscreen": [KEY_F11],
 		"choice_1": [KEY_1], "choice_2": [KEY_2], "choice_3": [KEY_3], "choice_4": [KEY_4], "choice_5": [KEY_5],
-		"advance": [KEY_SPACE, KEY_ENTER],
+		"advance": [KEY_SPACE, KEY_ENTER], "inventory": [KEY_TAB, KEY_I], "flashlight": [KEY_T],
 	}
 	for action in keys:
 		if not InputMap.has_action(action):
@@ -136,18 +140,58 @@ func item_price(key: String) -> int:
 	return maxi(5, int(round(ITEMS[key]["gold"] * PRICE_PER_G)))
 
 
+func is_locked(key: String) -> bool:
+	return locked.get(key, false)
+
+
+func set_locked(key: String, on: bool) -> void:
+	if on:
+		locked[key] = true
+	else:
+		locked.erase(key)
+	changed.emit()
+	save_game()
+
+
+## Сколько штук можно продать/протравить (без отложенных)
+func free_count() -> int:
+	var n := 0
+	for k in bag:
+		if not is_locked(k):
+			n += bag[k]
+	return n
+
+
 func bag_value() -> int:
 	var v := 0
 	for k in bag:
-		v += item_price(k) * bag[k]
+		if not is_locked(k):
+			v += item_price(k) * bag[k]
 	return v
 
 
 func bag_gold() -> float:
 	var g := 0.0
 	for k in bag:
-		g += ITEMS[k]["gold"] * bag[k]
+		if not is_locked(k):
+			g += ITEMS[k]["gold"] * bag[k]
 	return g
+
+
+## Сколько стоит грамм золота в разном виде
+func gram_price(form: String) -> int:
+	match form:
+		"dust":
+			return int(round(PRICE_PER_G * DUST_K))
+		"ingot":
+			return int(round(PRICE_PER_G * INGOT_K))
+	return int(PRICE_PER_G)
+
+
+func _clear_unlocked() -> void:
+	for k in bag.keys():
+		if not is_locked(k):
+			bag.erase(k)
 
 
 func dust_value() -> int:
@@ -159,18 +203,19 @@ func ingot_value() -> int:
 
 
 func sell_value() -> int:
-	return bag_value() + dust_value() + ingot_value()
+	return bag_value() + (0 if is_locked("dust") else dust_value()) + ingot_value()
 
 
 func has_goods() -> bool:
-	return bag_count() > 0 or dust > 0.0001 or ingots > 0.0001
+	return free_count() > 0 or (dust > 0.0001 and not is_locked("dust")) or ingots > 0.0001
 
 
 func sell_all() -> int:
 	var v := sell_value()
 	money += v
-	bag.clear()
-	dust = 0.0
+	_clear_unlocked()
+	if not is_locked("dust"):
+		dust = 0.0
 	ingots = 0.0
 	changed.emit()
 	save_game()
@@ -179,9 +224,9 @@ func sell_all() -> int:
 
 ## Кислота: всё из мешка превращается в золотой порошок. quality 0..1 — как удачно протравил.
 func etch_bag(quality: float) -> float:
-	var g := bag_gold() * clampf(quality, 0.0, 1.0)
+	var g := bag_gold() * lerpf(ETCH_MIN, 1.0, clampf(quality, 0.0, 1.0))
 	dust += g
-	bag.clear()
+	_clear_unlocked()
 	changed.emit()
 	save_game()
 	return g
@@ -189,7 +234,7 @@ func etch_bag(quality: float) -> float:
 
 ## Печь: порошок в слиток. eff 0..1 — сколько не расплескал.
 func melt_dust(eff: float) -> float:
-	var g := dust * clampf(eff, 0.0, 1.0)
+	var g := dust * lerpf(MELT_MIN, 1.0, clampf(eff, 0.0, 1.0))
 	ingots += g
 	dust = 0.0
 	changed.emit()
@@ -355,7 +400,7 @@ static func rub(v: int) -> String:
 func save_game() -> void:
 	var d := {"money": money, "bag": bag, "debt": debt, "debt_round": debt_round, "time": time,
 		"deadline": deadline, "round_len": round_len, "upgrades": upgrades, "flags": flags, "digs": digs,
-		"dust": dust, "ingots": ingots, "bins": bins}
+		"dust": dust, "ingots": ingots, "bins": bins, "locked": locked}
 	var f := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if f:
 		f.store_string(JSON.stringify(d))
@@ -381,11 +426,18 @@ func load_game() -> void:
 	ingots = float(d.get("ingots", 0.0))
 	bins = int(d.get("bins", 0))
 	bag = {}
+	locked = {}
 	var b = d.get("bag", {})
 	if typeof(b) == TYPE_DICTIONARY:
 		for k in b:
 			if ITEMS.has(k):
 				bag[k] = int(b[k])
+	locked = {}
+	var lk = d.get("locked", {})
+	if typeof(lk) == TYPE_DICTIONARY:
+		for k in lk:
+			if (ITEMS.has(k) or k == "dust") and lk[k]:
+				locked[k] = true
 	var u = d.get("upgrades", {})
 	if typeof(u) == TYPE_DICTIONARY:
 		for k in upgrades:

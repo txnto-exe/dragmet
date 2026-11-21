@@ -12,6 +12,7 @@ var yaw := 0.0
 var pitch := 0.0
 var enabled := true
 var focus: Interactable = null
+var flashlight: SpotLight3D
 var _bob := 0.0
 var _step := 0.0
 
@@ -36,6 +37,23 @@ func _ready() -> void:
 	head.add_child(cam)
 	cam.current = true
 	Settings.changed.connect(func(): cam.fov = float(Settings.get_v("fov")))
+	# фонарик (T): светит туда, куда смотришь
+	flashlight = SpotLight3D.new()
+	flashlight.light_color = Color(1.0, 0.93, 0.8)
+	flashlight.spot_range = 10.0
+	flashlight.spot_angle = 30.0
+	flashlight.spot_angle_attenuation = 1.6
+	flashlight.spot_attenuation = 0.9
+	flashlight.shadow_enabled = true
+	flashlight.position = Vector3(0.12, -0.12, 0.0)
+	flashlight.visible = false
+	cam.add_child(flashlight)
+
+
+func toggle_flashlight() -> void:
+	flashlight.visible = not flashlight.visible
+	flashlight.light_energy = 2.8 + 0.8 * G.upgrades.get("lamp", 0)
+	Sfx.play("switch", -6.0, 1.0 if flashlight.visible else 0.85)
 
 
 func look_at_point(p: Vector3) -> void:

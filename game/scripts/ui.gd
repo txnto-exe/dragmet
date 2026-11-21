@@ -29,6 +29,7 @@ var left_lbl: Label
 var hud_box: Control
 var gold_lbl: Label
 var goal_lbl: Label
+var quest_lbl: RichTextLabel
 var top_hint: Label
 var mg: PanelContainer
 var mg_title: Label
@@ -46,6 +47,9 @@ var dlg_money: Label
 var dlg_text: Label
 var dlg_choices: VBoxContainer
 var dlg_hint: Label
+var inv: PanelContainer
+var prompt_box: HBoxContainer
+var prompt_key: Label
 var shop: PanelContainer
 var menu_layer: Control
 var fade_rect: ColorRect
@@ -199,15 +203,43 @@ func _build_hud() -> void:
 	crosshair.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hud_box.add_child(crosshair)
 
+	# подсказка у прицела: клавиша в рамке + название того, на что смотришь
+	prompt_box = HBoxContainer.new()
+	prompt_box.alignment = BoxContainer.ALIGNMENT_CENTER
+	prompt_box.add_theme_constant_override("separation", 8)
+	prompt_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	prompt_box.set_anchors_preset(Control.PRESET_CENTER)
+	prompt_box.offset_left = -400
+	prompt_box.offset_right = 400
+	prompt_box.offset_top = 30
+	prompt_box.offset_bottom = 62
+	prompt_box.modulate.a = 0.85
+	prompt_box.visible = false
+	hud_box.add_child(prompt_box)
+	var kp := _key_badge("E")
+	prompt_key = kp.get_child(0)
+	prompt_box.add_child(kp)
+	# в углу — две клавиши, которые не видны на предметах
+	var legend := HBoxContainer.new()
+	legend.add_theme_constant_override("separation", 6)
+	legend.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	legend.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	legend.offset_left = -300
+	legend.offset_top = -48
+	legend.offset_right = -24
+	legend.offset_bottom = -18
+	legend.alignment = BoxContainer.ALIGNMENT_END
+	legend.modulate.a = 0.55
+	hud_box.add_child(legend)
+	for pair in [["Tab", "Мешок"], ["T", "Фонарь"]]:
+		legend.add_child(_key_badge(pair[0]))
+		var ll := _label(16, C_TEXT)
+		ll.text = pair[1] + "   "
+		legend.add_child(ll)
 	prompt = _label(17, C_TEXT, f_bold)
-	prompt.modulate.a = 0.75
-	prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	prompt.set_anchors_preset(Control.PRESET_CENTER)
-	prompt.offset_left = -400
-	prompt.offset_right = 400
-	prompt.offset_top = 34
-	prompt.offset_bottom = 70
-	hud_box.add_child(prompt)
+	prompt.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
+	prompt.add_theme_constant_override("outline_size", 4)
+	prompt_box.add_child(prompt)
 
 	var tl := VBoxContainer.new()
 	tl.position = Vector2(26, 16)
@@ -227,6 +259,21 @@ func _build_hud() -> void:
 	goal_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	goal_lbl.custom_minimum_size = Vector2(380, 0)
 	tl.add_child(goal_lbl)
+	# поручение: что нужно и сколько уже есть
+	quest_lbl = RichTextLabel.new()
+	quest_lbl.bbcode_enabled = true
+	quest_lbl.fit_content = true
+	quest_lbl.scroll_active = false
+	quest_lbl.autowrap_mode = TextServer.AUTOWRAP_OFF
+	quest_lbl.custom_minimum_size = Vector2(380, 0)
+	quest_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	quest_lbl.add_theme_font_override("normal_font", f_text)
+	quest_lbl.add_theme_font_override("bold_font", f_bold)
+	quest_lbl.add_theme_font_size_override("normal_font_size", 17)
+	quest_lbl.add_theme_font_size_override("bold_font_size", 17)
+	quest_lbl.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
+	quest_lbl.add_theme_constant_override("outline_size", 3)
+	tl.add_child(quest_lbl)
 
 	top_hint = _label(20, C_TEXT, f_bold)
 	top_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -306,8 +353,47 @@ func _process(dt: float) -> void:
 	refresh_time()
 
 
-func set_prompt(t: String) -> void:
+func _key_badge(key: String) -> PanelContainer:
+	var kp := PanelContainer.new()
+	var ks := StyleBoxFlat.new()
+	ks.bg_color = Color(0.08, 0.07, 0.06, 0.75)
+	ks.border_color = Color(0.9, 0.87, 0.78, 0.9)
+	ks.set_border_width_all(2)
+	ks.set_corner_radius_all(4)
+	ks.content_margin_left = 7
+	ks.content_margin_right = 7
+	ks.content_margin_top = 0
+	ks.content_margin_bottom = 1
+	kp.add_theme_stylebox_override("panel", ks)
+	kp.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var l := _label(16, C_TEXT, f_bold)
+	l.text = key
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	kp.add_child(l)
+	return kp
+
+
+func set_prompt(t: String, key := "E") -> void:
 	prompt.text = t
+	prompt_key.text = key
+	prompt_box.visible = t != ""
+
+
+## rows: [[название, есть, нужно], ...]
+func set_quest(title: String, rows: Array) -> void:
+	if title == "":
+		quest_lbl.text = ""
+		return
+	var t := "[b][color=#8fc7ff]%s[/color][/b]" % title
+	for r in rows:
+		var have = r[1]
+		var need = r[2]
+		var done: bool = float(have) >= float(need) - 0.00001
+		var col := "#8cd86f" if done else "#d8cfb8"
+		var cnt := ("%s / %s" % [G.grams(have), G.grams(need)]) if typeof(need) == TYPE_FLOAT else ("%d / %d" % [mini(int(have), int(need)), int(need)])
+		t += "
+[color=%s]   %s  %s%s[/color]" % [col, r[0], cnt, "  ✓" if done else ""]
+	quest_lbl.text = t
 
 
 func set_goal(t: String) -> void:
@@ -427,6 +513,13 @@ func _build_overlays() -> void:
 	shop = PanelContainer.new()
 	shop.visible = false
 	root.add_child(shop)
+
+	inv = PanelContainer.new()
+	inv.visible = false
+	inv.add_theme_stylebox_override("panel", _box(Color(0.05, 0.045, 0.038, 0.94), Color(0.32, 0.27, 0.19), 2, 4, 16))
+	inv.set_anchors_preset(Control.PRESET_CENTER)
+	root.add_child(inv)
+	G.changed.connect(func(): if inv.visible: _fill_inventory())
 
 	menu_layer = Control.new()
 	menu_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -705,6 +798,103 @@ func open_shop(title: String, sub: String, items_fn: Callable, buy_fn: Callable)
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	_fill_shop()
 	await shop_closed
+
+
+# ---------- инвентарь (Tab) ----------
+
+func toggle_inventory(on: bool) -> void:
+	inv.visible = on
+	if on:
+		_fill_inventory()
+
+
+func _fill_inventory() -> void:
+	for c in inv.get_children():
+		inv.remove_child(c)
+		c.queue_free()
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 6)
+	v.custom_minimum_size = Vector2(620, 0)
+	inv.add_child(v)
+	var top := HBoxContainer.new()
+	v.add_child(top)
+	var t := _label(30, C_GOLD, f_head)
+	t.text = "Мешок  %d / %d" % [G.bag_count(), G.bag_cap()]
+	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top.add_child(t)
+	var m := _label(26, C_GOLD, f_head)
+	m.text = G.rub(G.money)
+	top.add_child(m)
+	var rows := 0
+	var keys: Array = G.bag.keys()
+	keys.sort_custom(func(a, b): return G.ITEMS[a]["gold"] > G.ITEMS[b]["gold"])
+	for k in keys:
+		var d: Dictionary = G.ITEMS[k]
+		_inv_row(v, d["name"], "×%d" % G.bag[k], G.rub(G.item_price(k) * G.bag[k]), G.TIER_COLORS[d["tier"]], k)
+		rows += 1
+	if G.dust > 0.0001:
+		_inv_row(v, "Золотой порошок", G.grams(G.dust), G.rub(G.dust_value()), Color(1.0, 0.82, 0.4), "dust")
+		rows += 1
+	if G.ingots > 0.0001:
+		_inv_row(v, "Золотые слитки", G.grams(G.ingots), G.rub(G.ingot_value()), Color(1.0, 0.72, 0.25), "")
+		rows += 1
+	if G.flags.get("key", false):
+		_inv_row(v, "Ключ от сетки", "", "", Color(0.6, 0.95, 0.5), "")
+		rows += 1
+	if G.flags.get("crowbar", false):
+		_inv_row(v, "Лом", "", "", Color(1.0, 0.7, 0.4), "")
+		rows += 1
+	if rows == 0:
+		var e := _label(20, C_DIM)
+		e.text = "Пусто"
+		v.add_child(e)
+	var sep := HSeparator.new()
+	v.add_child(sep)
+	var p := _label(16, C_DIM)
+	p.text = "Грамм золота:  сырьём %s  ·  порошком %s  ·  слитком %s" % [G.rub(G.gram_price("raw")), G.rub(G.gram_price("dust")), G.rub(G.gram_price("ingot"))]
+	v.add_child(p)
+	inv.reset_size()
+	inv.position = (Vector2(1280, 720) - inv.size) * 0.5
+
+
+func _inv_row(parent: Control, name: String, count: String, value: String, col: Color, lock_key: String) -> void:
+	var row := PanelContainer.new()
+	var locked := lock_key != "" and G.is_locked(lock_key)
+	row.add_theme_stylebox_override("panel", _box(Color(0.09, 0.08, 0.06) if not locked else Color(0.07, 0.1, 0.13),
+		Color(0.22, 0.19, 0.14) if not locked else Color(0.35, 0.55, 0.75), 1, 3, 6))
+	parent.add_child(row)
+	var h := HBoxContainer.new()
+	h.add_theme_constant_override("separation", 14)
+	row.add_child(h)
+	var n := _label(20, col, f_bold)
+	n.text = name
+	n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	h.add_child(n)
+	var c := _label(19, C_TEXT)
+	c.text = count
+	c.custom_minimum_size = Vector2(80, 0)
+	c.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	h.add_child(c)
+	var val := _label(19, C_GOLD)
+	val.text = value
+	val.custom_minimum_size = Vector2(110, 0)
+	val.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	h.add_child(val)
+	if lock_key != "":
+		var b := CheckButton.new()
+		b.text = "Отложить"
+		b.button_pressed = locked
+		b.focus_mode = Control.FOCUS_NONE
+		b.add_theme_font_override("font", f_text)
+		b.add_theme_font_size_override("font_size", 16)
+		b.toggled.connect(func(on: bool):
+			Sfx.play("blip", -6.0)
+			G.set_locked(lock_key, on))
+		h.add_child(b)
+	else:
+		var sp := Control.new()
+		sp.custom_minimum_size = Vector2(128, 0)
+		h.add_child(sp)
 
 
 func shop_say(text: String) -> void:
@@ -986,7 +1176,7 @@ func show_settings() -> void:
 	_slider_row(a, "Поле зрения (FOV)", "fov", 55.0, 100.0, 1.0, func(x): return "%d°" % int(x))
 	_check_row(a, "Покачивание камеры при ходьбе", "head_bob")
 	var keys := _label(17, C_DIM)
-	keys.text = "WASD — ходить   ·   Shift — бежать   ·   E — действие   ·   Esc — пауза   ·   F11 — полный экран"
+	keys.text = "WASD — ходить   ·   Shift — бежать   ·   E — действие   ·   Tab — мешок   ·   T — фонарик   ·   Esc — пауза   ·   F11 — полный экран"
 	keys.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	a.add_child(keys)
 

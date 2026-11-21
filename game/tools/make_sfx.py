@@ -36,6 +36,7 @@ SOUNDS = {
     'rustle1': (fs(655630), 0.35, 0.95, 0, -2, {}),
     'rustle2': (ken('rpg-audio', 'cloth1.ogg'), 0, None, 0, -2, {}),
     'thud': (ken('impact-sounds', 'impactSoft_heavy_001.ogg'), 0, None, 0, -1, {}),
+    'switch': (ken('interface-sounds', 'switch_002.ogg'), 0, None, 0, 0, {}),
     'glass': (ken('impact-sounds', 'impactGlass_light_001.ogg'), 0, None, 0, 0, {}),
     'clank': (ken('impact-sounds', 'impactMetal_heavy_000.ogg'), 0, None, 0, -3, {}),
     'hurt': (ken('impact-sounds', 'impactPunch_medium_000.ogg'), 0, None, 0, -2, {}),

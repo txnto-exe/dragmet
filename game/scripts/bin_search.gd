@@ -279,7 +279,7 @@ func _find_visual(key: String) -> Node3D:
 			_boxm(n, Vector3(0.13, 0.004, 0.032), Vector3(0, 0.004, 0), _mat(Color(0.1, 0.4, 0.15), 0, 0.5))
 			for i in 4:
 				_boxm(n, Vector3(0.022, 0.006, 0.014), Vector3(-0.045 + i * 0.03, 0.009, 0), _mat(Color(0.05, 0.05, 0.05)))
-			_boxm(n, Vector3(0.13, 0.0045, 0.006), Vector3(0, 0.004, 0.017), gold)
+			_boxm(n, Vector3(0.13, 0.006, 0.007), Vector3(0, 0.004, 0.0175), gold)   # контакты толще платы — без мерцания
 		"cpus":
 			_boxm(n, Vector3(0.045, 0.006, 0.045), Vector3(0, 0.006, 0), _mat(Color(0.2, 0.5, 0.25), 0, 0.5))
 			_boxm(n, Vector3(0.03, 0.004, 0.03), Vector3(0, 0.011, 0), _mat(Color(0.75, 0.75, 0.78), 1.0, 0.2))

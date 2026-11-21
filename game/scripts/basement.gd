@@ -160,10 +160,10 @@ func wall(x0: float, z0: float, x1: float, z1: float, y0 := 0.0, y1 := H, t := 0
 func _room() -> void:
 	# пол с проёмом под подъёмник бака
 	var fm := surf("floor", 0.42, 1.0, Color(0.8, 0.78, 0.72))
-	var x0 := -W - 1.5
-	var x1 := W + 1.5
-	var z0 := -D - 0.7
-	var z1 := D + 2.3
+	var x0 := -W - 0.3
+	var x1 := W + 0.3
+	var z0 := -D - 0.3
+	var z1 := D + 0.3
 	var hx := LIFT.x - HOLE.x * 0.5
 	var hx2 := LIFT.x + HOLE.x * 0.5
 	var hz := LIFT.z - HOLE.y * 0.5
@@ -172,7 +172,7 @@ func _room() -> void:
 	box(Vector3(x1 - hx2, 0.2, z1 - z0), Vector3((hx2 + x1) * 0.5, -0.1, (z0 + z1) * 0.5), fm)
 	box(Vector3(HOLE.x, 0.2, hz - z0), Vector3(LIFT.x, -0.1, (z0 + hz) * 0.5), fm)
 	box(Vector3(HOLE.x, 0.2, z1 - hz2), Vector3(LIFT.x, -0.1, (hz2 + z1) * 0.5), fm)
-	box(Vector3(W * 2 + 3, 0.2, D * 2 + 4), Vector3(0, H + 0.1, 0.8), surf("ceiling", 0.4, 1.0, Color(0.6, 0.58, 0.54)))
+	box(Vector3(W * 2 + 3, 0.2, D * 2 + 0.6), Vector3(0, H + 0.1, 0.0), surf("ceiling", 0.4, 1.0, Color(0.6, 0.58, 0.54)))
 	var t := 0.3
 	# север и восток — глухие
 	wall(-W - t, -D - t * 0.5, W + t, -D - t * 0.5)
@@ -357,9 +357,9 @@ func _bathtub(c: Vector3) -> void:
 	var Wd := 0.72
 	var Hh := 0.55
 	var t := 0.06
-	box(Vector3(Wd, 0.08, L), c + Vector3(0, 0.12, 0), rust, false)                       # дно
-	box(Vector3(t, Hh, L), c + Vector3(-Wd * 0.5 + t * 0.5, Hh * 0.5 + 0.08, 0), enamel, false)
-	box(Vector3(t, Hh, L), c + Vector3(Wd * 0.5 - t * 0.5, Hh * 0.5 + 0.08, 0), enamel, false)
+	box(Vector3(Wd - t * 2, 0.08, L - t * 2), c + Vector3(0, 0.12, 0), rust, false)       # дно
+	box(Vector3(t, Hh, L - t * 2), c + Vector3(-Wd * 0.5 + t * 0.5, Hh * 0.5 + 0.08, 0), enamel, false)
+	box(Vector3(t, Hh, L - t * 2), c + Vector3(Wd * 0.5 - t * 0.5, Hh * 0.5 + 0.08, 0), enamel, false)
 	box(Vector3(Wd, Hh, t), c + Vector3(0, Hh * 0.5 + 0.08, -L * 0.5 + t * 0.5), enamel, false)
 	box(Vector3(Wd, Hh, t), c + Vector3(0, Hh * 0.5 + 0.08, L * 0.5 - t * 0.5), enamel, false)
 	# ножки
@@ -469,7 +469,7 @@ func _sign(parent: Node3D, pos: Vector3, rot: Vector3, text: String) -> Label3D:
 	l.pixel_size = 0.0028
 	l.modulate = Color(0.15, 0.1, 0.08)
 	l.outline_size = 0
-	l.position = Vector3(0, 0, 0.012)
+	l.position = Vector3(0, 0, 0.018)   # надпись над картонкой с зазором — без мерцания
 	l.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 	board.add_child(l)
 	return l
@@ -520,7 +520,7 @@ func _east_stalls() -> void:
 		box(Vector3(depth + 0.06, 0.045, L + 0.06), Vector3(STALL_X, 0.92, z), top_mat, false)
 		box(Vector3(0.03, 0.88, L), Vector3(x0 + 0.015, 0.45, z), planks, false)
 		for s in [-1, 1]:
-			box(Vector3(depth, 0.88, 0.03), Vector3(STALL_X, 0.45, z + s * (L * 0.5 - 0.015)), planks, false)
+			box(Vector3(depth - 0.03, 0.88, 0.03), Vector3(STALL_X + 0.015, 0.45, z + s * (L * 0.5 - 0.015)), planks, false)
 		var body := StaticBody3D.new()
 		var cs := CollisionShape3D.new()
 		var sh := BoxShape3D.new()
@@ -584,7 +584,7 @@ func _wall_shelf(z: float, L: float, i: int) -> void:
 		box(Vector3(0.3, 0.03, L - 0.1), Vector3(W - 0.15, y, z), planks, false)
 		for s in [-1, 1]:
 			box(Vector3(0.24, 0.025, 0.025), Vector3(W - 0.13, y - 0.05, z + s * (L * 0.5 - 0.15)), metal, false)
-			box(Vector3(0.025, 0.16, 0.025), Vector3(W - 0.012, y - 0.1, z + s * (L * 0.5 - 0.15)), metal, false)
+			box(Vector3(0.025, 0.16, 0.014), Vector3(W - 0.012, y - 0.1, z + s * (L * 0.5 - 0.15)), metal, false)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 900 + i
 	var stuff := ["can_rusted", "cardboard_box_01", "plastic_bottle_gallon", "russian_food_cans_01", "metal_jerrycan"]
@@ -642,8 +642,8 @@ func _lift_pit() -> void:
 	var depth := 2.3
 	# шахта под полом
 	for s in [-1, 1]:
-		box(Vector3(0.06, depth, HOLE.y), c + Vector3(s * (HOLE.x * 0.5 + 0.03), -depth * 0.5, 0), wall_m, false)
-		box(Vector3(HOLE.x, depth, 0.06), c + Vector3(0, -depth * 0.5, s * (HOLE.y * 0.5 + 0.03)), wall_m, false)
+		box(Vector3(0.06, depth, HOLE.y - 0.01), c + Vector3(s * (HOLE.x * 0.5 + 0.025), -depth * 0.5, 0), wall_m, false)
+		box(Vector3(HOLE.x - 0.01, depth, 0.06), c + Vector3(0, -depth * 0.5, s * (HOLE.y * 0.5 + 0.025)), wall_m, false)
 	box(Vector3(HOLE.x, 0.06, HOLE.y), c + Vector3(0, -depth, 0), wall_m, false)
 	# окантовка проёма жёлто-чёрной полосой
 	var hz := _hazard_mat()
@@ -772,7 +772,7 @@ func _stairwell() -> void:
 	var plaster := surf("plaster_dirty", 0.45, 1.0, Color(0.7, 0.68, 0.62))
 	var metal := surf("metal", 1.4, 0.6, Color(0.55, 0.5, 0.45))
 	# нижняя площадка
-	box(Vector3(wdt, 0.1, land + 0.05), Vector3(x0, -0.05, D + land * 0.5), concrete)
+	box(Vector3(wdt, 0.1, land - 0.25), Vector3(x0, -0.05, D + 0.3 + (land - 0.25) * 0.5), concrete)
 	# ступени — сплошные, от пола (никаких висящих плит)
 	for i in steps:
 		var h := (i + 1) * rise
@@ -783,9 +783,9 @@ func _stairwell() -> void:
 	# боковые стены во всю высоту — кирпич
 	var wall_h := top_y + H + 0.2
 	for sx in [-1, 1]:
-		box(Vector3(0.12, wall_h, z_end - D), Vector3(x0 + sx * (wdt * 0.5 + 0.06), wall_h * 0.5, (D + z_end) * 0.5), brick)
+		box(Vector3(0.12, wall_h, z_end - D - 0.3), Vector3(x0 + sx * (wdt * 0.5 + 0.06), wall_h * 0.5, (D + 0.3 + z_end) * 0.5), brick)
 	# потолок: над площадкой ровный, над маршем — наклонный, над верхней площадкой — ровный
-	box(Vector3(wdt + 0.2, 0.12, land), Vector3(x0, H + 0.06, D + land * 0.5), plaster, false)
+	box(Vector3(wdt + 0.2, 0.12, land - 0.3), Vector3(x0, H + 0.06, D + 0.3 + (land - 0.3) * 0.5), plaster, false)
 	var slope_len := Vector2(z_top - z_st, top_y).length()
 	var slope := box(Vector3(wdt + 0.2, 0.12, slope_len + 0.1), Vector3(x0, H + top_y * 0.5 + 0.06, (z_st + z_top) * 0.5), plaster, false)
 	slope.rotation.x = -atan2(top_y, z_top - z_st)
@@ -794,7 +794,7 @@ func _stairwell() -> void:
 	box(Vector3(wdt + 0.24, H + 0.2, 0.12), Vector3(x0, top_y + (H + 0.2) * 0.5, z_end + 0.06), brick)
 	var street_door := surf("door", 1.4, 0.6, Color(0.55, 0.5, 0.48))
 	box(Vector3(0.95, 2.05, 0.05), Vector3(x0, top_y + 1.025, z_end - 0.03), street_door, false)
-	box(Vector3(0.95, 0.02, 0.06), Vector3(x0, top_y + 0.01, z_end - 0.06), _glow_mat(Color(1.0, 0.85, 0.6), 2.5), false)  # свет из-под двери
+	box(Vector3(0.93, 0.02, 0.06), Vector3(x0, top_y + 0.01, z_end - 0.06), _glow_mat(Color(1.0, 0.85, 0.6), 2.5), false)  # свет из-под двери
 	# перила вдоль марша
 	var rail_len := slope_len
 	var rail := cyl(0.022, rail_len, Vector3(x0 + wdt * 0.5 - 0.1, 0.9 + top_y * 0.5, (z_st + z_top) * 0.5), metal, Vector3.ZERO, 8)

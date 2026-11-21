@@ -62,7 +62,7 @@ func build(base: Basement) -> void:
 	var qm := QuadMesh.new()
 	qm.size = SIZE
 	q.mesh = qm
-	q.position = Vector3(0, 0, 0.072)
+	q.position = Vector3(0, 0, 0.08)
 	glass_mat = ShaderMaterial.new()
 	glass_mat.shader = load("res://shaders/screen.gdshader")
 	glass_mat.set_shader_parameter("tex", vp.get_texture())

@@ -136,13 +136,35 @@ func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--auto="):
 			_shot_dir = a.substr(7)
-	if _shot_dir != "":
+	if "--zscan" in OS.get_cmdline_user_args():
+		_zscan()
+	elif _shot_dir != "":
 		_auto_test()
 	elif G.has_meta("skip_menu"):
 		G.remove_meta("skip_menu")
 		_start_game()
 	else:
 		_main_menu()
+
+
+## Отладка: список совпадающих граней (зет-файтинг) в закрытом и открытом состоянии подвала.
+func _zscan() -> void:
+	for i in 5:
+		await get_tree().process_frame
+	var r := ZScan.scan(sub)
+	print("ZSCAN closed: %d" % r.size())
+	for l in r:
+		print("  ", l)
+	world.open_acid()
+	world.open_furnace()
+	world.open_door(true)
+	for i in 120:
+		await get_tree().process_frame
+	r = ZScan.scan(sub)
+	print("ZSCAN open: %d" % r.size())
+	for l in r:
+		print("  ", l)
+	get_tree().quit()
 
 
 ## Размер 3D-картинки: окно / целый множитель (чтобы пиксели были ровные).

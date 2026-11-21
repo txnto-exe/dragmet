@@ -26,14 +26,15 @@ func build(t: String, base: Basement, lid_open := true) -> void:
 	# стенки и дно
 	base.box(Vector3(OUT.x, h, w), Vector3(0, cy, OUT.z * 0.5 - w * 0.5), metal, false, self)
 	base.box(Vector3(OUT.x, h, w), Vector3(0, cy, -OUT.z * 0.5 + w * 0.5), metal, false, self)
-	base.box(Vector3(w, h, OUT.z), Vector3(OUT.x * 0.5 - w * 0.5, cy, 0), metal, false, self)
-	base.box(Vector3(w, h, OUT.z), Vector3(-OUT.x * 0.5 + w * 0.5, cy, 0), metal, false, self)
-	base.box(Vector3(OUT.x, 0.05, OUT.z), Vector3(0, FLOOR_Y - 0.025, 0), dark, false, self)
+	# боковины и дно — между передней и задней стенкой, без наложения граней в углах
+	base.box(Vector3(w, h, OUT.z - w * 2), Vector3(OUT.x * 0.5 - w * 0.5, cy, 0), metal, false, self)
+	base.box(Vector3(w, h, OUT.z - w * 2), Vector3(-OUT.x * 0.5 + w * 0.5, cy, 0), metal, false, self)
+	base.box(Vector3(OUT.x - w * 2, 0.05, OUT.z - w * 2), Vector3(0, FLOOR_Y - 0.025, 0), dark, false, self)
 	# отбортовка сверху
 	base.box(Vector3(OUT.x + 0.05, 0.05, 0.06), Vector3(0, OUT.y - 0.02, OUT.z * 0.5), dark, false, self)
 	base.box(Vector3(OUT.x + 0.05, 0.05, 0.06), Vector3(0, OUT.y - 0.02, -OUT.z * 0.5), dark, false, self)
-	base.box(Vector3(0.06, 0.05, OUT.z), Vector3(OUT.x * 0.5, OUT.y - 0.02, 0), dark, false, self)
-	base.box(Vector3(0.06, 0.05, OUT.z), Vector3(-OUT.x * 0.5, OUT.y - 0.02, 0), dark, false, self)
+	base.box(Vector3(0.06, 0.05, OUT.z - 0.06), Vector3(OUT.x * 0.5, OUT.y - 0.02, 0), dark, false, self)
+	base.box(Vector3(0.06, 0.05, OUT.z - 0.06), Vector3(-OUT.x * 0.5, OUT.y - 0.02, 0), dark, false, self)
 	# рёбра жёсткости спереди
 	for x in [-0.4, 0.0, 0.4]:
 		base.box(Vector3(0.05, h * 0.8, 0.02), Vector3(x, cy, OUT.z * 0.5 + 0.01), dark, false, self)
@@ -60,7 +61,7 @@ func build(t: String, base: Basement, lid_open := true) -> void:
 	l.pixel_size = 0.0019
 	l.modulate = Color(0.95, 0.92, 0.82)
 	l.outline_size = 0
-	l.position = Vector3(0, 0, 0.008)
+	l.position = Vector3(0, 0, 0.013)   # надпись над табличкой с зазором — без мерцания
 	plate.add_child(l)
 	if t == "military":
 		var star := Label3D.new()

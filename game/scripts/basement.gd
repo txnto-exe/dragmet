@@ -226,8 +226,10 @@ func _west_side() -> void:
 	_furnace_parts()
 	# --- ниша скупщика (z 1.5..4.5): окошко в стене, за ним будка с лампой
 	var bars := surf("metal", 1.5, 0.6, Color(0.7, 0.7, 0.7))
-	for i in 5:
-		cyl(0.012, 1.0, Vector3(-W - 0.12, 1.5, 2.6 + i * 0.2), bars, Vector3.ZERO, 6)
+	# решётка только по краям: посередине окно для передачи, лицо скупщика ничем не закрыто
+	for z in [2.6, 2.72, 3.28, 3.4]:
+		cyl(0.012, 1.0, Vector3(-W - 0.12, 1.5, z), bars, Vector3.ZERO, 6)
+	cyl(0.012, 0.9, Vector3(-W - 0.12, 1.98, 3.0), bars, Vector3(90, 0, 0), 6)
 	box(Vector3(0.6, 0.05, 1.0), Vector3(-W - 0.05, 0.985, 3.0), surf("planks", 0.8, 0.9))  # подоконник-прилавок
 	# будка
 	var bx := -W - 1.0
@@ -748,23 +750,81 @@ func _door_and_corridor() -> void:
 	bcs.position = Vector3(DOOR_X, DOOR_H * 0.5, D + 0.02)
 	block.add_child(bcs)
 	add_child(block)
-	# коридор: пол, стены, лестница вверх, тусклая лампа
-	var cz := D + 1.3
-	box(Vector3(1.6, 0.1, 2.2), Vector3(DOOR_X, -0.05, cz), surf("floor"))
-	box(Vector3(1.6, 0.1, 2.2), Vector3(DOOR_X, H + 0.05, cz), surf("ceiling"))
-	box(Vector3(0.1, H, 2.2), Vector3(DOOR_X - 0.8, H * 0.5, cz), surf("wall_top", 0.4, 1.0, Color(0.55, 0.55, 0.5)))
-	box(Vector3(0.1, H, 2.2), Vector3(DOOR_X + 0.8, H * 0.5, cz), surf("wall_top", 0.4, 1.0, Color(0.55, 0.55, 0.5)))
-	for i in 6:
-		box(Vector3(1.5, 0.18, 0.3), Vector3(DOOR_X, 0.09 + i * 0.18, D + 1.55 + i * 0.28), surf("floor"))
-	box(Vector3(1.6, H, 0.1), Vector3(DOOR_X, H * 0.5, D + 2.45), surf("wall_top", 0.4, 1.0, Color(0.5, 0.5, 0.45)))
-	var cl := OmniLight3D.new()
-	cl.light_color = Color(0.85, 0.9, 1.0)
-	cl.light_energy = 0.7
-	cl.omni_range = 3.0
-	cl.position = Vector3(DOOR_X, 2.4, D + 0.9)
-	cl.shadow_enabled = true
-	add_child(cl)
-	Props.place(self, "lightbulb_01", Vector3(DOOR_X, 2.62, D + 0.9), 0, {"height": 0.12, "collide": false})
+	_stairwell()
+
+
+## Лестничная клетка за дверью: площадка, марши вверх, наклонный потолок, наверху дверь на улицу.
+## Отсюда спускаются гости (Колян).
+func _stairwell() -> void:
+	var x0 := DOOR_X
+	var wdt := 1.6
+	var land := 1.5                 # нижняя площадка
+	var steps := 12
+	var rise := 0.19
+	var run := 0.28
+	var z_st := D + land            # начало ступеней
+	var z_top := z_st + steps * run # верхняя площадка
+	var top_y := steps * rise
+	var top_len := 1.1
+	var z_end := z_top + top_len
+	var concrete := surf("floor", 0.42, 1.0, Color(0.72, 0.7, 0.66))
+	var brick := surf("brick", 0.55, 1.0, Color(0.8, 0.72, 0.66))
+	var plaster := surf("plaster_dirty", 0.45, 1.0, Color(0.7, 0.68, 0.62))
+	var metal := surf("metal", 1.4, 0.6, Color(0.55, 0.5, 0.45))
+	# нижняя площадка
+	box(Vector3(wdt, 0.1, land + 0.05), Vector3(x0, -0.05, D + land * 0.5), concrete)
+	# ступени — сплошные, от пола (никаких висящих плит)
+	for i in steps:
+		var h := (i + 1) * rise
+		box(Vector3(wdt - 0.1, h, run), Vector3(x0, h * 0.5, z_st + run * (i + 0.5)), concrete)
+		box(Vector3(wdt - 0.1, 0.02, 0.04), Vector3(x0, h + 0.005, z_st + run * i + 0.02), metal, false)  # металлический уголок
+	# верхняя площадка
+	box(Vector3(wdt, top_y, top_len), Vector3(x0, top_y * 0.5, z_top + top_len * 0.5), concrete)
+	# боковые стены во всю высоту — кирпич
+	var wall_h := top_y + H + 0.2
+	for sx in [-1, 1]:
+		box(Vector3(0.12, wall_h, z_end - D), Vector3(x0 + sx * (wdt * 0.5 + 0.06), wall_h * 0.5, (D + z_end) * 0.5), brick)
+	# потолок: над площадкой ровный, над маршем — наклонный, над верхней площадкой — ровный
+	box(Vector3(wdt + 0.2, 0.12, land), Vector3(x0, H + 0.06, D + land * 0.5), plaster, false)
+	var slope_len := Vector2(z_top - z_st, top_y).length()
+	var slope := box(Vector3(wdt + 0.2, 0.12, slope_len + 0.1), Vector3(x0, H + top_y * 0.5 + 0.06, (z_st + z_top) * 0.5), plaster, false)
+	slope.rotation.x = -atan2(top_y, z_top - z_st)
+	box(Vector3(wdt + 0.2, 0.12, top_len), Vector3(x0, H + top_y + 0.06, z_top + top_len * 0.5), plaster, false)
+	# торцевая стена наверху и дверь на улицу
+	box(Vector3(wdt + 0.24, H + 0.2, 0.12), Vector3(x0, top_y + (H + 0.2) * 0.5, z_end + 0.06), brick)
+	var street_door := surf("door", 1.4, 0.6, Color(0.55, 0.5, 0.48))
+	box(Vector3(0.95, 2.05, 0.05), Vector3(x0, top_y + 1.025, z_end - 0.03), street_door, false)
+	box(Vector3(0.95, 0.02, 0.06), Vector3(x0, top_y + 0.01, z_end - 0.06), _glow_mat(Color(1.0, 0.85, 0.6), 2.5), false)  # свет из-под двери
+	# перила вдоль марша
+	var rail_len := slope_len
+	var rail := cyl(0.022, rail_len, Vector3(x0 + wdt * 0.5 - 0.1, 0.9 + top_y * 0.5, (z_st + z_top) * 0.5), metal, Vector3.ZERO, 8)
+	rail.rotation.x = PI * 0.5 - atan2(top_y, z_top - z_st)
+	for i in [1, 6, 11]:
+		var zz: float = z_st + run * (i + 0.5)
+		cyl(0.015, 0.9, Vector3(x0 + wdt * 0.5 - 0.1, (i + 1) * rise + 0.45, zz), metal, Vector3.ZERO, 6)
+	# свет: лампа у нижней двери и над верхней
+	for p in [Vector3(x0, H - 0.1, D + 0.8), Vector3(x0, top_y + H - 0.25, z_end - 0.5)]:
+		var l := OmniLight3D.new()
+		l.light_color = Color(1.0, 0.86, 0.65)
+		l.light_energy = 0.9
+		l.omni_range = 3.6
+		l.position = p
+		l.shadow_enabled = true
+		add_child(l)
+		Props.place(self, "lightbulb_01", p + Vector3(0, 0.08, 0), 0, {"height": 0.12, "collide": false})
+	# немного мусора на площадке
+	Props.place(self, "cigarette_pack", Vector3(x0 - 0.5, 0, D + 1.1), 40, {"scale": 1.0, "collide": false})
+	Props.place(self, "can_rusted", Vector3(x0 + 0.55, 0, D + 1.3), 0, {"height": 0.12, "collide": false, "tilt": Vector3(90, 0, 0)})
+
+
+func _glow_mat(c: Color, e: float) -> StandardMaterial3D:
+	var m := StandardMaterial3D.new()
+	m.albedo_color = c
+	m.emission_enabled = true
+	m.emission = c
+	m.emission_energy_multiplier = e
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	return m
 
 
 func open_door(open: bool) -> void:

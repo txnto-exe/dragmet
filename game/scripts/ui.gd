@@ -48,6 +48,7 @@ var dlg_text: Label
 var dlg_choices: VBoxContainer
 var dlg_hint: Label
 var inv: PanelContainer
+var finds_box: VBoxContainer
 var legend: HBoxContainer
 var ring: Control
 var _ring_v := -1.0
@@ -74,13 +75,17 @@ var _shop_buy: Callable
 func _ready() -> void:
 	layer = 10
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	f_text = load("res://assets/fonts/FiraSans-Regular.ttf")
-	f_bold = load("res://assets/fonts/FiraSans-SemiBold.ttf")
-	f_head = load("res://assets/fonts/Oswald.ttf")
+	# пиксельные шрифты без сглаживания: Handjet — текст, Press Start 2P — заголовки и деньги
+	var fallback: FontFile = load("res://assets/fonts/FiraSans-Regular.ttf")
+	var hj: FontFile = _pixel_font("res://assets/fonts/Handjet.ttf", fallback)
+	f_text = _weight(hj, 450)
+	f_bold = _weight(hj, 700)
+	f_head = _pixel_font("res://assets/fonts/PressStart2P.ttf", fallback)
 	theme_main = _make_theme()
 	root = Control.new()
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	root.theme = theme_main
 	add_child(root)
 	_build_hud()
@@ -92,6 +97,48 @@ func _ready() -> void:
 
 
 # ---------- тема ----------
+
+func _pixel_font(path: String, fallback: Font) -> FontFile:
+	var f: FontFile = load(path)
+	f.antialiasing = TextServer.FONT_ANTIALIASING_NONE
+	f.hinting = TextServer.HINTING_NONE
+	f.subpixel_positioning = TextServer.SUBPIXEL_POSITIONING_DISABLED
+	f.generate_mipmaps = false
+	f.fallbacks = [fallback]
+	return f
+
+
+func _weight(base: FontFile, w: int) -> FontVariation:
+	var v := FontVariation.new()
+	v.base_font = base
+	v.variation_opentype = {TextServerManager.get_primary_interface().name_to_tag("wght"): w}
+	return v
+
+
+## Размер под пиксельные шрифты: Handjet узкий — крупнее, Press Start 2P широкий — мельче.
+func _fs(size: int, font: Font = null) -> int:
+	if font == f_head:
+		return maxi(8, int(round(size * 0.6 / 2.0)) * 2)
+	return int(round(size * 1.3))
+
+
+## Пиксельная панель из текстуры (9-патч): margin — рамка в пикселях текстуры, pad — отступ содержимого.
+func _tex(name: String, margin: int, pad_x: int, pad_y: int, tile := true) -> StyleBoxTexture:
+	var sb := StyleBoxTexture.new()
+	sb.texture = load("res://assets/ui/%s.png" % name)
+	sb.texture_margin_left = margin
+	sb.texture_margin_right = margin
+	sb.texture_margin_top = margin
+	sb.texture_margin_bottom = margin
+	sb.content_margin_left = pad_x
+	sb.content_margin_right = pad_x
+	sb.content_margin_top = pad_y
+	sb.content_margin_bottom = pad_y
+	if tile:
+		sb.axis_stretch_horizontal = StyleBoxTexture.AXIS_STRETCH_MODE_TILE_FIT
+		sb.axis_stretch_vertical = StyleBoxTexture.AXIS_STRETCH_MODE_TILE_FIT
+	return sb
+
 
 func _box(bg: Color, border: Color, bw := 1, radius := 3, pad := 10) -> StyleBoxFlat:
 	var sb := StyleBoxFlat.new()
@@ -109,13 +156,13 @@ func _box(bg: Color, border: Color, bw := 1, radius := 3, pad := 10) -> StyleBox
 func _make_theme() -> Theme:
 	var t := Theme.new()
 	t.default_font = f_text
-	t.default_font_size = 20
+	t.default_font_size = _fs(20)
 	t.set_color("font_color", "Label", C_TEXT)
-	t.set_stylebox("panel", "PanelContainer", _box(Color(0.045, 0.042, 0.035, 0.94), Color(0.32, 0.27, 0.19), 1, 4, 16))
-	var bn := _box(Color(0.09, 0.083, 0.068, 0.95), Color(0.28, 0.24, 0.17), 1, 3, 7)
-	var bh := _box(Color(0.2, 0.155, 0.085, 0.98), C_GOLD, 1, 3, 7)
-	var bp := _box(Color(0.28, 0.2, 0.09, 1.0), C_GOLD, 2, 3, 7)
-	var bd := _box(Color(0.06, 0.056, 0.05, 0.8), Color(0.18, 0.16, 0.13), 1, 3, 7)
+	t.set_stylebox("panel", "PanelContainer", _tex("panel_metal", 24, 32, 24))
+	var bn := _tex("btn_normal", 9, 16, 8)
+	var bh := _tex("btn_hover", 9, 16, 8)
+	var bp := _tex("btn_pressed", 9, 16, 8)
+	var bd := _tex("btn_disabled", 9, 16, 8)
 	for cls in ["Button", "OptionButton"]:
 		t.set_stylebox("normal", cls, bn)
 		t.set_stylebox("hover", cls, bh)
@@ -127,7 +174,7 @@ func _make_theme() -> Theme:
 		t.set_color("font_focus_color", cls, Color(1, 0.92, 0.7))
 		t.set_color("font_pressed_color", cls, Color(1, 0.95, 0.8))
 		t.set_color("font_disabled_color", cls, Color(0.42, 0.39, 0.34))
-		t.set_font_size("font_size", cls, 20)
+		t.set_font_size("font_size", cls, _fs(20))
 		t.set_font("font", cls, f_bold)
 	t.set_constant("separation", "VBoxContainer", 6)
 	t.set_constant("separation", "HBoxContainer", 10)
@@ -151,11 +198,11 @@ func _make_theme() -> Theme:
 		t.set_stylebox("pressed", cls, empty)
 		t.set_stylebox("focus", cls, _box(Color(0, 0, 0, 0), C_GOLD, 1, 3, 2))
 	t.set_font("font", "PopupMenu", f_text)
-	t.set_font_size("font_size", "PopupMenu", 19)
+	t.set_font_size("font_size", "PopupMenu", _fs(19))
 	t.set_color("font_color", "PopupMenu", C_TEXT)
 	t.set_color("font_hover_color", "PopupMenu", Color(1, 0.92, 0.7))
-	t.set_stylebox("panel", "PopupMenu", _box(Color(0.06, 0.055, 0.045, 0.98), Color(0.35, 0.3, 0.2), 1, 3, 4))
-	t.set_stylebox("hover", "PopupMenu", _box(Color(0.2, 0.155, 0.085), C_GOLD, 0, 2, 4))
+	t.set_stylebox("panel", "PopupMenu", _tex("panel_metal", 24, 14, 14))
+	t.set_stylebox("hover", "PopupMenu", _tex("btn_hover", 9, 8, 4))
 	return t
 
 
@@ -163,7 +210,7 @@ func _label(size: int, col: Color, font: Font = null) -> Label:
 	var l := Label.new()
 	if font:
 		l.add_theme_font_override("font", font)
-	l.add_theme_font_size_override("font_size", size)
+	l.add_theme_font_size_override("font_size", _fs(size, font))
 	l.add_theme_color_override("font_color", col)
 	l.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.8))
 	l.add_theme_constant_override("shadow_offset_x", 2)
@@ -269,8 +316,8 @@ func _build_hud() -> void:
 	quest_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	quest_lbl.add_theme_font_override("normal_font", f_text)
 	quest_lbl.add_theme_font_override("bold_font", f_bold)
-	quest_lbl.add_theme_font_size_override("normal_font_size", 17)
-	quest_lbl.add_theme_font_size_override("bold_font_size", 17)
+	quest_lbl.add_theme_font_size_override("normal_font_size", _fs(17))
+	quest_lbl.add_theme_font_size_override("bold_font_size", _fs(17))
 	quest_lbl.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
 	quest_lbl.add_theme_constant_override("outline_size", 3)
 	tl.add_child(quest_lbl)
@@ -356,18 +403,14 @@ func _process(dt: float) -> void:
 
 func _key_badge(key: String) -> PanelContainer:
 	var kp := PanelContainer.new()
-	var ks := StyleBoxFlat.new()
-	ks.bg_color = Color(0.08, 0.07, 0.06, 0.75)
-	ks.border_color = Color(0.9, 0.87, 0.78, 0.9)
-	ks.set_border_width_all(2)
-	ks.set_corner_radius_all(4)
-	ks.content_margin_left = 7
-	ks.content_margin_right = 7
-	ks.content_margin_top = 0
-	ks.content_margin_bottom = 1
+	var ks := _tex("key", 9, 9, 3, false)
+	ks.content_margin_bottom = 8
 	kp.add_theme_stylebox_override("panel", ks)
 	kp.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var l := _label(16, C_TEXT, f_bold)
+	var l := _label(16, Color(0.1, 0.09, 0.08), f_bold)
+	l.add_theme_color_override("font_shadow_color", Color(1, 1, 1, 0.25))
+	l.add_theme_constant_override("shadow_offset_x", 0)
+	l.add_theme_constant_override("shadow_offset_y", 1)
 	l.text = key
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	kp.add_child(l)
@@ -432,7 +475,7 @@ func _build_minigame() -> void:
 	mg.visible = false
 	root.add_child(mg)
 	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 8)
+	v.add_theme_constant_override("separation", 14)
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	mg.add_child(v)
 	var top := HBoxContainer.new()
@@ -447,8 +490,17 @@ func _build_minigame() -> void:
 	bar.custom_minimum_size = Vector2(700, 34)
 	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	v.add_child(bar)
+	var frame := Panel.new()   # утопленная железная канавка вокруг полосы
+	frame.add_theme_stylebox_override("panel", _tex("slot", 6, 0, 0))
+	frame.set_anchors_preset(Control.PRESET_FULL_RECT)
+	frame.offset_left = -6
+	frame.offset_top = -6
+	frame.offset_right = 6
+	frame.offset_bottom = 6
+	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bar.add_child(frame)
 	mg_bg = ColorRect.new()
-	mg_bg.color = Color(0.13, 0.12, 0.1)
+	mg_bg.color = Color(0.09, 0.085, 0.07)
 	mg_bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	mg_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	bar.add_child(mg_bg)
@@ -516,6 +568,39 @@ func toast(text: String, col := C_TEXT) -> void:
 		toasts.get_child(0).free()
 
 
+## «Нашёл …» крупно по центру снизу: название цветом редкости и цена.
+func find_popup(title: String, value: String, col: Color) -> void:
+	var c := CenterContainer.new()
+	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var p := PanelContainer.new()
+	p.add_theme_stylebox_override("panel", _tex("tag_brass", 12, 22, 8))
+	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	c.add_child(p)
+	var h := HBoxContainer.new()
+	h.add_theme_constant_override("separation", 16)
+	p.add_child(h)
+	var n := _label(24, col, f_bold)
+	n.text = title
+	h.add_child(n)
+	if value != "":
+		var v := _label(22, Color(1.0, 0.86, 0.45), f_head)
+		v.text = value
+		h.add_child(v)
+	finds_box.add_child(c)
+	c.pivot_offset = Vector2(400, 20)
+	c.scale = Vector2(0.6, 0.6)
+	c.modulate.a = 0.0
+	var tw := create_tween()
+	tw.set_parallel()
+	tw.tween_property(c, "scale", Vector2.ONE, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(c, "modulate:a", 1.0, 0.12)
+	tw.chain().tween_interval(2.6)
+	tw.chain().tween_property(c, "modulate:a", 0.0, 0.6)
+	tw.chain().tween_callback(c.queue_free)
+	while finds_box.get_child_count() > 3:
+		finds_box.get_child(0).free()
+
+
 func say_sub(who: String, text: String, sec := 3.5) -> void:
 	subtitle.text = ("%s: %s" % [who, text]) if who != "" else text
 	subtitle.modulate.a = 1.0
@@ -527,7 +612,20 @@ func say_sub(who: String, text: String, sec := 3.5) -> void:
 func _build_overlays() -> void:
 	shop = PanelContainer.new()
 	shop.visible = false
+	shop.add_theme_stylebox_override("panel", _tex("panel_wood", 18, 30, 24))   # лавка Коляна — фанерный щит
 	root.add_child(shop)
+
+	# находки — по центру снизу, на латунной табличке
+	finds_box = VBoxContainer.new()
+	finds_box.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	finds_box.offset_left = -400
+	finds_box.offset_right = 400
+	finds_box.offset_top = -250
+	finds_box.offset_bottom = -70
+	finds_box.alignment = BoxContainer.ALIGNMENT_END
+	finds_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	finds_box.add_theme_constant_override("separation", 6)
+	root.add_child(finds_box)
 
 	# кольцо «вынимаю осколок» у курсора
 	ring = Control.new()
@@ -542,7 +640,7 @@ func _build_overlays() -> void:
 
 	inv = PanelContainer.new()
 	inv.visible = false
-	inv.add_theme_stylebox_override("panel", _box(Color(0.05, 0.045, 0.038, 0.94), Color(0.32, 0.27, 0.19), 2, 4, 16))
+	inv.add_theme_stylebox_override("panel", _tex("panel_cardboard", 18, 30, 26))
 	inv.set_anchors_preset(Control.PRESET_CENTER)
 	root.add_child(inv)
 	G.changed.connect(func(): if inv.visible: _fill_inventory())
@@ -885,7 +983,7 @@ func _fill_inventory() -> void:
 		v.add_child(e)
 	var sep := HSeparator.new()
 	v.add_child(sep)
-	var p := _label(16, C_DIM)
+	var p := _label(16, Color(0.17, 0.11, 0.06), f_bold)   # тёмная надпись по картону — читается
 	p.text = "Грамм золота:  сырьём %s  ·  порошком %s  ·  слитком %s" % [G.rub(G.gram_price("raw")), G.rub(G.gram_price("dust")), G.rub(G.gram_price("ingot"))]
 	v.add_child(p)
 	inv.reset_size()
@@ -895,8 +993,7 @@ func _fill_inventory() -> void:
 func _inv_row(parent: Control, name: String, count: String, value: String, col: Color, lock_key: String) -> void:
 	var row := PanelContainer.new()
 	var locked := lock_key != "" and G.is_locked(lock_key)
-	row.add_theme_stylebox_override("panel", _box(Color(0.09, 0.08, 0.06) if not locked else Color(0.07, 0.1, 0.13),
-		Color(0.22, 0.19, 0.14) if not locked else Color(0.35, 0.55, 0.75), 1, 3, 6))
+	row.add_theme_stylebox_override("panel", _tex("slot_locked" if locked else "slot", 6, 14, 6))
 	parent.add_child(row)
 	var h := HBoxContainer.new()
 	h.add_theme_constant_override("separation", 14)
@@ -921,7 +1018,7 @@ func _inv_row(parent: Control, name: String, count: String, value: String, col: 
 		b.button_pressed = locked
 		b.focus_mode = Control.FOCUS_NONE
 		b.add_theme_font_override("font", f_text)
-		b.add_theme_font_size_override("font_size", 16)
+		b.add_theme_font_size_override("font_size", _fs(16))
 		b.toggled.connect(func(on: bool):
 			Sfx.play("blip", -6.0)
 			G.set_locked(lock_key, on))
@@ -965,7 +1062,7 @@ func _fill_shop() -> void:
 	v.add_child(grid)
 	for it in _shop_items.call():
 		var row := PanelContainer.new()
-		row.add_theme_stylebox_override("panel", _box(Color(0.075, 0.068, 0.056), Color(0.22, 0.19, 0.14), 1, 3, 8))
+		row.add_theme_stylebox_override("panel", _tex("slot", 6, 16, 10))
 		row.custom_minimum_size = Vector2(525, 0)
 		grid.add_child(row)
 		var h := HBoxContainer.new()
@@ -994,7 +1091,7 @@ func _fill_shop() -> void:
 			lv.add_child(dot)
 		var b := Button.new()
 		b.custom_minimum_size = Vector2(178, 54)
-		b.add_theme_font_size_override("font_size", 17)
+		b.add_theme_font_size_override("font_size", _fs(17))
 		b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		b.focus_mode = Control.FOCUS_ALL
 		var cost: int = int(it["cost"])
@@ -1005,7 +1102,7 @@ func _fill_shop() -> void:
 			b.text = it["locked"]
 			b.disabled = true
 			b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			b.add_theme_font_size_override("font_size", 16)
+			b.add_theme_font_size_override("font_size", _fs(16))
 		elif int(it["level"]) >= int(it["max"]):
 			b.text = "Максимум"
 			b.disabled = true
@@ -1195,11 +1292,11 @@ func show_settings() -> void:
 	var tabs := TabContainer.new()
 	tabs.custom_minimum_size = Vector2(700, 0)
 	tabs.add_theme_font_override("font", f_bold)
-	tabs.add_theme_font_size_override("font_size", 19)
-	tabs.add_theme_stylebox_override("panel", _box(Color(0.06, 0.055, 0.045), Color(0.25, 0.21, 0.15), 1, 3, 14))
-	tabs.add_theme_stylebox_override("tab_selected", _box(Color(0.2, 0.155, 0.085), C_GOLD, 1, 3, 8))
-	tabs.add_theme_stylebox_override("tab_unselected", _box(Color(0.07, 0.065, 0.052), Color(0.22, 0.19, 0.14), 1, 3, 8))
-	tabs.add_theme_stylebox_override("tab_hovered", _box(Color(0.14, 0.11, 0.065), Color(0.5, 0.4, 0.2), 1, 3, 8))
+	tabs.add_theme_font_size_override("font_size", _fs(19))
+	tabs.add_theme_stylebox_override("panel", _tex("slot", 6, 18, 14))
+	tabs.add_theme_stylebox_override("tab_selected", _tex("btn_hover", 9, 14, 6))
+	tabs.add_theme_stylebox_override("tab_unselected", _tex("btn_normal", 9, 14, 6))
+	tabs.add_theme_stylebox_override("tab_hovered", _tex("btn_pressed", 9, 14, 6))
 	tabs.add_theme_color_override("font_selected_color", Color(1, 0.92, 0.7))
 	tabs.add_theme_color_override("font_unselected_color", C_DIM)
 	tabs.add_theme_color_override("font_hovered_color", C_TEXT)

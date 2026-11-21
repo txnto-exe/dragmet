@@ -641,7 +641,7 @@ func _collect(f: Dictionary) -> void:
 	G.add_item(key)
 	var d: Dictionary = G.ITEMS[key]
 	if ui:
-		ui.toast("Нашёл: %s (≈%s)" % [d["name"], G.rub(G.item_price(key))], G.TIER_COLORS[d["tier"]])
+		ui.find_popup(d["name"], G.rub(G.item_price(key)), G.TIER_COLORS[d["tier"]])
 	Sfx.play("pickup", -4.0, 1.0 + 0.08 * d["tier"])
 	if d["tier"] >= 2:
 		Sfx.play("coins", -8.0, 1.3)

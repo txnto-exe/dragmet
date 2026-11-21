@@ -635,7 +635,8 @@ func _process(dt: float) -> void:
 		if knock_timer <= 0.0:
 			knock_timer = 7.0
 			knock_count += 1
-			Sfx.play3d("knock", DOOR_POS, 4.0)
+			Sfx.play3d("knock", DOOR_POS, 14.0, 1.0, 40.0)
+			Sfx.play("knock", -10.0)   # стук слышен по всему подвалу, а не только у двери
 			if knock_count == 1:
 				ui.toast("Кто-то стучит в дверь", Color(0.9, 0.85, 0.6))
 				ui.say_sub("Голос за дверью", "Палыч! Открой, свои!", 4.0)
@@ -865,7 +866,7 @@ func _complete_quest(q: String) -> void:
 		await talk("Колян", "Во, то что надо. Держи ключ. Только руки в ванну не суй.")
 		ui.close_dialog()
 		Sfx.play("pickup", -2.0, 0.8)
-		ui.toast("Получен ключ от сетки", Color(0.6, 0.95, 0.5))
+		ui.find_popup("Ключ от сетки", "", Color(0.6, 0.95, 0.5))
 	else:
 		G.dust = maxf(0.0, G.dust - 0.1)
 		G.flags["q_furnace"] = 2
@@ -874,7 +875,7 @@ func _complete_quest(q: String) -> void:
 		await talk("Колян", "Блестит… Красота. Держи лом. Завал сам разгребёшь — я спину берегу.")
 		ui.close_dialog()
 		Sfx.play("clank", -6.0, 1.2)
-		ui.toast("Получен лом", Color(1.0, 0.7, 0.4))
+		ui.find_popup("Лом", "", Color(1.0, 0.7, 0.4))
 	_refresh_station_prompts()
 
 
@@ -975,7 +976,8 @@ func _use_acid() -> void:
 	var raw_v := G.bag_value()
 	var g := G.etch_bag(quality)
 	var dust_v := int(round(g * G.gram_price("dust")))
-	ui.toast("Порошок %s ≈ %s  (сырьём было %s)" % [G.grams(g), G.rub(dust_v), G.rub(raw_v)], Color(0.95, 0.85, 0.4))
+	ui.find_popup("Золотой порошок %s" % G.grams(g), G.rub(dust_v), Color(1.0, 0.82, 0.4))
+	ui.toast("Сырьём было бы %s" % G.rub(raw_v), Color(0.8, 0.75, 0.6))
 	Sfx.play("coins", -6.0, 1.2)
 	await cine_back()
 	set_mode("walk")
@@ -1057,7 +1059,8 @@ func _use_furnace() -> void:
 	var g := G.melt_dust(1.0 - loss)
 	Sfx.play("clank", -4.0, 1.4)
 	Sfx.play("coins", -6.0, 1.1)
-	ui.toast("Слиток %s ≈ %s  (порошком было %s)" % [G.grams(g), G.rub(int(round(g * G.gram_price("ingot")))), G.rub(dust_before)], Color(1.0, 0.8, 0.35))
+	ui.find_popup("Золотой слиток %s" % G.grams(g), G.rub(int(round(g * G.gram_price("ingot")))), Color(1.0, 0.72, 0.25))
+	ui.toast("Порошком было бы %s" % G.rub(dust_before), Color(0.8, 0.75, 0.6))
 	await cine_back()
 	set_mode("walk")
 
@@ -1227,6 +1230,8 @@ func _auto_test() -> void:
 	_start_knocking()
 	await wait(0.3)
 	_peephole()
+	await wait(1.6)
+	await _shot("06b_peephole")
 	for i in 4:
 		await _adv()
 	await _pick(0)
@@ -1242,6 +1247,9 @@ func _auto_test() -> void:
 	Input.action_release("move_forward")
 	Input.action_release("sprint")
 	print("DOOR_TEST z=%.2f %s" % [player.position.z, "OK" if player.position.z < Basement.D else "FAIL"])
+	player.look_at_point(Vector3(Basement.DOOR_X, 2.2, Basement.D + 6.0))
+	await wait(0.4)
+	await _shot("07c_stairwell")
 	world.open_door(false)
 	await wait(0.6)
 	player.position = Vector3(3.2, 0, -2.5)

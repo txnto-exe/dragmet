@@ -62,6 +62,16 @@ SOUNDS = {
     'bubbles': (fs(202094), 0.15, 2.05, 0.3, -2, {}),
     'fire': (fs(532191), 20.0, 34.0, 1.0, -2, {'limit': True}),
     'ambience': (fs(208073), 6.0, 44.0, 2.0, -4, {}),
+    # страх: крик, скример, сердце, выбитая дверь, гул (Freesound, CC0)
+    'scream': (fs(574835), 4.8, 6.1, 0, 0, {'fade_out': 0.25}),
+    'shout': (fs(219815), 0.0, None, 0, 0, {'fade_out': 0.2}),
+    'scare': (fs(366168), 0.0, 3.2, 0, 0, {'fade_out': 0.8}),
+    'scare2': (fs(341670), 0.0, None, 0, 0, {'fade_out': 0.3}),
+    'hit': (fs(222517), 0.0, 4.5, 0, 0, {'fade_out': 1.5}),
+    'heart': (fs(21409), 3.0, 11.0, 0.4, 0, {}),
+    'door_bash': (fs(160213), 0.0, None, 0, 0, {}),
+    'door_break': (fs(441665), 0.0, None, 0, 0, {}),
+    'drone': (fs(457046), 0.0, None, 0.5, 0, {}),
 }
 
 
@@ -137,5 +147,7 @@ else:
     json.dump(LEVELS, open(LEVELS_P, 'w'), indent=1)
 
 if __name__ == '__main__':
+    only = sys.argv[3:]   # можно пересобрать только перечисленные звуки
     for n, s in SOUNDS.items():
-        make(n, s)
+        if not only or n in only:
+            make(n, s)

@@ -21,6 +21,10 @@ var player: CharacterBody3D
 var ui: CanvasLayer
 var cine: Camera3D
 var search: BinSearch
+var acid_st: AcidStation
+var furnace_st: FurnaceStation
+var dread: Dread
+var phone_kind := "next"
 var bin: TrashBin
 var bin_busy := false
 var it_bin: Interactable
@@ -100,6 +104,13 @@ func _ready() -> void:
 	search = BinSearch.new()
 	sub.add_child(search)
 	search.finished.connect(_on_search_done)
+	dread = Dread.new()
+	add_child(dread)
+	acid_st = AcidStation.new()
+	acid_st.visual_fn = search._find_visual
+	sub.add_child(acid_st)
+	furnace_st = FurnaceStation.new()
+	sub.add_child(furnace_st)
 
 	ambience = AudioStreamPlayer.new()
 	ambience.stream = Sfx.looped("ambience")
@@ -125,7 +136,11 @@ func _ready() -> void:
 		kolyan.play("Sitting_Idle", 0.0)
 		world.stall_lights[0].light_energy = 1.1
 		it_kolyan.active = true
+	dread.setup(self)
 	G.deadline_missed.connect(_on_deadline_missed)
+	if G.flags.get("doomed", false):
+		G.paused_time = true
+		dread.doom_pending = true
 	G.changed.connect(_update_board)
 	_update_board()
 
@@ -351,6 +366,7 @@ func _intro() -> void:
 		await ui.big_text("Ты должен Хозяину.", 1.4)
 		await ui.big_text("3 000 ₽. Три дня.", 1.4)
 		await ui.big_text("Из подвала не выпустят,\nпока не отдашь.", 1.8)
+		await ui.big_text("Не отдашь — за тобой придут.", 1.8, Color(0.95, 0.35, 0.3))
 		G.flags["intro_done"] = true
 		G.save_game()
 	await ui.fade(0.0, 2.0)
@@ -573,11 +589,21 @@ func _deadline_warnings() -> void:
 		G.flags[key] = 1
 		Sfx.play3d("blip", b, 6.0, 0.6)
 		ui.say_sub("Палыч", "Табло пищит… До срока меньше суток.", 4.0)
+		# Хозяин звонит сам — напомнить, что будет
+		get_tree().create_timer(6.0).timeout.connect(_warn_call)
 	elif stage < 2 and left < G.DAY_SEC * 0.25:
 		G.flags[key] = 2
 		for i in 3:
 			get_tree().create_timer(i * 0.35).timeout.connect(func(): Sfx.play3d("blip", b, 8.0, 0.55))
-		ui.say_sub("Палыч", "Табло мигает. Часы остались — надо нести деньги.", 4.0)
+		var top := Vector3(1.5, 2.6, 8.5)
+		for i in 4:
+			get_tree().create_timer(1.0 + i * 0.7).timeout.connect(func(): Sfx.play3d("thud", top, 6.0, 0.6, 30.0))
+		ui.say_sub("Палыч", "Табло мигает… И наверху кто-то ходит. За мной?", 4.5)
+	elif stage < 3 and left < G.DAY_SEC * 0.08:
+		G.flags[key] = 3
+		for i in 3:
+			get_tree().create_timer(i * 0.6).timeout.connect(func(): Sfx.play3d("knock", DOOR_POS, 6.0, 0.7, 40.0))
+		ui.say_sub("Голос за дверью", "Тик-так, Палыч. Тик-так.", 4.0)
 
 
 func _start_ring() -> void:
@@ -587,11 +613,33 @@ func _start_ring() -> void:
 	ui.toast("Звонит таксофон", Color(0.9, 0.85, 0.6))
 
 
+func _warn_call() -> void:
+	if phone_ringing or G.debt <= 0 or G.mode in ["menu", "intro", "cutscene"]:
+		return
+	phone_kind = "warn"
+	_start_ring()
+	await get_tree().create_timer(18.0).timeout
+	if phone_ringing and phone_kind == "warn":
+		phone_ringing = false
+		it_phone.active = false
+		phone_kind = "next"
+		ui.say_sub("Палыч", "Перестал звонить. Хуже не будет… или будет.", 3.5)
+
+
 func _answer_phone() -> void:
 	phone_ringing = false
 	it_phone.active = false
 	set_mode("dialog")
 	await cine_to(look_xf(Vector3(1.55, 1.55, -3.75), Vector3(1.6, 1.35, -4.4)), 50.0, 0.5)
+	if phone_kind == "warn":
+		phone_kind = "next"
+		await talk("Хозяин", "Палыч. Сутки остались. %s с тебя." % G.rub(G.debt))
+		await talk("Хозяин", "Не будет денег — пришлю ребят. Второго раза не будет.")
+		ui.close_dialog()
+		Sfx.play("thud", -10.0)
+		await cine_back()
+		set_mode("walk")
+		return
 	await talk("Хозяин", "Слышу, отдал. Молодец, Палыч.")
 	G.start_next_debt()
 	await talk("Хозяин", "Следующий взнос — %s. Срок — %s. Не подведи." % [G.rub(G.debt), G.left_text()])
@@ -603,14 +651,15 @@ func _answer_phone() -> void:
 
 
 func _on_deadline_missed() -> void:
-	Sfx.play("bad", 0.0)
-	ui.flash(0.7)
-	ui.big_text("СРОК ВЫШЕЛ\nХозяин недоволен. Теперь должен %s." % G.rub(G.debt), 2.5, Color(0.95, 0.35, 0.3))
+	dread.doom_pending = true
 
 
 # ---------- дверь и гости ----------
 
 func _use_door() -> void:
+	if dread.ghost_knock:
+		dread.peep_scare()
+		return
 	if knocking:
 		_peephole()
 	else:
@@ -796,6 +845,9 @@ func _use_kolyan() -> void:
 			await ui.open_shop("Точка Коляна", "Выбирай, что улучшить. Деньги вперёд.", _upgrade_items, _buy_upgrade)
 			line = ["Ещё чего?", "Заходи, если что.", "Ну, работаем."].pick_random()
 		elif c == 1:
+			if G.flags.get("belka_talk", false):
+				G.flags["belka_talk"] = false
+				await talk("Колян", "Ты чего такой бледный, Палыч? Я тут сидел, никуда не ходил. Честно.")
 			await talk("Колян", ["Ещё по одной… плате.", "Спина болит, но держусь.", "На заводе хоть обед был.",
 				"Хозяин этот… ты его видел вообще?", "Слышишь, как трубы гудят? Как живые."].pick_random())
 			line = "Ну так что?"
@@ -825,17 +877,21 @@ func _kolyan_offer_quest() -> void:
 		ui.toast("Порошок отложен для Коляна (Tab)", Color(0.6, 0.85, 1.0))
 
 
-## Колян заводит разговор про ключ после первого отданного долга, про лом — после второго. Не сразу.
+## Колян заводит разговор про ключ после первого отданного долга, про лом — вскоре после первого травления.
 const QUEST_DELAY := 90.0
 func _quest_due(q: String) -> bool:
 	if not G.flags.get("kolyan_in", false) or G.quest_stage(q) != 0 or G.upgrades[q] > 0:
 		return false
-	if q == "furnace" and G.upgrades["acid"] == 0:
+	if q == "furnace":
+		if G.upgrades["acid"] == 0:
+			return false
+		for key in ["etched_at", "debt2_paid_at"]:
+			if G.flags.has(key) and G.time - float(G.flags[key]) >= 45.0:
+				return true
 		return false
-	var key := "debt1_paid_at" if q == "acid" else "debt2_paid_at"
-	if not G.flags.has(key):
+	if not G.flags.has("debt1_paid_at"):
 		return false
-	return G.time - float(G.flags[key]) >= QUEST_DELAY
+	return G.time - float(G.flags["debt1_paid_at"]) >= QUEST_DELAY
 
 
 func _kolyan_call_check() -> void:
@@ -906,6 +962,16 @@ func _complete_quest(q: String) -> void:
 func _refresh_station_prompts() -> void:
 	it_acid.prompt = "Кислота" if G.upgrades["acid"] > 0 else "Сетка"
 	it_furnace.prompt = "Печь" if G.upgrades["furnace"] > 0 else "Завал"
+	# когда сетка/завал убраны, точка взаимодействия — сама ванна и сама печь (подходи как угодно близко)
+	if G.upgrades["acid"] > 0:
+		_resize_it(it_acid, Vector3(-5.35, 0.6, -3.2), Vector3(1.1, 1.2, 2.4))
+	if G.upgrades["furnace"] > 0:
+		_resize_it(it_furnace, Vector3(-5.2, 0.7, -0.1), Vector3(1.2, 1.4, 1.8))
+
+
+func _resize_it(it: Interactable, pos: Vector3, size: Vector3) -> void:
+	it.position = pos
+	((it.get_child(0) as CollisionShape3D).shape as BoxShape3D).size = size
 
 
 func _use_acid() -> void:
@@ -938,69 +1004,21 @@ func _use_acid() -> void:
 	if G.free_count() == 0:
 		ui.toast("Травить нечего" if G.bag_count() > 0 else "Мешок пустой", Color(1, 0.7, 0.4))
 		return
-	set_mode("mini")
-	var tub := Vector3(-5.4, 0.5, -3.55)
-	await cine_to(look_xf(Vector3(-4.45, 1.5, -2.85), tub), 55.0, 0.6)
-	var basket := world.acid_basket
-	basket.position.y = 1.2
-	basket.visible = true
-	var tw := create_tween()
-	tw.tween_property(basket, "position:y", 0.62, 0.9).set_trans(Tween.TRANS_SINE)
-	await tw.finished
-	Sfx.play3d("sizzle", tub, 2.0)
-	var loop := _loop3d("bubbles", tub, -6.0)
-	ui.mg_show("Травление", "Вытащи, пока стрелка в зелёном.")
-	ui.set_legend([["ЛКМ", "Вытащить"]])
-	var total := 0.0
-	var rounds := 3
-	for r in rounds:
-		var zc := randf_range(0.58, 0.82)
-		var zw := 0.17 - r * 0.035
-		var speed := 0.32 + r * 0.1
-		var x := 0.0
-		_mg_hit = false
-		var q := 0.3
-		while true:
-			var dt := get_process_delta_time()
-			x += dt * speed * (1.0 + 0.5 * sin(x * 9.0 + r))
-			if G.auto_test and absf(x - zc) < 0.015:
-				_mg_hit = true
-			world.acid_mat.emission_energy_multiplier = 1.6 + x * 3.0
-			world.acid_glow.light_energy = 0.6 + x * 1.2
-			ui.mg_set(x, zc - zw * 0.5, zc + zw * 0.5, Color(0.35, 0.75, 0.3, 0.85), -1.0, "Окунание %d из %d" % [r + 1, rounds])
-			if randf() < dt * (1.0 + x * 3.0):
-				Sfx.play3d("sizzle", tub, -6.0, randf_range(0.8, 1.3))
-			if _mg_hit or x >= 1.0:
-				var d := absf(x - zc)
-				if d <= zw * 0.5:
-					q = 1.0 - d / (zw * 0.5) * 0.12
-					Sfx.play("good", -6.0)
-				else:
-					q = clampf(0.88 - (d - zw * 0.5) * 2.8, 0.3, 0.88)
-					Sfx.play("thud", -8.0, 1.3)
-				break
-			await get_tree().process_frame
-		total += q
-		ui.mg_set(x, zc - zw * 0.5, zc + zw * 0.5, Color(0.35, 0.75, 0.3, 0.85), -1.0, "Окунание %d: %d%%" % [r + 1, int(q * 100)])
-		var up := create_tween()
-		up.tween_property(basket, "position:y", 0.9, 0.25)
-		up.tween_property(basket, "position:y", 0.62, 0.35)
-		await up.finished
-	var quality := total / rounds
-	loop.queue_free()
-	world.acid_mat.emission_energy_multiplier = 1.6
-	world.acid_glow.light_energy = 0.6
-	var out := create_tween()
-	out.tween_property(basket, "position:y", 1.2, 0.6)
-	await out.finished
-	basket.visible = false
-	ui.mg_hide()
-	var raw_v := G.bag_value()
-	var g := G.etch_bag(quality)
-	var dust_v := int(round(g * G.gram_price("dust")))
-	ui.find_popup("Золотой порошок %s" % G.grams(g), G.rub(dust_v), Color(1.0, 0.82, 0.4))
-	ui.toast("Сырьём было бы %s" % G.rub(raw_v), Color(0.8, 0.75, 0.6))
-	Sfx.play("coins", -6.0, 1.2)
+	set_mode("station")
+	await cine_to(look_xf(Vector3(-4.55, 1.62, -2.3), Vector3(-5.5, 0.4, -3.05)), 64.0, 0.6)
+	var r: Dictionary = await acid_st.run(cine, ui, world)
+	if r.get("done", false):
+		var loaded: Dictionary = r["loaded"]
+		var raw_v := 0
+		for k in loaded:
+			raw_v += G.item_price(k) * int(loaded[k])
+		var g := G.etch_items(loaded, float(r["quality"]))
+		G.flags["etched_at"] = G.time
+		G.save_game()
+		var dust_v := int(round(g * G.gram_price("dust")))
+		ui.find_popup("Золотой порошок %s" % G.grams(g), G.rub(dust_v), Color(1.0, 0.82, 0.4))
+		ui.toast("Сырьём было бы %s" % G.rub(raw_v), Color(0.8, 0.75, 0.6))
+		Sfx.play("coins", -6.0, 1.2)
 	await cine_back()
 	set_mode("walk")
 
@@ -1029,60 +1047,25 @@ func _use_furnace() -> void:
 			await cine_back()
 			set_mode("walk")
 			return
-		var extra := " Колян говорил про лом — за щепоть порошка." if G.quest_stage("furnace") == 1 else ""
-		await talk("", "Старая буржуйка, заваленная кирпичом и досками. Расчистить бы — будет где плавить." + extra)
+		var extra := "Лом есть у Коляна — просил за него 0,1 г золотого порошка." if G.quest_stage("furnace") == 1 			else ("Руками не разобрать — нужен лом. Колян вроде что-то говорил про лом…" if G.upgrades["acid"] > 0
+			else "Руками не разобрать — нужен лом. Сначала разберись с кислотой.")
+		await talk("", "Старая буржуйка под кирпичом и досками. Расчистить — будет где плавить порошок в слитки. " + extra)
 		ui.close_dialog()
 		set_mode("walk")
 		return
 	if G.dust <= 0.0001:
 		ui.toast("Нет порошка", Color(1, 0.7, 0.4))
 		return
-	set_mode("mini")
-	await cine_to(look_xf(Vector3(-4.2, 1.35, 0.95), Vector3(-5.3, 0.6, 0.1)), 58.0, 0.6)
-	var fire := _loop3d("fire", Vector3(-5.3, 0.5, 0.0), -10.0)
-	ui.mg_show("Плавка", "Держи жар в жёлтом.")
-	ui.set_legend([["Зажать ЛКМ", "Мехи"]])
-	var temp := 0.15
-	var prog := 0.0
-	var loss := 0.0
-	var t := 0.0
-	var pumping := false
-	while prog < 1.0:
-		var dt := get_process_delta_time()
-		t += dt
-		var zc := 0.55 + 0.14 * sin(t * 0.9) + 0.05 * sin(t * 2.3)
-		var zw := 0.2
-		var hold := Input.is_action_pressed("use") or Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
-		if G.auto_test:
-			hold = temp < zc
-		if hold and not pumping:
-			Sfx.play("bellows", -6.0, randf_range(0.9, 1.1))
-		pumping = hold
-		temp = clampf(temp + (0.5 if hold else -0.3) * dt, 0.0, 1.0)
-		world.pump_bellows((0.5 + 0.5 * sin(t * 12.0)) if hold else 0.0)
-		if absf(temp - zc) <= zw * 0.5:
-			prog += dt / 6.0
-		if temp > 0.9:
-			loss = minf(0.5, loss + dt * 0.12)
-			if randf() < dt * 3.0:
-				ui.flash(0.15)
-		world.furnace_light.light_energy = 0.3 + temp * 3.2
-		world.crucible_mat.emission_energy_multiplier = temp * 4.0
-		fire.volume_db = -14.0 + temp * 12.0
-		ui.mg_set(temp, zc - zw * 0.5, zc + zw * 0.5, Color(0.95, 0.75, 0.25, 0.85), prog,
-			"Расплавлено %d%%   ·   потери %d%%" % [int(prog * 100), int(loss * (1.0 - G.MELT_MIN) * 100)])
-		await get_tree().process_frame
-	fire.queue_free()
-	world.pump_bellows(0.0)
-	world.furnace_light.light_energy = 0.25
-	world.crucible_mat.emission_energy_multiplier = 0.0
-	ui.mg_hide()
-	var dust_before := int(round(G.dust * G.gram_price("dust")))
-	var g := G.melt_dust(1.0 - loss)
-	Sfx.play("clank", -4.0, 1.4)
-	Sfx.play("coins", -6.0, 1.1)
-	ui.find_popup("Золотой слиток %s" % G.grams(g), G.rub(int(round(g * G.gram_price("ingot")))), Color(1.0, 0.72, 0.25))
-	ui.toast("Порошком было бы %s" % G.rub(dust_before), Color(0.8, 0.75, 0.6))
+	set_mode("station")
+	await cine_to(look_xf(Vector3(-3.95, 1.62, -0.12), Vector3(-5.2, 0.5, -0.12)), 66.0, 0.6)
+	var r: Dictionary = await furnace_st.run(cine, ui, world)
+	if r.get("done", false):
+		var grams := float(r["grams"])
+		var was := int(round(grams * G.gram_price("dust")))
+		var g := G.melt_some(grams, float(r["eff"]))
+		Sfx.play("coins", -6.0, 1.1)
+		ui.find_popup("Золотой слиток %s" % G.grams(g), G.rub(int(round(g * G.gram_price("ingot")))), Color(1.0, 0.72, 0.25))
+		ui.toast("Порошком было бы %s" % G.rub(was), Color(0.8, 0.75, 0.6))
 	await cine_back()
 	set_mode("walk")
 
@@ -1133,6 +1116,8 @@ func _goal_text() -> String:
 		return "принеси Коляну 0,10 г порошка"
 	if _quest_due("acid") or _quest_due("furnace"):
 		return "Колян звал — подойди к нему"
+	if G.upgrades["acid"] > 0 and G.upgrades["furnace"] == 0 and G.flags.has("etched_at") and G.quest_stage("furnace") == 0:
+		return "за завалом у левой стены — печь. Спроси Коляна про лом"
 	if G.upgrades["acid"] > 0 and G.bag_count() >= 3:
 		return "протрави находки в кислоте — золото дороже сырья"
 	if G.dust > 0.0001 and G.upgrades["furnace"] > 0:
@@ -1145,6 +1130,27 @@ func _goal_text() -> String:
 
 
 # ---------- автотест со скриншотами ----------
+
+## Автотест рабочего места: снимок на каждом шаге (через секунду после его начала).
+func _station_shots(st: Station, names: Dictionary) -> void:
+	for i in 40:
+		if G.mode == "station":
+			break
+		await wait(0.1)
+	var last := ""
+	var since := 0.0
+	var taken := {}
+	while G.mode == "station":
+		if st.step != last:
+			last = st.step
+			since = 0.0
+		since += get_process_delta_time()
+		if names.has(last) and not taken.has(last) and since > 1.1:
+			taken[last] = true
+			await _shot(names[last])
+		await get_tree().process_frame
+	print("STATION_STEPS %s" % [taken.keys()])
+
 
 func _shot(name: String) -> void:
 	await RenderingServer.frame_post_draw
@@ -1345,13 +1351,12 @@ func _auto_test() -> void:
 	player.look_at_point(Vector3(-5.4, 0.6, -3.5))
 	await wait(0.6)
 	await _shot("10_acid_open")
+	var bag_before := G.bag_count()
 	_use_acid()
-	await wait(2.6)
-	await _shot("11_acid_game")
-	while G.mode == "mini":
-		await wait(0.2)
+	await _station_shots(acid_st, {"load": "11_acid_load", "dunk": "11a_acid_dunk", "stir": "11c_acid_stir",
+		"pour": "11d_acid_pour", "collect": "11e_acid_collect"})
 	await wait(1.0)
-	print("ACID_TEST dust=%.3f hdd_kept=%d" % [G.dust, int(G.bag.get("hdd", 0))])
+	print("ACID_TEST dust=%.3f hdd_kept=%d bag %d->%d" % [G.dust, int(G.bag.get("hdd", 0)), bag_before, G.bag_count()])
 	# счётчик поручения в углу экрана
 	var dust_keep := G.dust
 	G.flags["q_furnace"] = 1
@@ -1387,13 +1392,12 @@ func _auto_test() -> void:
 	# печь
 	player.position = Vector3(-3.4, 0, 0.6)
 	player.look_at_point(Vector3(-5.4, 0.6, 0.0))
+	var dust_had := G.dust
 	_use_furnace()
-	await wait(4.0)
-	await _shot("12_furnace_game")
-	while G.mode == "mini":
-		await wait(0.2)
+	await _station_shots(furnace_st, {"fill": "12_furnace_fill", "place": "12a_furnace_place", "heat": "12b_furnace_heat",
+		"cast": "12c_furnace_cast", "knock": "12d_furnace_knock"})
 	await wait(1.0)
-	print("FURNACE_TEST ingots=%.3f" % G.ingots)
+	print("FURNACE_TEST ingots=%.3f dust %.3f->%.3f" % [G.ingots, dust_had, G.dust])
 	player.position = Vector3(-2.0, 0, 1.5)
 	player.look_at_point(Vector3(-5.0, 0.8, -1.0))
 	await wait(0.6)
@@ -1461,4 +1465,41 @@ func _auto_test() -> void:
 	player.look_at_point(Vector3(-Basement.W - 1.0, 1.55, 3.0))
 	await wait(0.4)
 	await _shot("20_buyer_window")
+	# скримеры и конец срока
+	player.position = Vector3(-1.5, 0, 0.5)
+	player.look_at_point(Vector3(1.0, 1.2, 0.5))
+	await wait(0.3)
+	dread.belochka()
+	await wait(1.8)
+	player.look_at_point(Vector3(-4.0, 1.3, 0.5))
+	while not dread.get_meta("face_in", false):
+		await wait(0.02)
+	await wait(0.12)
+	await _shot("21_scare_belka")
+	while dread.busy:
+		await wait(0.1)
+	dread.ghost_knock = true
+	_use_door()
+	while not dread.get_meta("face_in", false):
+		await wait(0.02)
+	await wait(0.13)
+	await _shot("22_scare_peep")
+	while dread.busy:
+		await wait(0.1)
+	print("SCARE_TEST belka=%s peep_done=%s" % [G.flags.get("scare_belka", false), not dread.ghost_knock])
+	player.position = Vector3(0.0, 0, 0.5)
+	player.look_at_point(Vector3(1.0, 1.2, 3.0))
+	dread.doom(true)
+	await wait(5.2)
+	await _shot("23_doom_door")
+	var tt := 0.0
+	while dread.busy and tt < 20.0:
+		await wait(0.1)
+		tt += 0.1
+		if ui.big.modulate.a > 0.95:
+			break
+	await _shot("24_doom_text")
+	while dread.busy:
+		await wait(0.1)
+	print("DOOM_TEST ok")
 	get_tree().quit()

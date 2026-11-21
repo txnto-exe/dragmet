@@ -497,6 +497,30 @@ func _top_cover(f: Dictionary) -> Dictionary:
 	return best
 
 
+func rat_scare(at: Vector3) -> void:
+	G.flags["scare_rat"] = true
+	var holder := Node3D.new()
+	bin.add_child(holder)
+	var r := Props.place(holder, "street_rat", Vector3.ZERO, 0, {"height": 0.1, "collide": false})
+	if r == null:
+		holder.queue_free()
+		return
+	holder.position = at
+	var cam_local := bin.to_local(cam.global_position + (-cam.global_transform.basis.z) * 0.22)
+	holder.look_at(cam.global_position, Vector3.UP)
+	Sfx.play("squeak", 2.0, 0.8)
+	Sfx.play("scare2", 0.0)
+	var tw := create_tween()
+	tw.tween_property(holder, "position", cam_local, 0.16).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tw.parallel().tween_property(holder, "scale", Vector3.ONE * 3.0, 0.16)
+	tw.tween_callback(func():
+		if ui:
+			ui.flash(0.6))
+	tw.tween_property(holder, "position", cam_local + Vector3(0.6, -0.4, 0.3), 0.12)
+	tw.tween_callback(holder.queue_free)
+	G.save_game()
+
+
 func _toss(p: Dictionary, chain := true, cut := false) -> void:
 	if not pieces.has(p):
 		return
@@ -526,6 +550,9 @@ func _toss(p: Dictionary, chain := true, cut := false) -> void:
 			body.scale = Vector3.ONE * lerpf(1.0, 0.5, v * v), 0.0, 1.0, 0.42)
 	tw.tween_callback(body.queue_free)
 	Sfx.play("rustle%d" % (randi() % 3), -6.0, _rng.randf_range(0.85, 1.15))
+	# скример: из-под хлама в лицо прыгает крыса (раз за игру)
+	if not G.auto_test and not G.flags.get("scare_rat", false) and G.bins >= 2 and _rng.randf() < 0.1:
+		rat_scare(start)
 	if p["glass"]:
 		Sfx.play("glass", -4.0 if cut else -9.0, _rng.randf_range(0.9, 1.1))
 		if cut:

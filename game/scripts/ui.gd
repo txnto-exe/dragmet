@@ -9,7 +9,7 @@ signal shop_closed
 signal menu_action(action: String)
 
 const C_TEXT := Color(0.9, 0.87, 0.78)
-const C_DIM := Color(0.62, 0.58, 0.5)
+const C_DIM := Color(0.74, 0.7, 0.62)
 const C_GOLD := Color(0.96, 0.78, 0.38)
 const C_RED := Color(0.92, 0.38, 0.32)
 const C_GREEN := Color(0.55, 0.85, 0.45)
@@ -60,6 +60,10 @@ var fade_rect: ColorRect
 var big: Label
 var peep: ColorRect
 var flash_rect: ColorRect
+var step_box: CenterContainer
+var step_lbl: Label
+var step_bar_bg: Control
+var step_bar: ColorRect
 
 var menu_open := ""        # "", "main", "pause", "settings"
 var _typing := false
@@ -215,6 +219,9 @@ func _label(size: int, col: Color, font: Font = null) -> Label:
 	l.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.8))
 	l.add_theme_constant_override("shadow_offset_x", 2)
 	l.add_theme_constant_override("shadow_offset_y", 2)
+	# тёмная обводка: текст читается и на светлой стене, и на зелёной кислоте
+	l.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+	l.add_theme_constant_override("outline_size", 6)
 	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return l
 
@@ -263,7 +270,7 @@ func _build_hud() -> void:
 	prompt_box.offset_right = 400
 	prompt_box.offset_top = 30
 	prompt_box.offset_bottom = 62
-	prompt_box.modulate.a = 0.85
+	prompt_box.modulate.a = 1.0
 	prompt_box.visible = false
 	hud_box.add_child(prompt_box)
 	var kp := _key_badge("E")
@@ -280,7 +287,7 @@ func _build_hud() -> void:
 	legend.offset_right = -24
 	legend.offset_bottom = -18
 	legend.alignment = BoxContainer.ALIGNMENT_END
-	legend.modulate.a = 0.6
+	legend.modulate.a = 0.92
 	root.add_child(legend)
 	set_legend([["Tab", "Мешок"], ["T", "Фонарь"]])
 	prompt = _label(17, C_TEXT, f_bold)
@@ -302,7 +309,7 @@ func _build_hud() -> void:
 	var gap := Control.new()
 	gap.custom_minimum_size = Vector2(0, 10)
 	tl.add_child(gap)
-	goal_lbl = _label(17, Color(0.78, 0.74, 0.64))
+	goal_lbl = _label(17, C_TEXT)
 	goal_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	goal_lbl.custom_minimum_size = Vector2(380, 0)
 	tl.add_child(goal_lbl)
@@ -318,8 +325,8 @@ func _build_hud() -> void:
 	quest_lbl.add_theme_font_override("bold_font", f_bold)
 	quest_lbl.add_theme_font_size_override("normal_font_size", _fs(17))
 	quest_lbl.add_theme_font_size_override("bold_font_size", _fs(17))
-	quest_lbl.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
-	quest_lbl.add_theme_constant_override("outline_size", 3)
+	quest_lbl.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+	quest_lbl.add_theme_constant_override("outline_size", 6)
 	tl.add_child(quest_lbl)
 
 	top_hint = _label(20, C_TEXT, f_bold)
@@ -411,6 +418,7 @@ func _key_badge(key: String) -> PanelContainer:
 	l.add_theme_color_override("font_shadow_color", Color(1, 1, 1, 0.25))
 	l.add_theme_constant_override("shadow_offset_x", 0)
 	l.add_theme_constant_override("shadow_offset_y", 1)
+	l.add_theme_constant_override("outline_size", 0)
 	l.text = key
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	kp.add_child(l)
@@ -599,6 +607,50 @@ func find_popup(title: String, value: String, col: Color) -> void:
 	tw.chain().tween_callback(c.queue_free)
 	while finds_box.get_child_count() > 3:
 		finds_box.get_child(0).free()
+
+
+## Рабочее место «руками»: латунная табличка сверху — что делать сейчас и полоска хода дела.
+func station_step(text: String, prog := -1.0, col := C_GOLD) -> void:
+	if step_box == null:
+		step_box = CenterContainer.new()
+		step_box.set_anchors_preset(Control.PRESET_CENTER_TOP)
+		step_box.offset_left = -500
+		step_box.offset_right = 500
+		step_box.offset_top = 18
+		step_box.offset_bottom = 110
+		step_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		root.add_child(step_box)
+		var p := PanelContainer.new()
+		p.add_theme_stylebox_override("panel", _tex("tag_brass", 12, 26, 10))
+		p.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		step_box.add_child(p)
+		var v := VBoxContainer.new()
+		v.add_theme_constant_override("separation", 6)
+		v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		p.add_child(v)
+		step_lbl = _label(24, C_GOLD, f_bold)
+		step_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		v.add_child(step_lbl)
+		step_bar_bg = Panel.new()
+		step_bar_bg.add_theme_stylebox_override("panel", _tex("slot", 6, 0, 0))
+		step_bar_bg.custom_minimum_size = Vector2(380, 14)
+		step_bar_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		v.add_child(step_bar_bg)
+		step_bar = ColorRect.new()
+		step_bar.color = Color(0.95, 0.72, 0.28)
+		step_bar.anchor_bottom = 1.0
+		step_bar.offset_left = 3
+		step_bar.offset_top = 3
+		step_bar.offset_bottom = -3
+		step_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		step_bar_bg.add_child(step_bar)
+	step_box.visible = text != ""
+	step_lbl.text = text
+	step_lbl.add_theme_color_override("font_color", col)
+	step_bar_bg.visible = prog >= 0.0
+	step_bar.anchor_right = clampf(prog, 0.0, 1.0)
+	step_bar.offset_right = -3.0 if prog >= 0.995 else 0.0
+	step_bar.color = col
 
 
 func say_sub(who: String, text: String, sec := 3.5) -> void:
@@ -984,6 +1036,9 @@ func _fill_inventory() -> void:
 	var sep := HSeparator.new()
 	v.add_child(sep)
 	var p := _label(16, Color(0.17, 0.11, 0.06), f_bold)   # тёмная надпись по картону — читается
+	p.add_theme_constant_override("outline_size", 0)
+	p.add_theme_constant_override("shadow_offset_x", 0)
+	p.add_theme_constant_override("shadow_offset_y", 0)
 	p.text = "Грамм золота:  сырьём %s  ·  порошком %s  ·  слитком %s" % [G.rub(G.gram_price("raw")), G.rub(G.gram_price("dust")), G.rub(G.gram_price("ingot"))]
 	v.add_child(p)
 	inv.reset_size()

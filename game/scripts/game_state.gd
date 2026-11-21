@@ -233,6 +233,35 @@ func etch_bag(quality: float) -> float:
 	return g
 
 
+## Кислота руками: травятся только загруженные в корзину находки. quality 0..1.
+func etch_items(items: Dictionary, quality: float) -> float:
+	var g := 0.0
+	for k in items:
+		var n := mini(int(items[k]), int(bag.get(k, 0)))
+		g += ITEMS[k]["gold"] * n
+		bag[k] = int(bag.get(k, 0)) - n
+		if bag[k] <= 0:
+			bag.erase(k)
+	g *= lerpf(ETCH_MIN, 1.0, clampf(quality, 0.0, 1.0))
+	dust += g
+	changed.emit()
+	save_game()
+	return g
+
+
+## Печь руками: плавится засыпанная часть порошка. eff 0..1.
+func melt_some(grams: float, eff: float) -> float:
+	grams = minf(grams, dust)
+	var g := grams * lerpf(MELT_MIN, 1.0, clampf(eff, 0.0, 1.0))
+	ingots += g
+	dust = maxf(0.0, dust - grams)
+	if dust < 0.0001:
+		dust = 0.0
+	changed.emit()
+	save_game()
+	return g
+
+
 ## Печь: порошок в слиток. eff 0..1 — сколько не расплескал.
 func melt_dust(eff: float) -> float:
 	var g := dust * lerpf(MELT_MIN, 1.0, clampf(eff, 0.0, 1.0))
@@ -363,13 +392,32 @@ func start_next_debt() -> void:
 	save_game()
 
 
+## Срок вышел — время встаёт, за тобой идут (сцена в Dread). Игра начнётся заново.
 func _miss_deadline() -> void:
-	debt = int(debt * 1.5 / 100.0) * 100
-	round_len = 2.0 * DAY_SEC
-	deadline = time + round_len
+	if flags.get("doomed", false):
+		return
+	flags["doomed"] = true
+	paused_time = true
 	deadline_missed.emit()
-	changed.emit()
 	save_game()
+
+
+## Рекорд живёт отдельно от сохранения — переживает смерть.
+func record_run(days: int) -> Dictionary:
+	var p := "user://record.json"
+	var r := {"best_days": 0, "runs": 0}
+	if FileAccess.file_exists(p):
+		var f := FileAccess.open(p, FileAccess.READ)
+		var d = JSON.parse_string(f.get_as_text()) if f else null
+		if typeof(d) == TYPE_DICTIONARY:
+			r["best_days"] = int(d.get("best_days", 0))
+			r["runs"] = int(d.get("runs", 0))
+	r["runs"] = int(r["runs"]) + 1
+	r["best_days"] = maxi(int(r["best_days"]), days)
+	var w := FileAccess.open(p, FileAccess.WRITE)
+	if w:
+		w.store_string(JSON.stringify(r))
+	return r
 
 
 func clock_text() -> String:
@@ -449,6 +497,7 @@ func load_game() -> void:
 
 
 func reset_game() -> void:
+	paused_time = false
 	if FileAccess.file_exists(SAVE_PATH):
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(SAVE_PATH))
 	money = 0

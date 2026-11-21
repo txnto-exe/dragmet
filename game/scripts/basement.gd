@@ -46,6 +46,7 @@ var acid_basket: Node3D
 var furnace_light: OmniLight3D
 var bellows: Node3D
 var crucible_mat: StandardMaterial3D
+var crucible_mesh: MeshInstance3D
 var env: Environment
 var rat: Node3D
 var _t := 0.0
@@ -198,9 +199,9 @@ func _west_side() -> void:
 	# --- ниша кислоты (z -4.5..-1.5): за сеткой ржавая ванна с кислотой, бутыли на ящике, зелёный свет
 	_bathtub(Vector3(-5.4, 0, -3.55))
 	Props.place(self, "wooden_military_crate", Vector3(-5.7, 0, -2.15), 90, {"scale": 1.0})
-	Props.place(self, "bleach_bottle", Vector3(-5.75, 0.46, -2.55), 0, {"height": 0.3, "collide": false})
-	Props.place(self, "plastic_bottle_gallon", Vector3(-5.68, 0.46, -2.2), 40, {"height": 0.32, "collide": false})
-	Props.place(self, "plastic_bottle_gallon", Vector3(-5.75, 0.46, -1.85), -30, {"height": 0.3, "collide": false})
+	# ящик — рабочий стол у ванны (поднос, осадитель, банка); бутыли стоят на полу рядом
+	Props.place(self, "bleach_bottle", Vector3(-5.85, 0, -1.68), 0, {"height": 0.3, "collide": false})
+	Props.place(self, "plastic_bottle_gallon", Vector3(-5.2, 0, -1.72), 40, {"height": 0.32, "collide": false})
 	Props.place(self, "plastic_bottle_gallon", Vector3(-4.75, 0, -4.2), 10, {"height": 0.32})
 	acid_glow = OmniLight3D.new()
 	acid_glow.light_color = Color(0.45, 1.0, 0.25)
@@ -273,12 +274,8 @@ func _acid_basket() -> void:
 		box(Vector3(0.012, bh, bd), Vector3(s * bw * 0.5, -bh * 0.5, 0), wire, false, acid_basket)
 	box(Vector3(bw, 0.012, bd), Vector3(0, -bh, 0), wire, false, acid_basket)
 	cyl(0.008, 0.9, Vector3(0, 0.45, 0), wire, Vector3.ZERO, 6, acid_basket)   # подвес
-	# платы внутри
-	var green := StandardMaterial3D.new()
-	green.albedo_color = Color(0.15, 0.45, 0.2)
-	for i in 5:
-		var b := box(Vector3(0.18, 0.008, 0.12), Vector3(randf_range(-0.12, 0.12), -bh + 0.02 + i * 0.025, randf_range(-0.08, 0.08)), green, false, acid_basket)
-		b.rotation.y = randf() * TAU
+	# деревянная рукоять сверху — за неё корзину опускают и поднимают
+	cyl(0.022, 0.2, Vector3(0, 0.9, 0), surf("planks", 1.0, 1.0, Color(0.5, 0.36, 0.22)), Vector3(0, 0, 90), 8, acid_basket)
 
 
 ## Печь: свет огня внутри, тигель сверху, мехи сбоку.
@@ -307,10 +304,11 @@ func _furnace_parts() -> void:
 	cr.material_override = crucible_mat
 	cr.position = Vector3(-5.45, 0.86 + 0.065, 0.22)
 	add_child(cr)
+	crucible_mesh = cr
 	# мехи: две доски и «кожа» между ними
 	bellows = Node3D.new()
-	bellows.position = Vector3(-4.95, 0.0, 0.62)
-	bellows.rotation.y = deg_to_rad(-35)
+	bellows.position = Vector3(-5.08, 0.0, 0.52)
+	bellows.rotation.y = deg_to_rad(33)   # носик смотрит в печь
 	add_child(bellows)
 	var wood := surf("planks", 1.0, 1.0, Color(0.55, 0.42, 0.3))
 	box(Vector3(0.32, 0.03, 0.5), Vector3(0, 0.05, 0), wood, false, bellows)
@@ -827,6 +825,21 @@ func _glow_mat(c: Color, e: float) -> StandardMaterial3D:
 	return m
 
 
+## Свет лампы: 1 — как обычно, 0 — темнота (для страшных моментов).
+var dim := 1.0
+
+
+func flicker(sec: float) -> void:
+	_flicker = sec
+
+
+## Дверь вышибают ногой — распахивается рывком.
+func slam_door() -> void:
+	var tw := create_tween()
+	tw.tween_property(door_pivot, "rotation:y", deg_to_rad(-112.0), 0.22).set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_OUT)
+	tw.tween_property(door_pivot, "rotation:y", deg_to_rad(-100.0), 0.3)
+
+
 func open_door(open: bool) -> void:
 	var tw := create_tween()
 	tw.tween_property(door_pivot, "rotation:y", deg_to_rad(-105.0) if open else 0.0, 1.4).set_trans(Tween.TRANS_SINE)
@@ -853,7 +866,6 @@ func _clutter() -> void:
 	Props.place(self, "old_tyre", Vector3(3.4, 0, D - 0.36), 0, {"size": 0.6, "tilt": Vector3(90, 0, 0)})
 	Props.place(self, "old_tyre", Vector3(3.42, 0.2, D - 0.37), 0, {"size": 0.6, "tilt": Vector3(90, 0, 0), "collide": false})
 	Props.place(self, "rubber_boots", Vector3(0.5, 0, D - 0.16), 0, {"scale": 1.0, "collide": false})
-	Props.place(self, "wooden_bucket_01", Vector3(-2.2, 0, -2.4), 0, {"height": 0.3})
 	# кровать Палыча у южной стены
 	Props.place(self, "old_bed_frame", Vector3(-2.5, 0, D - 0.47), 90, {"scale": 1.0})
 	# ещё барахло по углам (CC0, Poly Haven)
@@ -1023,8 +1035,8 @@ func _process(dt: float) -> void:
 	if _flicker > 0.0:
 		_flicker -= dt
 		e *= 0.15 if fmod(_t * 23.0, 1.0) < 0.5 else 0.8
-	bulb_light.light_energy = e * (1.0 - rot * 0.25)
-	(bulb_glass.material_override as StandardMaterial3D).emission_energy_multiplier = e * 2.3
+	bulb_light.light_energy = e * (1.0 - rot * 0.25) * dim
+	(bulb_glass.material_override as StandardMaterial3D).emission_energy_multiplier = e * 2.3 * dim
 	if booth_light:
 		booth_light.light_energy = 1.4 if fmod(_t * 7.3, 9.0) > 0.25 else 0.4
 	if _beacon_on:

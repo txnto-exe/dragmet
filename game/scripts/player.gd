@@ -122,6 +122,7 @@ func _find_focus() -> Interactable:
 	var qa := PhysicsRayQueryParameters3D.create(from, to, 2)
 	qa.collide_with_areas = true
 	qa.collide_with_bodies = false
+	qa.hit_from_inside = true   # стоишь вплотную (глаза уже внутри зоны) — всё равно видно, на что смотришь
 	var ha := space.intersect_ray(qa)
 	if ha.is_empty():
 		return null

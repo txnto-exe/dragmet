@@ -55,10 +55,14 @@ func build(t: String, base: Basement, lid_open := true) -> void:
 	# табличка с типом
 	var plate := base.box(Vector3(0.62, 0.15, 0.012), Vector3(0, 0.62, OUT.z * 0.5 + 0.026), _plate_mat(), false, self)
 	var l := Label3D.new()
-	l.text = info["name"]
-	l.font = load("res://assets/fonts/Oswald.ttf")
-	l.font_size = 64
+	l.text = String(info["name"]).to_upper()
+	var f: FontFile = load("res://assets/fonts/PressStart2P.ttf")
+	l.font = f
+	l.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	# размер под ширину таблички: длинное название не вылезает на рамку
 	l.pixel_size = 0.0019
+	var tw_m := f.get_string_size(l.text, HORIZONTAL_ALIGNMENT_LEFT, -1, 32).x * l.pixel_size
+	l.font_size = clampi(int(32.0 * 0.52 / maxf(tw_m, 0.001)), 8, 48)
 	l.modulate = Color(0.95, 0.92, 0.82)
 	l.outline_size = 0
 	l.position = Vector3(0, 0, 0.013)   # надпись над табличкой с зазором — без мерцания

@@ -21,6 +21,15 @@
 | Шорох бумаги в баке | Freesound: [«Paper Crumpled 001»](https://freesound.org/s/197179/), автор razrox | CC0 |
 | Шорох пакета в баке | Freesound: [«plastic bag.wav»](https://freesound.org/s/655630/), автор Hankof | CC0 |
 | Мехи у печи | Freesound: [«Hand Pump»](https://freesound.org/s/361771/), автор Jofae | CC0 |
+| Крик Коляна («белочка») | Freesound: [«Male Screams»](https://freesound.org/s/574835/), автор kaffemaskin | CC0 |
+| Короткий выкрик | Freesound: [«effort scream.wav»](https://freesound.org/s/219815/), автор saraonsins | CC0 |
+| Скример | Freesound: [«Intense Jumpscare»](https://freesound.org/s/366168/), автор Unaxete | CC0 |
+| Скример (крыса) | Freesound: [«Jump scare sound 3»](https://freesound.org/s/341670/), автор dangthaiduy007 | CC0 |
+| Удар | Freesound: [«Dramatic Hit»](https://freesound.org/s/222517/), автор qubodup | CC0 |
+| Сердцебиение под конец срока | Freesound: [«heart beat.mp3»](https://freesound.org/s/21409/), автор greyseraphim | CC0 |
+| Удары в дверь | Freesound: [«Kicking/Forcing/Breaking Wooden Door»](https://freesound.org/s/160213/), автор qubodup | CC0 |
+| Выбитая дверь | Freesound: [«Breaking through a wooden door.wav»](https://freesound.org/s/441665/), автор ethanchase7744 | CC0 |
+| Гул страха | Freesound: [«Horror Pulsating Drone Loop»](https://freesound.org/s/457046/), автор gerainsan | CC0 |
 | Шрифт Fira Sans (интерфейс) | [Google Fonts](https://fonts.google.com/specimen/Fira+Sans) | SIL OFL 1.1 (файл `assets/fonts/OFL_Fira.txt`) |
 | Шрифт Press Start 2P (табло долга, заголовки, деньги) | [Google Fonts](https://fonts.google.com/specimen/Press+Start+2P) | SIL OFL 1.1 (файл `assets/fonts/OFL_PressStart2P.txt`) |
 | Шрифт Handjet (весь пиксельный текст интерфейса) | [Google Fonts](https://fonts.google.com/specimen/Handjet) | SIL OFL 1.1 (файл `assets/fonts/OFL_Handjet.txt`) |
